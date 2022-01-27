@@ -10,7 +10,10 @@ using LinearAlgebra: diagm
 #   - P2 wants to get close to *P1*
 #   - both players want to expend minimal control effort
 
+stackelberg_leader_idx = 1
+
 function coupling_example()
+    
     # Dynamics (Euler-discretized double integrator equations with Δt = 0.1s).
     # State for each player is layed out as [x, ẋ, y, ẏ].
     Ã = [1 0.1 0 0;
@@ -63,8 +66,11 @@ function coupling_example()
 
     Ps = solve_lq_nash_feedback(dyn, costs, horizon)
     xs_nash_feedback, us_nash_feedback = unroll_feedback(dyn, Ps, x₁)
-    Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon)
+    Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
+    # println(Ls[stackelberg_leader_idx])
     xs_stackelberg_feedback, us_stackelberg_feedback = unroll_feedback(dyn, Ls, x₁)
+    # println(xs_stackelberg_feedback)
+    # println(us_stackelberg_feedback)
 
     return xs_nash_feedback, us_nash_feedback, xs_stackelberg_feedback, us_stackelberg_feedback
 end
@@ -108,8 +114,9 @@ plot!(p, xs_nash_feedback[5, :], xs_nash_feedback[7, :],
       label="P2 acc (Nash FB)")
 
 # Stackelberg feedback.
+p2_label = (stackelberg_leader_idx == 2) ? "P2 (leader) Stackelberg Feedback" : "P2 (follower) Stackelberg Feedback"
 plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
-      seriestype=:scatter, arrow=true, seriescolor=:purple, label="P2 Stackelberg Feedback")
+      seriestype=:scatter, arrow=true, seriescolor=:purple, label=p2_label)
 plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
       seriestype=:quiver,  seriescolor=:purple,
       quiver=(0.1 * xs_stackelberg_feedback[6, :], 0.1 * xs_stackelberg_feedback[8, :]),
@@ -121,8 +128,9 @@ plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
       seriesalpha=α,
       label="P2 acc (Stackelberg FB)")
 
+p1_label = (stackelberg_leader_idx == 1) ? "P1 (leader) Stackelberg Feedback" : "P1 (follower) Stackelberg Feedback"
 plot!(p, xs_stackelberg_feedback[1, :], xs_stackelberg_feedback[3, :],
-      seriestype=:scatter, arrow=true, seriescolor=:green, label="P1 Stackelberg Feedback")
+      seriestype=:scatter, arrow=true, seriescolor=:green, label=p1_label)
 plot!(p, xs_stackelberg_feedback[1, :], xs_stackelberg_feedback[3, :],
       seriestype=:quiver,  seriescolor=:green,
       quiver=(0.1 * xs_stackelberg_feedback[2, :], 0.1 * xs_stackelberg_feedback[4, :]),

@@ -13,6 +13,8 @@ function solve_optimal_control()
 end
 
 @testset "TestLQSolvers" begin
+    stackelberg_leader_idx = 1
+
     # Common dynamics, costs, and initial condition.
     A = [1 0.1 0 0;
          0 1   0 0;
@@ -72,7 +74,7 @@ end
     # Ensure that the feedback solution satisfies Stackelberg conditions of optimality
     # for each player, holding others' strategies fixed.
     @testset "CheckFeedbackSatisfiesStackelberg" begin
-        Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon)
+        Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
         xs, us = unroll_feedback(dyn, Ls, x₁)
         nash_costs = [evaluate(c, xs, us) for c in costs]
 
