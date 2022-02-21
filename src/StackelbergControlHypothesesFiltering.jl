@@ -1,7 +1,10 @@
 module StackelbergControlHypothesesFiltering
 
-include("Utils.jl")
+include("CircularHypothesisFilteringUtils.jl")
 include("LQNashFeedbackSolver.jl")
 include("LQStackelbergFeedbackSolver.jl")
+include("NameTBDEstimator.jl")
+include("PlotUtils.jl")
+include("Utils.jl")
 
 end # module
