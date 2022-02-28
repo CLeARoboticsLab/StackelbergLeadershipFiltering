@@ -2,10 +2,10 @@
 
 # TODO(hamzah): Add a boolean flag that implements adding noise.
 function dyn_ode(x, u)
-    return [x[3] * cos(x[2]),
-            x[3] * sin(x[2]),
-            u[0],
-            u[1]]
+    return [x[4] * cos(x[3]),
+            x[4] * sin(x[3]),
+            u[1],
+            u[2]]
 end
 
 function rk4_dynamics(timestep, x, u)
@@ -45,10 +45,10 @@ end
 
 # Linearizes a dynamics matrix around a reference trajectory at time t.
 function construct_A(x_ref, timestep_s)
-    cos_ref = cos(x_ref[2])
-    sin_ref = sin(x_ref[2])
-    return [[1, 0, -x_ref[3] * sin_ref * timestep_s, cos_ref * timestep_s],
-            [0, 1,  x_ref[3] * cos_ref * timestep_s, sin_ref * timestep_s],
+    cos_ref = cos(x_ref[3])
+    sin_ref = sin(x_ref[3])
+    return [[1, 0, -x_ref[4] * sin_ref * timestep_s, cos_ref * timestep_s],
+            [0, 1,  x_ref[4] * cos_ref * timestep_s, sin_ref * timestep_s],
             [0, 0,                                1,                    0],
             [0, 0,                                0,                    1]]
 end
