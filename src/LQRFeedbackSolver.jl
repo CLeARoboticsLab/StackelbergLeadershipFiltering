@@ -20,16 +20,16 @@ function solve_lqr_feedback(dyn::Dynamics, costs::Cost, horizon::Int)
     end
 
     # At each horizon running backwards, solve the LQR problem inductively.
-    for tt in horizon:1
+    for tt in horizon:-1:1
 
         # Solve the LQR using induction and optimizing the quadratic cost for P and Z.
-        r_terms = R + B' * Pₜ₊₁ * B
+        r_terms = R + B' * Zₜ₊₁ * B
 
-        # This is equivalent to inv(r_terms) * (B' * Zₜ₊₁ * A)
-        Ps[:, :, tt] = r_terms \ (B' * Zₜ₊₁ * A)
+        # This is equivalent to inv(r_terms) * B' * Zₜ₊₁ * A
+        Ps[:, :, tt] = B' * Zₜ₊₁ * A \ r_terms
         
         # Update Zₜ₊₁ at t+1 to be the one at t as we go to t-1.
-        Zₜ₊₁ = Q + A' * Zₜ₊₁ * A - A' * Zₜ₊₁ * B * r_terms_inv * B' * Zₜ₊₁ * A
+        Zₜ₊₁ = Q + A' * Zₜ₊₁ * A - A' * Zₜ₊₁ * B * Ps[:, :, tt]
     end
 
     return Ps

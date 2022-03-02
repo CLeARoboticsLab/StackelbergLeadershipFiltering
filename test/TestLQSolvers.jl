@@ -75,9 +75,6 @@ seed!(0)
         follower_idx = 2
         num_players = follower_idx
 
-        # Feedback at horizon is state cost.
-        P2ₜ₊₁ = costs[follower_idx].Q
-
         # At each time step running backwards, perturb P1 at tt, solve the LQR problem for P2 with it, and validate the
         # new costs are higher than the old ones.
         for tt in horizon-1:-1:1
