@@ -142,13 +142,35 @@ and for the measurement update into \ref{eq:meas-update},
 \end{equation}
 
 
-Two of these terms are described with respect to the leadership filtering problem. We note that a Stackelberg game can be described using $H_t$ and $\initcond{t}$. Thus, the likelihood equation can be written
-\begin{equation}
-\ell(\obs{t} | H_t, \initcond{t}) \equiv \prob{\obs{t} | \left[ \stack{H_{t}}{t-1}\left(f_t, \costfn{1}, \costfn{2}; \initcond{t} \right) \right]_{t-1, 1}} = \prob{\obs{t} | \stackmeas{H_t}{t-1, 1}}.
-\end{equation}
+\subsection{How do we define the likelihood $\lkhd{\obs{t} | H_t, \initcond{t}}$?}
+Note that a Stackelberg game can be described using $H_t$ and $\initcond{t}$. Thus, the likelihood equation can be written as a sensor model
+\begin{align}
+\lkhd{\obs{t} | H_t, \initcond{t}} \equiv \prob{\obs{t} | \left[ \stack{H_{t}}{t-1}\left(f_t, \costfn{1}, \costfn{2}; \initcond{t} \right) \right]_{t-1, 1}} &= \prob{\obs{t} | \stackmeas{H_t}{t-1, 1}} \\
+    &= \exp\left[-\frac{1}{2} \left(\obs{t} - \stackmeas{H_t}{t-1, 1}\right)^\T \statecov{t}^{-1} \left(\obs{t} - \stackmeas{H_t}{t-1, 1}\right) \right].
+\end{align}
 
-We define a transition probability using a Markov Chain with probability $p$ of transitioning between states of $H_t$.
+\subsection{How do we define transition probability $\prob{H_t, \initcond{t} | H_{t-1}, \initcond{t-1}}$?}
+We make two assumptions to simplify the transition probability.
+\begin{enumerate}
+\item $H_t$ and $\initcond{t}$ are conditionally independent with respect to $H_{t-1}$ and $\initcond{t-1}$.
+\item $\prob{H_t | H_{t-1}, \initcond{t-1}} = \prob{H_t | H_{t-1}}$
+\end{enumerate}
+Thus, we can simplify the transition probability as follows.
+\begin{align}
+\label{eq:simplified-transition-prob}
+\prob{H_t, \initcond{t} | H_{t-1}, \initcond{t-1}} &= \prob{H_t | H_{t-1}, \initcond{t-1}} \prob{\initcond{t} | H_{t-1}, \initcond{t-1}} \\
+    &= \prob{H_t | H_{t-1}} \prob{\initcond{t} | H_{t-1}, \initcond{t-1}}
+\end{align}
+
+The probability $\prob{H_t | H_{t-1}}$ can be described using a Markov Chain with probability $p$ of transitioning between states of $H_t$. Equivalently, for some chosen $p \in [0, 1]$
+\begin{equation}
+\label{eq:lead-state-transition}
+\prob{H_t | H_{t-1}} = p \bm{1}(H_t = H_{t-1}) + (1-p) \bm{1}(H_t \neq H_{t-1})
+\end{equation}
 \todo{Add image here of two-state Markov Chain with probability $p$ of transitioning.}
+
+
+Finally, for the term $\prob{\initcond{t} | H_{t-1}, \initcond{t-1}}$, we \todo{Finish this up!}
 
 
 \subsection{How do we select the initial condition $\initcond{t}$?}
@@ -157,12 +179,21 @@ The mathematically correct value for $\initcond{t}$ is the true state at time $t
 \initcond{t} = \stackmeas{H_t}{t-1, 1}.
 \end{equation}
 
-There will likely be some error associated with this choice.
+There will likely be some error associated with this choice. {\comment{this is something that needs to be carefully revisited, especially with regards to how we use it in the transition probability. What about using $\obs{t-1}$?}}
 
 We could consider using the measurement $\obs{t}$ as our initial condition. However, this does not take into consideration Stackelberg leadership, which we believe provides a source of information by which to approximate leadership.
 
-\subsection{How can the use of this Bayesian filter be validated?}
+\subsection{Conclusion}
+Finally, to get our desired probability distribution, we marginalize the initial condition:
+\begin{equation}
+\prob{H_t | \obs{1:t}} = \int_{-\infty}^\infty \prob{H_t, \initcond{t} | \obs{1:t}} d\initcond{t}.
+\end{equation} 
+
+
+
+\section{How can the use of this Bayesian filter be validated?}
 In this description, we use a dynamic state because leadership can evolve over time in most two-agent scenarios. However, consider a scenario where we know one of the two agents is the leader for the entire scenario, though not which one. In such a scenario, we may use a Bayesian filter with static state to see how well the leadership filter performs under Monte Carlo analysis. If it performs well in predicting that the correct agent is the leader, then we can make the claim that a Bayesian filter with dynamic state should work well when the leading agent changes over time.
+
 
 This concludes our description of the hypothesis test used in the leadership filter.
 
