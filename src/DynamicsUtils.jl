@@ -46,6 +46,9 @@ struct UnicycleDynamics <: NonlinearDynamics
     sys_info::SystemInfo
 end
 
+# argument N - number of players
+UnicycleDynamics(N) = UnicycleDynamics(SystemInfo(N, 4*N, [2 for i in 1:N]))
+
 function propagate_dynamics(dyn::UnicycleDynamics, t, x, us)
     N = dyn.sys_info.num_agents
     @assert N == length(us)
