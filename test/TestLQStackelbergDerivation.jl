@@ -1,8 +1,9 @@
 # unit tests for confirming my derivation matches Basar's derivation over one time step with random inputs
 using StackelbergControlHypothesesFiltering
-using LinearAlgebra
+
 using Random: seed!
 using Test: @test, @testset
+include("TestUtils.jl")
 
 seed!(0)
 
@@ -24,22 +25,6 @@ function compute_basar_recursion_one_step(A, B1, B2, Q1, Q2, L1ₜ₊₁, L2ₜ�
     L1 = dynamics_tp1' * L1ₜ₊₁ * dynamics_tp1 + S1ₜ' * S1ₜ + S2ₜ' * R12 * S2ₜ + Q1
     L2 = dynamics_tp1' * L2ₜ₊₁ * dynamics_tp1 + S1ₜ' * R21 * S1ₜ + S2ₜ' * S2ₜ + Q2
     return [S1ₜ, S2ₜ, L1, L2]
-end
-
-function make_symmetric_pos_def_matrix(dim)
-    # Generate a matrix of the specified size.
-    A = rand(dim, dim)
-
-    # Make it symmetric.
-    A = (1/2) * (A + A')
-
-    # Make it positive definite.
-    smallest_eigenval = minimum(eigvals(A))
-    if smallest_eigenval <= 0
-        # Shift the eigenvalues by a factor of the absolute value of the smallest eigenvalue.
-        A += (2 - rand()) * abs(smallest_eigenval) * I
-    end
-    return A
 end
 
 @testset "TestLQStackelbergDerivationOneLine" begin

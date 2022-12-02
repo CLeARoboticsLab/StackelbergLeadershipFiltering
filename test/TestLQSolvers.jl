@@ -1,13 +1,9 @@
 # Unit tests for LQ Nash solvers.
+using StackelbergControlHypothesesFiltering
 
 using LinearAlgebra
-using StackelbergControlHypothesesFiltering
-using Test: @test, @testset
 using Random: seed!
-
-# (TODO: hamzah) Tests to write:
-# 1. Try it one 2-step horizon.
-# 2. Design a game with one state.
+using Test: @test, @testset
 
 seed!(0)
 

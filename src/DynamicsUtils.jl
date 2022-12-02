@@ -111,15 +111,15 @@ function num_agents(dyn::Dynamics)
 end
 
 function xdim(dyn::Dynamics)
-    return dyn.sys_info.num_x
+    return xdim(dyn.sys_info)
 end
 
 function udim(dyn::Dynamics)
-    return sum(dyn.sys_info.num_us)
+    return udim(dyn.sys_info)
 end
 
 function udim(dyn::Dynamics, player_idx)
-    return dyn.sys_info.num_us[player_idx]
+    return udim(dyn.sys_info, player_idx)
 end
 
 export num_agents, xdim, udim
