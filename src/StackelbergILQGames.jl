@@ -19,12 +19,12 @@ end
 
 function stackelberg_2p_ilqgames_iteration(leader_idx::Int,
                                            dyn::Dynamics,
-                                           costs::AbstractArray{Cost}
+                                           costs::AbstractVector{<:Cost},
                                            x0,
                                            t0,
-                                           current_ctrl_strats::StackelbergControlStrategy;
-                                           x_refs=zeros(zeros(xdim(dyn), horizon)),
-                                           u_refs=[zeros(udim(dyn, ii), horizon) for ii in 1:num_agents(dyn)])
+                                           current_ctrl_strats::StackelbergControlStrategy,
+                                           x_refs::AbstractArray{Float64},
+                                           u_refs::AbstractVector{<:AbstractArray{Float64}})
     N = num_agents(dyn)
     T = current_ctrl_strats.T
 
@@ -37,56 +37,57 @@ function stackelberg_2p_ilqgames_iteration(leader_idx::Int,
     dus = u_refs - u_hats
 
     # 3. Create an LQ approximation of the game about the error state and controls.
-    lin_dyns = Array{AbstractArray{Float64}}(undef, T)
-    quad_costs = Array{AbstractArray{Float64}}(undef, T)
-
-    for tt in 1:T
-        us_at_tt = [us[ii][tt, :] for ii in 1:N]
-        lin_dyns[tt] = linearize_dynamics(dyn, tt+t0, x_hats[t, :], us_at_tt)
-        quad_costs[tt] = quadraticize_costs(costs, tt+t0, x_hats[t, :], us_at_tt)
-    end
-
     # 4. Solve an LQ Stackelberg game given the approximated LQ conditions.
-    # TODO: Make the nash and stackelberg solvers work with time varying systems.
-    Ss, Ls = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx)
+    Ss, Ls = solve_approximated_lq_stackelberg_feedback(dyn, costs, T, t0, x_hats, u_hats, leader_idx)
 
     # 5. Adjust the control strategies based on the approximate solution.
-    # TODO
-    new_control_strats = StackelbergControlStrategy(u_hats - current_ctrl_strats.Ss * dxs)
+    new_control_strats = StackelbergControlStrategy(T, Ss, Ls)
 
-    return new_control_strats
+    for tt in 1:T
+        for ii in 1:N
+            u_hats[ii][:, tt] -= Ss[ii][:, :, tt] * dxs[:, tt]
+        end
+    end
+
+    return new_control_strats, u_hats
 
 end
 
+THRESHOLD = 0.01
 function stackelberg_ilqgames(leader_idx::Int,
-                              T,
+                              T::Int,
                               x0,
                               t0,
                               dyn::Dynamics,
-                              costs::AbstractArray{QuadraticCost},
-                              initial_ctrl_strats::StackelbergControlStrategy;
-                              x_refs=zeros(zeros(xdim(dyn), horizon)),
-                              u_refs=[zeros(udim(dyn, ii), horizon) for ii in 1:num_agents(dyn)])
-    THRESHOLD = 0.01
+                              costs::AbstractVector{QuadraticCost},
+                              initial_ctrl_strats::StackelbergControlStrategy,
+                              x_refs::AbstractArray{Float64},
+                              u_refs::AbstractVector{<:AbstractArray{Float64}};
+                              threshold::Float64 = THRESHOLD)
     MAX_ITERS = 100
-    iters = 0
+    num_iters = 0
+
+    N = num_agents(dyn)
 
     prev_ctrl_strats = initial_ctrl_strats
     current_ctrl_strats = initial_ctrl_strats
-
-    # x_refs = zeros(zeros(xdim(dyn), horizon))
-    # u_refs = [zeros(udim(dyn, ii), horizon) for ii in 1:num_agents(dyn)]
+    is_converged = false
 
     function simple_iter(ctrl_strats::StackelbergControlStrategy, x_references, u_references)
-        return stackelberg_2p_ilqgames_iteration(leader_idx, dyn, costs, x0, t0, T, current_ctrl_strats, x_references, u_references)
+        return stackelberg_2p_ilqgames_iteration(leader_idx, dyn, costs, x0, t0, current_ctrl_strats, x_references, u_references)
     end
 
-    while strategy_distance(current_ctrl_strats, prev_ctrl_strats) > THRESHOLD && iters < MAX_ITERS
+    while !is_converged && num_iters < MAX_ITERS
         prev_ctrl_strats = current_ctrl_strats
-        current_ctrl_strats = simple_iter(current_ctrl_strats, x_refs, u_refs)
+
+        # Q: What do I do with u_hat here?
+        current_ctrl_strats, u_hats = simple_iter(current_ctrl_strats, x_refs, u_refs)
+
+        is_converged = !(strategy_distance(current_ctrl_strats, prev_ctrl_strats) > threshold)
+        num_iters += 1
     end
 
-    exceeded_max_iters = iters >= MAX_ITERS
-    is_converged = !exceeded_max_iters
-    return current_ctrl_strats, is_converged
+    return current_ctrl_strats, is_converged, num_iters
 end
+
+export StackelbergControlStrategy, stackelberg_ilqgames
