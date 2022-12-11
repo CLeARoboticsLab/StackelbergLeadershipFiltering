@@ -126,26 +126,55 @@ export num_agents, xdim, udim
 
 
 # TODO(hamzah) Add better tests for the unroll_feedback, unroll_raw_controls functions.
-# TODO(hamzah) Abstract the unroll_feedback, unroll_raw_controls functions to not assume linear feedback P.
+
+# A MultiplayerControlStrategy must have the following fields
+# - num_players: number of players, N
+# - T:           horizon
+# - Ps:          an N-length vector of feedback gains across times 1:T
+# - Zs:          an N-length vector of future state costs across times 1:T
+# It must also have a function defined as follows:
+# - apply_control_strategy: accepts a control strategy, a time, and a state, and produced the strategy at that time.
+abstract type MultiplayerControlStrategy end
+
+# A control strategy for multiple players.
+struct FeedbackGainControlStrategy <: MultiplayerControlStrategy
+    num_players::Int                                # number of players
+    horizon::Int                                    # horizon
+    Ps::AbstractVector{<:AbstractArray{Float64, 3}} # feedback gains
+end
+FeedbackGainControlStrategy(Ps::AbstractVector{<:AbstractArray{Float64, 3}}) = FeedbackGainControlStrategy(length(Ps), size(Ps[1], 3), Ps)
+
+# This function accepts a feedback gain control strategy and applies it to a state at a given time (i.e. index).
+function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, x::AbstractArray{Float64})
+    return [-strategy.Ps[ii][:, :, tt] * x for ii in 1:strategy.num_players]
+end
+
+# Export the abstract type and its required method.
+export MultiplayerControlStrategy, apply_control_strategy
+
+# Export a commonly used control strategy for convenience.
+export FeedbackGainControlStrategy
+
 
 # Function to unroll a set of feedback matrices from an initial condition.
 # Output is a sequence of states xs[:, time] and controls us[player][:, time].
 export unroll_feedback
-function unroll_feedback(dyn::Dynamics, Ps, x₁)
+function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStrategy, x₁)
     @assert length(x₁) == xdim(dyn)
 
-    N = length(Ps)
+    N = control_strategy.num_players
     @assert N == dyn.sys_info.num_agents
 
-    horizon = last(size(first(Ps)))
+    horizon = control_strategy.horizon
 
     # Populate state/control trajectory.
     xs = zeros(xdim(dyn), horizon)
     xs[:, 1] = x₁
     us = [zeros(udim(dyn, ii), horizon) for ii in 1:N]
     for tt in 2:horizon
+        ctrls_at_ttm1 = apply_control_strategy(tt-1, control_strategy, xs[:, tt - 1])
         for ii in 1:N
-            us[ii][:, tt - 1] = -Ps[ii][:, :, tt - 1] * xs[:, tt - 1]
+            us[ii][:, tt - 1] = ctrls_at_ttm1[ii]
         end
 
         us_prev = [us[i][:, tt-1] for i in 1:N]
@@ -153,8 +182,9 @@ function unroll_feedback(dyn::Dynamics, Ps, x₁)
     end
 
     # Controls at final time.
+    final_ctrls = apply_control_strategy(horizon, control_strategy, xs[:, horizon])
     for ii in 1:N
-        us[ii][:, horizon] = -Ps[ii][:, :, horizon] * xs[:, horizon]
+        us[ii][:, horizon] = final_ctrls[ii]
     end
 
     return xs, us

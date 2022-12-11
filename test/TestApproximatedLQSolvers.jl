@@ -27,7 +27,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true)
 
         Ps, Zs = solve_lqr_feedback(dyn, costs[1], horizon)
-        xs, us = unroll_feedback(dyn, [Ps], x₁)
+        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy([Ps]), x₁)
         P̃s, Z̃s = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
 
         @test Ps == P̃s
@@ -46,7 +46,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true)
 
         Ps, Zs = solve_lq_nash_feedback(dyn, costs, horizon)
-        xs, us = unroll_feedback(dyn, Ps, x₁)
+        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ps), x₁)
         P̃s, Z̃s = solve_approximated_lq_nash_feedback(dyn, costs, horizon, t0, xs, us)
 
         @test Ps == P̃s
@@ -67,7 +67,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true)
 
         Ss, Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, Ss, x₁)
+        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
         S̃s, L̃s = solve_approximated_lq_stackelberg_feedback(dyn, costs, horizon, t0, xs, us, stackelberg_leader_idx)
 
         @test Ss == S̃s
