@@ -100,9 +100,34 @@ function linearize_dynamics(dyn::UnicycleDynamics, t, x, us)
     return LinearDynamics(A, Bs, dyn.sys_info)
 end
 
+# struct HomogenizedUnicycleDynamics <: NonlinearDynamics
+#     sys_info::SystemInfo
+#     dyn::UnicycleDynamics
+# end
+# HomogenizedUnicycleDynamics(dyn::UnicycleDynamics) = HomogenizedUnicycleDynamics(SystemInfo(num_agents()), )
+
+# function propagate_dynamics(dyn::UnicycleDynamics, t, x, us)
+#     N = dyn.sys_info.num_agents
+#     @assert N == length(us)
+#     @assert xdim(dyn) == 4 * N
+#     @assert udim(dyn) == 2 * N
+
+#     x_dot = zeros(xdim(dyn))
+
+
+#     return x_dot
+# end
+
+# function linearize_dynamics(dyn::UnicycleDynamics, t, x, us)
+#     N = dyn.sys_info.num_agents
+#     @assert N == length(us)
+#     @assert xdim(dyn) == 4 * N
+
+# end
+
 
 # Export the types of dynamics.
-export Dynamics, NonlinearDynamics, LinearDynamics, UnicycleDynamics
+export Dynamics, NonlinearDynamics, LinearDynamics, UnicycleDynamics, AffineLinearDynamics
 
 # Export the functionality each Dynamics requires.
 export propagate_dynamics, linearize_dynamics
@@ -148,7 +173,7 @@ end
 FeedbackGainControlStrategy(Ps::AbstractVector{<:AbstractArray{Float64, 3}}) = FeedbackGainControlStrategy(length(Ps), size(Ps[1], 3), Ps)
 
 # This function accepts a feedback gain control strategy and applies it to a state at a given time (i.e. index).
-function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, x::AbstractArray{Float64})
+function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, x::AbstractVector{Float64}) 
     return [-strategy.Ps[ii][:, :, tt] * x for ii in 1:strategy.num_players]
 end
 
