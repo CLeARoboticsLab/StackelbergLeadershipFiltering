@@ -1,4 +1,6 @@
 # Utilities
+# TODO(hmzh) Add a game class of some sort that ties together the system info, cost, and dynamics, factoring in possible
+#            homogenization.
 struct SystemInfo
     num_agents::Int
     num_x::Int
@@ -23,4 +25,8 @@ function udim(sys_info::SystemInfo, player_idx)
     return sys_info.num_us[player_idx]
 end
 
-export SystemInfo, num_agents, xdim, udim
+function vdim(sys_info::SystemInfo)
+    return sys_info.num_v
+end
+
+export SystemInfo, num_agents, xdim, udim, vdim

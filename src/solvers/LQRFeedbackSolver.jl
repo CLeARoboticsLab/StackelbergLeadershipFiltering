@@ -80,9 +80,11 @@ function solve_approximated_lqr_feedback(dyn::Dynamics,
     quad_costs = Array{QuadraticCost}(undef, T)
 
     for tt in 1:T
+        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
         current_time = t0 + tt
-        lin_dyns[tt] = linearize_dynamics(dyn, current_time, x_refs[:, tt], [u_refs[:, tt]])
-        quad_costs[tt] = quadraticize_costs(cost, current_time, x_refs[:, tt], [u_refs[:, tt]])
+        time_range = (prev_time, current_time)
+        lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], [u_refs[:, tt]])
+        quad_costs[tt] = quadraticize_costs(cost, time_range, x_refs[:, tt], [u_refs[:, tt]])
     end
 
     return solve_lqr_feedback(lin_dyns, quad_costs, T)

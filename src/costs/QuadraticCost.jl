@@ -1,19 +1,9 @@
-# Utilities for managing quadratic and nonquadratic dynamics.
-abstract type Cost end
-
-# Every Cost is assumed to have the following functions defined on it:
-# - quadraticize_costs(cost, t, x, us) - this function produces a QuadraticCost at time t given the state and controls
-# - evaluate(cost, xs, us) - this function evaluates the cost of a trajectory given the states and controls
-
-# We use this type by making a substruct of it which can then have certain functions defined for it.
-abstract type NonQuadraticCost <: Cost end
-
 # Cost for a single player.
 # Form is: x^T_t Q^i x + \sum_j u^{jT}_t R^{ij} u^j_t.
 # For simplicity, assuming that Q, R are time-invariant, and that dynamics are
 # linear time-invariant, i.e. x_{t+1} = A x_t + \sum_i B^i u^i_t.
 mutable struct QuadraticCost <: Cost
-    Q
+    Q::AbstractMatrix{Float64}
     Rs
 end
 QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
@@ -26,7 +16,7 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, Rij)
     c.Rs[other_player_idx] = Rij
 end
 
-function quadraticize_costs(cost::QuadraticCost, t, x, us)
+function quadraticize_costs(cost::QuadraticCost, time_range, x, us)
     return cost
 end
 
@@ -44,16 +34,8 @@ function evaluate(c::QuadraticCost, xs, us)
     return total
 end
 
-
-# TODO: Make the affine cost structure with homogenenized coordinates.
-# struct AffineCost <: Cost end
-# function quadraticize_costs(cost::AffineCost, t, x, us)
-# function evaluate(c::AffineCost, xs, us)
-# end
-
 # Export all the cost types/structs.
-export Cost, NonQuadraticCost, QuadraticCost
+export QuadraticCost
 
 # Export all the cost types/structs.
 export quadraticize_costs, evaluate
-
