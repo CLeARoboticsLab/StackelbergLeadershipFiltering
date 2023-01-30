@@ -1,3 +1,5 @@
+using SparseArrays
+
 # This util is meant to be used where the state can be decomposed into N players which each act according to unicycle
 # dynamics. A unicycle dynamics model with one actor has a 4-element state including 2D-position, angle, and speed.
 # There are two controls, turn rate and acceleration.
@@ -8,6 +10,9 @@
 struct UnicycleDynamics <: NonlinearDynamics
     sys_info::SystemInfo
 end
+
+# Constructor
+UnicycleDynamics(num_players::Int) = UnicycleDynamics(SystemInfo(num_players, 4*num_players, 2*ones(num_players)))
 
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,

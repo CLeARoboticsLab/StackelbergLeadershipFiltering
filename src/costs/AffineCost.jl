@@ -1,8 +1,10 @@
-# TODO: Add a better way to integrate a homogenized cost into the rest of the system.
-function homogenize_cost(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64)
+# TODO: Add a better way to integrate a homogenized cost into the rest of the system
+# Produces a symmetric matrix.
+# If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
+function homogenize_cost(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64; ρ=0.0)
     M_dim = size(M, 1)
-    return vcat(hcat(M , zeros(M_dim, 1)),
-                hcat(m',              cm))
+    return vcat(hcat(M ,  m),
+                hcat(m', cm)) + ρ * I
 end
 
 mutable struct AffineCost <: Cost
