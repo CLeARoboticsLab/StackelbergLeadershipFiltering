@@ -1,4 +1,17 @@
 # Utilities
+
+# TODO: Add a better way to integrate a homogenized matrix into the rest of the system
+# Produces a symmetric matrix.
+# If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
+function homogenize_matrix(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64; ρ=0.0)
+    M_dim = size(M, 1)
+    return vcat(hcat(M ,  m),
+                hcat(m', cm)) + ρ * I
+end
+
+export homogenize_matrix
+
+
 # TODO(hmzh) Add a game class of some sort that ties together the system info, cost, and dynamics, factoring in possible
 #            homogenization.
 struct SystemInfo
@@ -7,7 +20,7 @@ struct SystemInfo
     num_us::AbstractArray{Int}
     num_v::Int
 end
-SystemInfo(num_agents, num_x, num_us) = SystemInfo(num_agents, num_x, num_us, 0)
+SystemInfo(num_agents, num_x, num_us; is_homogenized=false) = SystemInfo(num_agents, num_x, num_us, 0, is_homogenized)
 
 function num_agents(sys_info::SystemInfo)
     return sys_info.num_agents

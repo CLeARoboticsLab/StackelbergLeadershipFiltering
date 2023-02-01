@@ -1,9 +1,4 @@
-# TODO: Add a better way to integrate a homogenized cost into the rest of the system.
-function homogenize_cost(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64)
-    M_dim = size(M, 1)
-    return vcat(hcat(M , zeros(M_dim, 1)),
-                hcat(m',              cm))
-end
+# Affine costs with quadratic, linear, constant terms.
 
 mutable struct AffineCost <: Cost
     Q::AbstractMatrix{Float64}
@@ -24,24 +19,27 @@ function add_control_cost!(c::AffineCost, other_player_idx, Rij, rj, crj)
     c.crs[other_player_idx] = crj
 end
 
-function quadraticize_costs(cost::AffineCost, time_range, x, us)
-    num_players = size(us, 1)
-    Q = homogenize_cost(cost.Q, cost.q, cost.cq)
-    cost = QuadraticCost(Q)
-    for jj in 1:num_players
-        R_ij = homogenize_cost(cost.Rs[jj], cost.rs[jj], cost.crs[jj])
-        add_control_cost!(cost, R_ij)
-    end
+function affinize_costs(cost::AffineCost, time_range, x, us)
+
     return cost
+
+    # num_players = size(us, 1)
+    # Q = homogenize_matrix(cost.Q, cost.q, cost.cq)
+    # cost = QuadraticCost(Q)
+    # for jj in 1:num_players
+    #     R_ij = homogenize_matrix(cost.Rs[jj], cost.rs[jj], cost.crs[jj])
+    #     add_control_cost!(cost, R_ij)
+    # end
+    # return cost
 end
 
 # TODO: Implement a way to do this well.
 function evaluate(c::AffineCost, xs, us)
-    error("Affine cost evaluation not implemented. Please use quadraticize_costs to extract a QuadraticCost and pad states with an extra entry of 1.")
+    error("Affine cost evaluation not implemented. Please use affinize_costs to extract a QuadraticCost and pad states with an extra entry of 1.")
 end
 
 # Export all the cost type.
 export AffineCost
 
 # Export functionality.
-export quadraticize_costs, evaluate, homogenize_cost
+export affinize_costs, evaluate, homogenize_matrix

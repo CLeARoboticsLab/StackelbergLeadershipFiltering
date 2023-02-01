@@ -4,7 +4,12 @@
 # - linearize_dynamics(dyn, x, us) - this function linearizes the dynamics given the state and controls.
 # - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
 # - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
-# Every Dynamics struct must have a sys_info field of type SystemInfo.
+# - homogenize_state(dyn, xs) - needs to be defined if dynamics requires linear/constant terms
+# - homogenize_ctrls(dyn, us) - needs to be defined if dynamics requires linear/constant terms
+
+# Every Dynamics struct must have
+# - a sys_info field of type SystemInfo and
+# - is_homogenized boolean.
 abstract type Dynamics end
 
 # A type that every nonlinear dynamics struct (unique per use case) can inherit from. These need to have the same

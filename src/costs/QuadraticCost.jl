@@ -5,8 +5,9 @@
 mutable struct QuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
     Rs
+    is_homogenized::Bool
 end
-QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
+QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}(), false) # quadratic costs are non homogenized by default
 
 # TODO(hamzah) Add better tests for the QuadraticCost struct and associated functions.
 
@@ -16,8 +17,10 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, Rij)
     c.Rs[other_player_idx] = Rij
 end
 
-function quadraticize_costs(cost::QuadraticCost, time_range, x, us)
-    return cost
+function affinize_costs(cost::QuadraticCost, time_range, x, us)
+    
+
+    return homogenize_matrix(cost, cost.Q, )
 end
 
 # Evaluate cost on a state/control trajectory.
@@ -38,4 +41,4 @@ end
 export QuadraticCost
 
 # Export all the cost types/structs.
-export quadraticize_costs, evaluate
+export affinize_costs, evaluate

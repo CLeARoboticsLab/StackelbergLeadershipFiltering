@@ -4,19 +4,22 @@ struct LinearDynamics <: Dynamics
     Bs # controls
     D  # process noise
     sys_info::SystemInfo
+    is_homogenized::Bool
 end
 
 # TODO(hamzah) Add [:,:] as necessary for auto-sizing - fixes bug if 1D vector passed in when a 2D matrix is expected.
 # Constructor for linear dynamics that auto-generates the system info and has no process noise.
-LinearDynamics(A, Bs) = LinearDynamics(A, Bs, nothing,
-                                       SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)]))
+LinearDynamics(A, Bs; is_homogenized=false) = LinearDynamics(A, Bs, nothing,
+                                       SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)]),
+                                       is_homogenized)
 
 # Constructor for linear dynamics that is provided the system info and has no process noise.
-LinearDynamics(A, Bs, sys_info::SystemInfo) = LinearDynamics(A, Bs, nothing, sys_info)
+LinearDynamics(A, Bs, sys_info::SystemInfo; is_homogenized=false) = LinearDynamics(A, Bs, nothing, sys_info, is_homogenized)
 
 # Constructor for linear dynamics that auto-generates the system info with process noise.
-LinearDynamics(A, Bs, D) = LinearDynamics(A, Bs, D,
-                                          SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
+LinearDynamics(A, Bs, D; is_homogenized=false) = LinearDynamics(A, Bs, D,
+                                       SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)),
+                                       is_homogenized)
 
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
 function propagate_dynamics(dyn::Dynamics,

@@ -7,6 +7,7 @@
 # minor changes to the control matrices B_i.
 struct UnicycleDynamics <: NonlinearDynamics
     sys_info::SystemInfo
+    is_homogenized::Bool
 end
 
 function propagate_dynamics(dyn::UnicycleDynamics,
