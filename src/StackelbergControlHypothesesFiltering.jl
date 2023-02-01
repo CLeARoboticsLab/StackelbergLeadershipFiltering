@@ -21,5 +21,6 @@ include("solvers/LQRFeedbackSolver.jl")
 
 include("ilqr.jl")
 include("StackelbergILQGames.jl")
+include("TwoStateParticleFilter.jl")
 
 end # module
