@@ -37,4 +37,4 @@ end
 export AffineCost
 
 # Export functionality.
-export affinize_costs, evaluate, homogenize_matrix
+export add_control_cost!, affinize_costs, compute_cost

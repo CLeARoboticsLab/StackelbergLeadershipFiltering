@@ -30,4 +30,4 @@ end
 export QuadraticCost
 
 # Export all the cost types/structs.
-export affinize_costs, evaluate
+export add_control_cost!, affinize_costs, compute_cost
