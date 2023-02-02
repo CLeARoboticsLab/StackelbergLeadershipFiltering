@@ -16,6 +16,16 @@ abstract type Dynamics end
 # functions as the Dynamics type.
 abstract type NonlinearDynamics <: Dynamics end
 
+# Homogenize state - by default, this adds a 1 to the bottom. If a custom one is needed, define it elsewhere.
+function homogenize_state(dyn::Dynamics, xs::AbstractMatrix{Float64})
+    return vcat(xs, ones(1, size(xs, 2)))
+end
+
+function homogenize_ctrls(dyn::Dynamics, us::AbstractVector{<:AbstractMatrix{Float64}})
+    num_players = num_agents(dyn)
+    return [vcat(us[ii], ones(1, size(us[ii], 2))) for ii in 1:num_players]
+end
+
 # By default, generate no process noise. Allow 
 function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))

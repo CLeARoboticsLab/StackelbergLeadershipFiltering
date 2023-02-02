@@ -18,23 +18,12 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, Rij)
 end
 
 function affinize_costs(cost::QuadraticCost, time_range, x, us)
-    
-
-    return homogenize_matrix(cost, cost.Q, )
+    return cost
 end
 
-# Evaluate cost on a state/control trajectory.
-# - xs[:, time]
-# - us[player][:, time]
-function evaluate(c::QuadraticCost, xs, us)
-    horizon = last(size(xs))
-
-    total = 0.0
-    for tt in 1:horizon
-        total += xs[:, tt]' * c.Q * xs[:, tt]
-        total += sum(us[jj][:, tt]' * Rij * us[jj][:, tt] for (jj, Rij) in c.Rs)
-    end
-    return total
+# Evaluate cost on a state/control trajectory at a particule time.
+function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return x' * c.Q * x + sum(us[jj]' * Rij * us[jj] for (jj, Rij) in c.Rs)
 end
 
 # Export all the cost types/structs.

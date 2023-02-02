@@ -71,8 +71,8 @@ function solve_approximated_lqr_feedback(dyn::Dynamics,
                                          cost::Cost,
                                          horizon::Int,
                                          t0::Float64,
-                                         x_refs::AbstractArray{Float64},
-                                         u_refs::AbstractArray{Float64})
+                                         xs_1::AbstractArray{Float64},
+                                         us_1::AbstractArray{Float64})
     T = horizon
     N = num_agents(dyn)
 

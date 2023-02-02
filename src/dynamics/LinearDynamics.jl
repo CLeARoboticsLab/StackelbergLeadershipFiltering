@@ -38,6 +38,11 @@ function propagate_dynamics(dyn::LinearDynamics,
                             x::AbstractVector{Float64},
                             us::AbstractVector{<:AbstractVector{Float64}},
                             v::Union{Nothing, AbstractVector{Float64}})
+    if dyn.is_homogenized && size(x, 1) == xdim(dyn)
+        x = homogenize_state(x)
+        us = homogenize_ctrls(us)
+    end
+
     N = dyn.sys_info.num_agents
     x_next = dyn.A * x
     for i in 1:N

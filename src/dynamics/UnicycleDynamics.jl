@@ -10,19 +10,34 @@ struct UnicycleDynamics <: NonlinearDynamics
     is_homogenized::Bool
 end
 
+function homogenize_state(dyn::UnicycleDynamics, x)
+    new_x = zeros(num_agents(dyn) * 5)
+    for ii in 1:num_agents(dyn)
+        ith_player_idx = (ii-1)
+        new_x[5*ith_player_idx:5*ith_player_idx+5] = vcat(x[4*ith_player_idx:4*ith_player_idx+4], ones(1))
+    end
+    return new_x
+end
+
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
                             x::AbstractVector{Float64},
                             us::AbstractVector{<:AbstractVector{Float64}})
-    N = dyn.sys_info.num_agents
+
+    if dyn.is_homogenized && size(x, 1) == xdim(dyn)
+        x = homogenize_state(x)
+        us = homogenize_ctrls(us)
+    end
+
+    N = num_agents(dyn)
     @assert N == length(us)
-    @assert xdim(dyn) == 4 * N
-    @assert udim(dyn) == 2 * N
+    @assert xdim(dyn) == (4 + dyn.is_homogenized) * N
+    @assert udim(dyn) == (2 + dyn.is_homogenized) * N
 
     x_dot = zeros(xdim(dyn))
 
     for ii in 1:N
-        start_idx = 4 * (ii-1)
+        start_idx = (4 + dyn.is_homogenized) * (ii-1)
         px = x[start_idx + 1]
         py = x[start_idx + 2]
         theta = x[start_idx + 3]
@@ -49,15 +64,17 @@ end
 function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     N = dyn.sys_info.num_agents
     @assert N == length(us)
-    @assert xdim(dyn) == 4 * N
+    num_states = 4 + dyn.is_homogenized
+    num_ctrls = 2 + dyn.is_homogenized
+    @assert xdim(dyn) + num_agents(dyn) * dyn.is_homogenized == num_states * N
 
-    As = [sparse(zeros(4, 4)) for ii in 1:N]
-    Bs = [zeros(xdim(dyn), 2) for ii in 1:N]
+    As = [sparse(zeros(num_states, num_states)) for ii in 1:N]
+    Bs = [zeros(xdim(dyn), num_ctrls) for ii in 1:N]
 
     for ii in 1:N
-        @assert udim(dyn, ii) == 2
+        @assert udim(dyn, ii) + dyn.is_homogenized == num_ctrls
 
-        start_idx = 4 * (ii-1)
+        start_idx = num_states * (ii-1)
         theta = x[start_idx + 3]
         v = x[start_idx + 4]
 
@@ -70,7 +87,7 @@ function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector
     # Combine the As into one large A matrix and add in the zeroth order term of the Taylor expansion.
     A = I + Matrix(blockdiag(As...))
 
-    return LinearDynamics(A, Bs, dyn.sys_info)
+    return LinearDynamics(A, Bs, dyn.sys_info; dyn.is_homogenized)
 end
 
 export UnicycleDynamics, propagate_dynamics, linearize_dynamics
