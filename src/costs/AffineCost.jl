@@ -1,11 +1,4 @@
-# TODO: Add a better way to integrate a homogenized cost into the rest of the system
-# Produces a symmetric matrix.
-# If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
-function homogenize_cost(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64; ρ=0.0)
-    M_dim = size(M, 1)
-    return vcat(hcat(M ,  m),
-                hcat(m', cm)) + ρ * I
-end
+# Affine costs with quadratic, linear, constant terms.
 
 mutable struct AffineCost <: Cost
     Q::AbstractMatrix{Float64}
@@ -14,8 +7,10 @@ mutable struct AffineCost <: Cost
     Rs::Dict{Int, Matrix{Float64}}
     rs::Dict{Int, Vector{Float64}}
     crs::Dict{Int, Float64}
+    is_homogenized::Bool
 end
-AffineCost(Q, q, cq) = AffineCost(Q, q, cq, Dict{Int, Matrix{eltype(Q)}}(), Dict{Int, Vector{eltype(q)}}(), Dict{Int, eltype(cq)}())
+# Affine costs always homogeneous
+AffineCost(Q, q, cq) = AffineCost(Q, q, cq, Dict{Int, Matrix{eltype(Q)}}(), Dict{Int, Vector{eltype(q)}}(), Dict{Int, eltype(cq)}(), true)
 
 function add_control_cost!(c::AffineCost, other_player_idx, Rij, rj, crj)
     @assert size(Rij, 1) == size(Rij, 2) == size(rj, 1)
@@ -26,24 +21,20 @@ function add_control_cost!(c::AffineCost, other_player_idx, Rij, rj, crj)
     c.crs[other_player_idx] = crj
 end
 
-function quadraticize_costs(cost::AffineCost, time_range, x, us)
-    num_players = size(us, 1)
-    Q = homogenize_cost(cost.Q, cost.q, cost.cq)
-    cost = QuadraticCost(Q)
-    for jj in 1:num_players
-        R_ij = homogenize_cost(cost.Rs[jj], cost.rs[jj], cost.crs[jj])
-        add_control_cost!(cost, R_ij)
-    end
+function affinize_costs(cost::AffineCost, time_range, x, us)
     return cost
 end
 
 # TODO: Implement a way to do this well.
-function evaluate(c::AffineCost, xs, us)
-    error("Affine cost evaluation not implemented. Please use quadraticize_costs to extract a QuadraticCost and pad states with an extra entry of 1.")
+function compute_cost(c::AffineCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(us)
+    Q̃ = homogenize_matrix(c.Q, c.q, c.cq)
+    R̃s = [homogenize_matrix(c.Rs[ii], c.rs[ii], c.crs[ii]) for ii in 1:num_players]
+    return x' * Q̃ * x + sum(us[jj]' * Rij * us[jj] for (jj, Rij) in R̃s)
 end
 
 # Export all the cost type.
 export AffineCost
 
 # Export functionality.
-export quadraticize_costs, evaluate, homogenize_cost
+export add_control_cost!, affinize_costs, compute_cost

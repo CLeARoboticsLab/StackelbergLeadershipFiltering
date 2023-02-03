@@ -121,7 +121,7 @@ function solve_approximated_lq_stackelberg_feedback(dyn::Dynamics,
         # Linearize and quadraticize the dynamics/costs.
         lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
         for ii in 1:N
-            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
+            quad_costs[ii] = affinize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
         end
         all_quad_costs[tt] = quad_costs
     end

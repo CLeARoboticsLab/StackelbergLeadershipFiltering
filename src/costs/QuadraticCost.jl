@@ -5,8 +5,9 @@
 mutable struct QuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
     Rs
+    is_homogenized::Bool
 end
-QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
+QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}(), false) # quadratic costs are non homogenized by default
 
 # TODO(hamzah) Add better tests for the QuadraticCost struct and associated functions.
 
@@ -16,26 +17,17 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, Rij)
     c.Rs[other_player_idx] = Rij
 end
 
-function quadraticize_costs(cost::QuadraticCost, time_range, x, us)
+function affinize_costs(cost::QuadraticCost, time_range, x, us)
     return cost
 end
 
-# Evaluate cost on a state/control trajectory.
-# - xs[:, time]
-# - us[player][:, time]
-function evaluate(c::QuadraticCost, xs, us)
-    horizon = last(size(xs))
-
-    total = 0.0
-    for tt in 1:horizon
-        total += xs[:, tt]' * c.Q * xs[:, tt]
-        total += sum(us[jj][:, tt]' * Rij * us[jj][:, tt] for (jj, Rij) in c.Rs)
-    end
-    return total
+# Evaluate cost on a state/control trajectory at a particule time.
+function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return x' * c.Q * x + sum(us[jj]' * Rij * us[jj] for (jj, Rij) in c.Rs)
 end
 
 # Export all the cost types/structs.
 export QuadraticCost
 
 # Export all the cost types/structs.
-export quadraticize_costs, evaluate
+export add_control_cost!, affinize_costs, compute_cost
