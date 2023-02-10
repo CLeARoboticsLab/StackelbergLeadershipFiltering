@@ -1,16 +1,5 @@
 # Utilities
 
-# TODO: Add a better way to integrate a homogenized matrix into the rest of the system
-# Produces a symmetric matrix.
-# If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
-function homogenize_matrix(M::AbstractMatrix{Float64}, m::AbstractVector{Float64}, cm::Float64; ρ=0.0)
-    M_dim = size(M, 1)
-    return vcat(hcat(M ,  m),
-                hcat(m', cm)) + ρ * I
-end
-
-export homogenize_matrix
-
 
 # TODO(hmzh) Add a game class of some sort that ties together the system info, cost, and dynamics, factoring in possible
 #            homogenization.
@@ -42,4 +31,28 @@ function vdim(sys_info::SystemInfo)
     return sys_info.num_v
 end
 
-export SystemInfo, num_agents, xdim, udim, vdim
+# For homogenized dimensions
+function xhdim(sys_info::SystemInfo)
+    return sys_info.num_x + 1
+end
+
+function uhdim(sys_info::SystemInfo)
+    return sum(uhdim(sys_info, ii) for ii in 1:num_agents(sys_info))
+end
+
+function uhdim(sys_info::SystemInfo, player_idx)
+    return sys_info.num_us[player_idx] + 1
+end
+
+export SystemInfo, num_agents, xdim, udim, vdim, xhdim, uhdim
+
+
+function homogenize_vector(v::AbstractVector{Float64})
+    return vcat(v, 1)
+end
+
+function homogenize_vector(vs::AbstractMatrix{Float64})
+    return vcat(vs, ones(1, size(vs, 2)))
+end
+
+export homogenize_vector

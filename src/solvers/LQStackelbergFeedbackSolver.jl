@@ -35,11 +35,11 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
     # TODO(hamzah) If we ever go beyond a 2-player game, figure out multiple followers.
     follower_idx = (leader_idx == 2) ? 1 : 2
     num_players = num_agents(dyns[1])
-    num_states = xdim(dyns[1])
+    num_states = xhdim(dyns[1])
 
     # Define recursive variables and initialize variables - the number of players, states, and control sizes are assumed
     # to be constant over time.
-    all_Ss = [zeros(udim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
+    all_Ss = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
     all_Ls = [zeros(num_states, num_states, horizon) for _ in 1:num_players]
     all_Ls[leader_idx][:, :, horizon] = all_costs[horizon][leader_idx].Q
     all_Ls[follower_idx][:, :, horizon] = all_costs[horizon][follower_idx].Q
@@ -75,7 +75,11 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         all_Ls[follower_idx][:, :, tt] = outputs[4]
     end
 
-    return all_Ss, all_Ls
+    # Adjust the matrices so the output has xdim/udim number of dimensions, not xhdim/uhdim number of dims.
+    out_Ss = [all_Ss[ii][1:udim(dyns[1], ii),:,:] for ii in 1:num_players]
+    # out_Ls = [all_Ls[ii][1:xdim(dyns[1]),:,:] for ii in 1:num_players]
+    L_future_costs = [[QuadraticCost(all_Ls[ii][:, :, tt]) for tt in 1:horizon] for ii in 1:num_players]
+    return out_Ss, L_future_costs
 end
 
 # Shorthand function for LQ time-invariant dynamics and costs.
@@ -121,7 +125,7 @@ function solve_approximated_lq_stackelberg_feedback(dyn::Dynamics,
         # Linearize and quadraticize the dynamics/costs.
         lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
         for ii in 1:N
-            quad_costs[ii] = affinize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
+            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
         end
         all_quad_costs[tt] = quad_costs
     end

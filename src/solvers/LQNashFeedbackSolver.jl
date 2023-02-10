@@ -6,32 +6,39 @@
 function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{QuadraticCost}, Zₜ₊₁)
 
     num_players = num_agents(dyn_at_t)
-    num_states = xdim(dyn_at_t)
+    num_states = xhdim(dyn_at_t)
     A = dyn_at_t.A
 
     # TODO: This line breaks very easily under weirdly-dimensioned systems. Change the code here.
-    lhs_rows = Array{Float64}(undef, 0, num_states ÷ num_players)
+    lhs_dim = uhdim(dyn_at_t)
+    lhs_rows = Array{Float64}(undef, 0, lhs_dim)
 
-    for player_idx in 1:num_players
+    for ii in 1:num_players
 
         # Identify terms.
-        B = dyn_at_t.Bs[player_idx]
-        Rⁱⁱ = costs_at_t[player_idx].Rs[player_idx]
+        B = dyn_at_t.Bs[ii]
+        Rⁱⁱ = costs_at_t[ii].Rs[ii]
 
-        # Compute terms for the matrices. First term is (*) in class notes, second is (**).
-        first_term = Rⁱⁱ + B' *  Zₜ₊₁[player_idx] * B
-        sum_of_other_player_control_matrices = sum(dyn_at_t.Bs) - B
-        second_term = B' * Zₜ₊₁[player_idx] * sum_of_other_player_control_matrices
+        # Compute terms for the matrices. Self term is (*) in class notes, cross term is (**).
+        lhs_ith_rows = Array{Float64}(undef, uhdim(dyn_at_t, ii), 0)
+        for jj in 1:num_players
+            if ii == jj
+                self_term = Rⁱⁱ + B' *  Zₜ₊₁[ii] * B
+                lhs_ith_rows = hcat(lhs_ith_rows, self_term)
+            else
+                cross_term = B' * Zₜ₊₁[ii] * dyn_at_t.Bs[jj]
+                lhs_ith_rows = hcat(lhs_ith_rows, cross_term)
+            end
+        end
 
         # Create the LHS rows for the ith player and add to LHS rows.
-        lhs_ith_row  = hcat([(i == player_idx) ? first_term : second_term for i in 1:num_players]...)
-        lhs_rows = vcat(lhs_rows, lhs_ith_row)
+        lhs_rows = vcat(lhs_rows, lhs_ith_rows)
     end
 
     # Construct the matrices we will use to solve for P.
     lhs_matrix = lhs_rows
-    rhs_matrix_terms = [dyn_at_t.Bs[i]' * Zₜ₊₁[i] * A for i in 1:num_players]
-    rhs_matrix = vcat(Array{Float64}(undef, 0, num_states), rhs_matrix_terms...)
+    rhs_matrix_terms = [dyn_at_t.Bs[ii]' * Zₜ₊₁[ii] * A for ii in 1:num_players]
+    rhs_matrix = vcat(rhs_matrix_terms...)
 
     # Finally compute P.
     return lhs_matrix \ rhs_matrix
@@ -54,11 +61,11 @@ function solve_lq_nash_feedback(
 
     # The number of players, states, and control sizes are assumed to be constant over time.
     num_players = num_agents(dyns[1])
-    num_states = xdim(dyns[1])
+    num_states = xhdim(dyns[1])
 
     # Initialize the feedbacks gains and state costs.
     all_Zs = [zeros(num_states, num_states, horizon) for _ in 1:num_players]
-    all_Ps = [zeros(udim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
+    all_Ps = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
 
     # 1. Start at the final timestep (t=T), setting Z^i_T = Q^i_T.
     Zₜ₊₁ = [all_costs[horizon][ii].Q for ii in 1:num_players]
@@ -76,11 +83,12 @@ function solve_lq_nash_feedback(
 
         # 2. Compute P^{i*}_t and Z^i_t for all players at time t and store them.
         Ps = compute_P_at_t(dyn, costs, Zₜ₊₁)
+        num_inputs = 0
         for ii in 1:num_players
-            num_inputs = udim(dyn, ii)
-            index_range = (ii-1) * num_inputs + 1 : ii * num_inputs
+            index_range = num_inputs + 1 : num_inputs + uhdim(dyn, ii)
+            num_inputs += uhdim(dyn, ii)
 
-            all_Ps[ii][:, :, tt] = reshape(Ps[index_range, :], (num_inputs, xdim(dyn), 1))
+            all_Ps[ii][:, :, tt] = reshape(Ps[index_range, :], (uhdim(dyn, ii), xhdim(dyn), 1))
         end
 
         for ii in 1:num_players
@@ -107,7 +115,9 @@ function solve_lq_nash_feedback(
         # 3. Go to (2) until t=1.
     end
 
-    return all_Ps, all_Zs
+    out_Ps = [all_Ps[ii][1:udim(dyns[1], ii),:,:] for ii in 1:num_players]
+    Z_future_costs = [[QuadraticCost(all_Zs[ii][:, :, tt]) for tt in 1:horizon] for ii in 1:num_players]
+    return out_Ps, Z_future_costs
 end
 
 # Shorthand function for LQ time-invariant dynamics and costs.
@@ -152,7 +162,7 @@ function solve_approximated_lq_nash_feedback(dyn::Dynamics,
         time_range = (prev_time, current_time)
         lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
         for ii in 1:N
-            quad_costs[ii] = affinize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
+            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
         end
         all_quad_costs[tt] = quad_costs
     end

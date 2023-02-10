@@ -27,8 +27,8 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     @assert !isempty(costs) && size(costs, 1) == horizon
 
     # Note: There should only be one "player" for an LQR problem.
-    num_states = xdim(dyns[1])
-    num_ctrls = udim(dyns[1], 1)
+    num_states = xhdim(dyns[1])
+    num_ctrls = uhdim(dyns[1], 1)
 
     Ps = zeros((num_ctrls, num_states, horizon))
     Zs = zeros((num_states, num_states, horizon))
@@ -59,7 +59,9 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
         Zs[:, :, tt] = Zₜ₊₁
     end
 
-    return Ps, Zs
+    # Cut off the extra dimension of the homgenized coordinates system.
+    Z_future_costs = [QuadraticCost(Zs[:, :, tt]) for tt in 1:horizon]
+    return Ps[1:udim(dyns[1], 1),:,:], Z_future_costs
 end
 
 
@@ -84,7 +86,7 @@ function solve_approximated_lqr_feedback(dyn::Dynamics,
         current_time = t0 + tt
         time_range = (prev_time, current_time)
         lin_dyns[tt] = linearize_dynamics(dyn, time_range, xs_1[:, tt], [us_1[:, tt]])
-        quad_costs[tt] = affinize_costs(cost, time_range, xs_1[:, tt], [us_1[:, tt]])
+        quad_costs[tt] = quadraticize_costs(cost, time_range, xs_1[:, tt], [us_1[:, tt]])
     end
 
     return solve_lqr_feedback(lin_dyns, quad_costs, T)

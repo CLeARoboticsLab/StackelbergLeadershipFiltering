@@ -29,12 +29,15 @@ function generate_random_linear_dynamics(sys_info::SystemInfo)
     return LinearDynamics(A, Bs, sys_info)
 end
 
-function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_costs=true)
+function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_costs=true, make_affine=false)
     N = num_agents(sys_info)
     num_states = xdim(sys_info)
 
     # Make state cost.
-    costs = [QuadraticCost(make_symmetric_pos_def_matrix(num_states)) for _ in 1:N]
+    Q = make_symmetric_pos_def_matrix(num_states)
+    Q = (make_affine) ? vcat(hcat(Q, zeros(num_states)), hcat(zeros(1, num_states), 1.)) : Q
+    costs = [QuadraticCost(Q) for _ in 1:N]
+
 
     # Make control costs.
     for ii in 1:N
@@ -47,6 +50,7 @@ function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_cos
                 continue
             end
             R_ij = make_symmetric_pos_def_matrix(num_uj)
+            R_ij = (make_affine) ? vcat(hcat(R_ij, zeros(num_uj)), hcat(zeros(1, num_uj), 1.)) : R_ij
             add_control_cost!(costs[ii], jj, R_ij)
         end
     end

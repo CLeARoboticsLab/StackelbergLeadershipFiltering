@@ -9,14 +9,13 @@
 # - apply_control_strategy: accepts a control strategy, a time, and a state, and produced the strategy at that time.
 abstract type MultiplayerControlStrategy end
 
-
 # Function to unroll a set of feedback matrices from an initial condition.
 # Output is a sequence of states xs[:, time] and controls us[player][:, time].
 function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStrategy, x₁)
     @assert length(x₁) == xdim(dyn)
 
     N = control_strategy.num_players
-    @assert N == dyn.sys_info.num_agents
+    @assert N == num_agents(dyn)
 
     horizon = control_strategy.horizon
 
@@ -25,7 +24,8 @@ function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStra
     xs[:, 1] = x₁
     us = [zeros(udim(dyn, ii), horizon) for ii in 1:N]
     for tt in 2:horizon
-        ctrls_at_ttm1 = apply_control_strategy(tt-1, control_strategy, xs[:, tt - 1])
+        xh = homogenize_vector(xs[:, tt-1])
+        ctrls_at_ttm1 = apply_control_strategy(tt-1, control_strategy, xh)
         for ii in 1:N
             us[ii][:, tt - 1] = ctrls_at_ttm1[ii]
         end
@@ -36,7 +36,8 @@ function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStra
     end
 
     # Controls at final time.
-    final_ctrls = apply_control_strategy(horizon, control_strategy, xs[:, horizon])
+    xh = homogenize_vector(xs[:, horizon])
+    final_ctrls = apply_control_strategy(horizon, control_strategy, xh)
     for ii in 1:N
         us[ii][:, horizon] = final_ctrls[ii]
     end
