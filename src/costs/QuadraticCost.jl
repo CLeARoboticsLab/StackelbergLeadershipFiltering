@@ -5,16 +5,9 @@
 mutable struct QuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
     Rs
-    is_pure::Bool
+    # is_pure::Bool # TODO(hamzah) Find a way to identify pureness of quadratic matrices for cost computation purposes.
 end
-QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}(), true)
-
-# function construct_q_cost()
-#     Q_dim = size(Q, 1)
-#     @assert all(Q .== Q') # check symmetry
-#     @assert all(Q[1:, size(Q, 1)] .== vcat(zeros(Q_dim-1), 1)) # check that there are no linear terms and constant term
-#     # quadratic costs are non homogenized by default
-# end
+QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
 
 # TODO(hamzah) Add better tests for the QuadraticCost struct and associated functions.
 
@@ -33,10 +26,8 @@ end
 function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
     @assert size(xh, 1) == size(c.Q, 1)
     cost = xh' * c.Q * xh
-    # println("1: ", time_range, cost, c.Rs)
     if !isempty(c.Rs)
         cost += sum(uhs[jj]' * Rij * uhs[jj] for (jj, Rij) in c.Rs)
-        # println("2+: ", time_range, cost)
     end
     return cost
 end

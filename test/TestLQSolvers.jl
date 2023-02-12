@@ -95,8 +95,6 @@ seed!(0)
 
                 # Manual cost is formed by the sum of the current state/ctrls costs and the future costs.
                 manual_cost = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt) - 2
-                # manual_cost = xh_tt' * costs[ii].Q * xh_tt
-                # manual_cost += uh_tt[ii]' * costs[ii].Rs[ii] * uh_tt[ii]
                 manual_cost += compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1) - 1
                 computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt) - 1
 
@@ -152,25 +150,14 @@ seed!(0)
 
             # Compute the homogenized controls for time tt+1.
             uh_ttp1 = [ũhs[ii][:, tt+1] for ii in 1:num_players]
-            # uh_ttp1 = homogenize_ctrls(dyn, u_ttp1)
 
             # The cost computed manually for perturbed inputs using
             # x_t^T Q_t x_t^T + ... + <control costs> + ... + x_{t+1}^T * L^1_{t+1} x_{t+1}.
             state_and_controls_cost = compute_cost(costs[leader_idx], time_range, xhs[:, tt], ũh_tt)
-            # state_cost = xhs[:, tt]' * costs[leader_idx].Q * xhs[:, tt]
-            # self_control_cost = ũ1ₜ' * costs[leader_idx].Rs[leader_idx] * ũ1ₜ
-            # if haskey(costs[leader_idx].Rs, follower_idx)
-            #     cross_control_cost = ũ2ₜ' * costs[leader_idx].Rs[follower_idx] * ũ2ₜ
-            # else
-            #     cross_control_cost = 0
-            # end
             ũ_tt = [ũs[ii][:, tt] for ii in 1:num_players]
             xhₜ₊₁ = propagate_dynamics(dyn, time_range, xs[:, tt], ũ_tt)
             x̃hₜ₊₁ = homogenize_vector(xhₜ₊₁)
-            # x̃ₜ₊₁ = dyn.A * xhs[:, tt] + dyn.Bs[leader_idx] * ũh1ₜ + dyn.Bs[follower_idx] * ũh2ₜ
-            # future_cost = x̃ₜ₊₁' * Ls[leader_idx][:, :, tt+1] * x̃ₜ₊₁
             future_cost = compute_cost(future_costs[leader_idx][tt+1], time_range, x̃hₜ₊₁, uh_ttp1)
-            # new_P1_cost = state_cost + self_control_cost + cross_control_cost + future_cost
             new_P1_cost = state_and_controls_cost + future_cost
 
             # The costs from time t+1 of the perturbed and optimal trajectories should also satisfy this condition.
@@ -240,13 +227,8 @@ seed!(0)
 
                 # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
                 state_and_control_costs = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt) - 2
-                # state_cost = xs[:, tt]' * costs[ii].Q * xs[:, tt]
-                # self_control_cost = us[ii][:, tt]' * costs[ii].Rs[ii] * us[ii][:, tt]
-                # cross_control_cost = us[jj][:, tt]' * costs[ii].Rs[jj] * us[jj][:, tt]
-                # future_cost = xs[:, tt+1]' * Ls[ii][:, :, tt+1] * xs[:, tt+1]
                 future_cost = compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1) - 1
 
-                # manual_cost = state_cost + self_control_cost + cross_control_cost + future_cost
                 manual_cost = state_and_control_costs + future_cost
                 computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt) - 1
 

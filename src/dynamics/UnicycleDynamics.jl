@@ -9,15 +9,6 @@ struct UnicycleDynamics <: NonlinearDynamics
     sys_info::SystemInfo
 end
 
-function homogenize_state(dyn::UnicycleDynamics, x)
-    new_x = zeros(num_agents(dyn) * 5)
-    for ii in 1:num_agents(dyn)
-        ith_player_idx = (ii-1)
-        new_x[5*ith_player_idx:5*ith_player_idx+5] = vcat(x[4*ith_player_idx:4*ith_player_idx+4], ones(1))
-    end
-    return new_x
-end
-
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
                             x::AbstractVector{Float64},
