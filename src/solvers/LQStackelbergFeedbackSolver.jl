@@ -77,7 +77,6 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
 
     # Adjust the matrices so the output has xdim/udim number of dimensions, not xhdim/uhdim number of dims.
     out_Ss = [all_Ss[ii][1:udim(dyns[1], ii),:,:] for ii in 1:num_players]
-    # out_Ls = [all_Ls[ii][1:xdim(dyns[1]),:,:] for ii in 1:num_players]
     L_future_costs = [[QuadraticCost(all_Ls[ii][:, :, tt]) for tt in 1:horizon] for ii in 1:num_players]
     return out_Ss, L_future_costs
 end

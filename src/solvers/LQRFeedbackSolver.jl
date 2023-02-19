@@ -59,7 +59,6 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
         Zs[:, :, tt] = Zₜ₊₁
     end
 
-    # Cut off the extra dimension of the homgenized coordinates system.
     Z_future_costs = [QuadraticCost(Zs[:, :, tt]) for tt in 1:horizon]
     return Ps[1:udim(dyns[1], 1),:,:], Z_future_costs
 end
