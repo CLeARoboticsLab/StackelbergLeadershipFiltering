@@ -38,7 +38,7 @@ function coupling_example()
     Q₁ = zeros(8, 8)
     Q₁[5, 5] = 1.0
     Q₁[7, 7] = 1.0
-    c₁ = QuadraticCost(Q₁)
+    c₁ = PureQuadraticCost(Q₁)
     add_control_cost!(c₁, 1, 1 * diagm([1, 1]))
     add_control_cost!(c₁, 2, zeros(2, 2))
 
@@ -51,7 +51,7 @@ function coupling_example()
     Q₂[7, 7] = 1.0
     Q₂[3, 7] = -1.0
     Q₂[7, 3] = -1.0
-    c₂ = QuadraticCost(Q₂)
+    c₂ = PureQuadraticCost(Q₂)
     add_control_cost!(c₂, 2, 1 * diagm([1, 1]))
     add_control_cost!(c₂, 1, zeros(2, 2))
 

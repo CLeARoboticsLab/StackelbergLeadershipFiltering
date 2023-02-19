@@ -36,7 +36,7 @@ function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_cos
     # Make state cost.
     Q = make_symmetric_pos_def_matrix(num_states)
     Q = (make_affine) ? vcat(hcat(Q, zeros(num_states)), hcat(zeros(1, num_states), 1.)) : Q
-    costs = [QuadraticCost(Q) for _ in 1:N]
+    costs = [PureQuadraticCost(Q) for _ in 1:N]
 
 
     # Make control costs.

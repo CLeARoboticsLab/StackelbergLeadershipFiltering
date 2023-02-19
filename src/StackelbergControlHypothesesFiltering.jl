@@ -3,8 +3,8 @@ module StackelbergControlHypothesesFiltering
 include("Utils.jl")
 
 include("costs/CostUtils.jl")
+include("costs/PureQuadraticCost.jl")
 include("costs/QuadraticCost.jl")
-include("costs/AffineCost.jl")
 
 include("costs/ExampleILQRCost.jl")
 

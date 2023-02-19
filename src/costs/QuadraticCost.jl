@@ -1,39 +1,63 @@
-# Quadratic cost for a single player.
-# Form is: x^T_t Q^i x + \sum_j u^{jT}_t R^{ij} u^j_t.
-# For simplicity, assuming that Q, R are time-invariant, and that dynamics are
-# linear time-invariant, i.e. x_{t+1} = A x_t + \sum_i B^i u^i_t.
+# Affine costs with quadratic, linear, constant terms.
+
 mutable struct QuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
-    Rs
-    # is_pure::Bool # TODO(hamzah) Find a way to identify pureness of quadratic matrices for cost computation purposes.
+    q::AbstractVector{Float64}
+    cq::Float64
+    Rs::Dict{Int, Matrix{Float64}}
+    rs::Dict{Int, Vector{Float64}}
+    crs::Dict{Int, Float64}
 end
-QuadraticCost(Q) = QuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
+# Quadratic costs always homogeneous
+QuadraticCost(Q::AbstractMatrix{Float64}) = QuadraticCost(Q, zeros(size(Q, 1)), 0,
+                                                          Dict{Int, Matrix{eltype(Q)}}(),
+                                                          Dict{Int, Vector{eltype(Q)}}(),
+                                                          Dict{Int, eltype(Q)}())
+QuadraticCost(Q::AbstractMatrix{Float64}, q::AbstractVector{Float64}, cq::Float64) = QuadraticCost(Q, q, cq,
+                                                                                                   Dict{Int, Matrix{eltype(Q)}}(),
+                                                                                                   Dict{Int, Vector{eltype(q)}}(),
+                                                                                                   Dict{Int, eltype(cq)}())
 
-# TODO(hamzah) Add better tests for the QuadraticCost struct and associated functions.
+function add_control_cost!(c::QuadraticCost, other_player_idx, Rij; rj=zeros(size(Rij, 1))::AbstractVector{Float64}, crj=0.::Float64)
+    @assert size(Rij, 1) == size(Rij, 2) == size(rj, 1)
+    @assert size(crj) == ()
 
-# Method to add R^{ij}s to a Cost struct.
-export add_control_cost!
-function add_control_cost!(c::QuadraticCost, other_player_idx, Rij)
     c.Rs[other_player_idx] = Rij
+    c.rs[other_player_idx] = rj
+    c.crs[other_player_idx] = crj
 end
 
-# TODO(hamzah): Use Julia's conversion and promotion for this? Or at least for affine costs.
-function quadraticize_costs(cost::QuadraticCost, time_range, x, us)
-    return cost
-end
+function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    Q̃ = homogenize_cost_matrix(c.Q, c.q, c.cq)
+    q_cost = PureQuadraticCost(Q̃)
 
-# Evaluate cost on a state/control trajectory at a particule time.
-function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
-    @assert size(xh, 1) == size(c.Q, 1)
-    cost = xh' * c.Q * xh
-    if !isempty(c.Rs)
-        cost += sum(uhs[jj]' * Rij * uhs[jj] for (jj, Rij) in c.Rs)
+    # Fill control costs.
+    num_players = length(c.Rs)
+    for ii in 1:num_players
+        R̃ = homogenize_cost_matrix(c.Rs[ii], c.rs[ii], c.crs[ii];)
+        add_control_cost!(q_cost, ii, R̃)
     end
-    return cost
+
+    return q_cost
 end
 
-# Export all the cost types/structs.
+function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(uhs)
+    out_size = size(c.Q, 1)
+    x = xh[1:out_size]
+
+    total = (1/2.) * x' * c.Q * x + c.q' * x + (1/2.) * c.cq
+    for ii in 1:num_players
+        out_size = size(c.Rs[ii], 1)
+        u = uhs[ii][1:out_size]
+
+        total += (1/2.) * u' * c.Rs[ii] * u + c.rs[ii]' * u + (1/2.) * c.crs[ii]
+    end
+    return total
+end
+
+# Export all the cost type.
 export QuadraticCost
 
-# Export all the cost types/structs.
+# Export functionality.
 export add_control_cost!, quadraticize_costs, compute_cost

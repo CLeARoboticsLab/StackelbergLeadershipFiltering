@@ -2,7 +2,7 @@
 abstract type Cost end
 
 # Every Cost is assumed to have the following functions defined on it:
-# - quadraticize_costs(cost, time_range, x, us) - this function produces a QuadraticCost at time t given the state and controls
+# - quadraticize_costs(cost, time_range, x, us) - this function produces a PureQuadraticCost at time t given the state and controls
 # - compute_cost(cost, xs, us) - this function evaluates the cost of a trajectory given the states and controls
 # - homogenize_state(cost, xs) - needs to be defined if cost requires linear/constant terms
 # - homogenize_ctrls(cost, us) - needs to be defined if cost requires linear/constant terms
@@ -14,7 +14,12 @@ abstract type NonQuadraticCost <: Cost end
 
 # Produces a symmetric matrix.
 # If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
-function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=1.0::Float64, ρ=0.0)
+function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
+    # If we're gonna have problems with singularity, then spectral shift the matrix.
+    if all(m .== iszero.(size(M, 1))) && cm == 0.0 && ρ == nothing
+        ρ = 1e-32
+    end
+
     M_dim = size(M, 1)
     return vcat(hcat(M ,  m),
                 hcat(m', cm)) + ρ * I
@@ -22,7 +27,7 @@ end
 
 # Creates a homgenized cost matrix which doesn't have the extra column entries and a 1 on the bottom right.
 function homogenize_cost_matrix(M::AbstractMatrix{Float64})
-    return homogenize_cost_matrix(M, zeros(size(M, 1)), 1.0)
+    return homogenize_cost_matrix(M, zeros(size(M, 1)), 0.0)
 end
 export homogenize_cost_matrix
 

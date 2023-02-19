@@ -23,7 +23,7 @@ seed!(0)
           0 0 0  0;
           0 0 1. 0;
           0 0 0  0]
-    c₁ = AffineCost(Q₁)
+    c₁ = QuadraticCost(Q₁)
     add_control_cost!(c₁, 1, ones(1, 1))
     add_control_cost!(c₁, 2, zeros(1, 1))
 
@@ -31,7 +31,7 @@ seed!(0)
           0  0 0  0;
           -1 0 1  0;
           0  0 0  0]
-    c₂ = AffineCost(Q₂)
+    c₂ = QuadraticCost(Q₂)
     add_control_cost!(c₂, 2, ones(1, 1))
     add_control_cost!(c₂, 1, zeros(1, 1))
 
@@ -94,9 +94,9 @@ seed!(0)
                 # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
 
                 # Manual cost is formed by the sum of the current state/ctrls costs and the future costs.
-                manual_cost = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt) - 2
-                manual_cost += compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1) - 1
-                computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt) - 1
+                manual_cost = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt)
+                manual_cost += compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1)
+                computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt)
 
                 @test manual_cost ≈ computed_cost
             end
@@ -226,11 +226,11 @@ seed!(0)
                 uh_ttp1 = homogenize_ctrls(dyn, u_ttp1)
 
                 # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
-                state_and_control_costs = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt) - 2
-                future_cost = compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1) - 1
+                state_and_control_costs = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt)
+                future_cost = compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1)
 
                 manual_cost = state_and_control_costs + future_cost
-                computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt) - 1
+                computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt)
 
                 # The manually recursion at time t should match the computed L cost at time t.
                 @test manual_cost ≈ computed_cost
