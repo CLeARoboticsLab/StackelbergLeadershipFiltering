@@ -11,7 +11,7 @@ abstract type MultiplayerControlStrategy end
 
 # Function to unroll a set of feedback matrices from an initial condition.
 # Output is a sequence of states xs[:, time] and controls us[player][:, time].
-function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStrategy, x₁)
+function unroll_feedback(dyn::Dynamics, times::AbstractVector{Float64}, control_strategy::MultiplayerControlStrategy, x₁)
     @assert length(x₁) == xdim(dyn)
 
     N = control_strategy.num_players
@@ -31,7 +31,7 @@ function unroll_feedback(dyn::Dynamics, control_strategy::MultiplayerControlStra
         end
 
         us_prev = [us[i][:, tt-1] for i in 1:N]
-        time_range = (tt-1, tt)
+        time_range = (times[tt-1], times[tt])
         xs[:, tt] = propagate_dynamics(dyn, time_range, xs[:, tt-1], us_prev)
     end
 
@@ -47,7 +47,7 @@ end
 
 # As above, but replacing feedback matrices `P` with raw control inputs `u`.
 
-function unroll_raw_controls(dyn::Dynamics, us, x₁)
+function unroll_raw_controls(dyn::Dynamics, times::AbstractVector{Float64}, us, x₁)
     @assert length(x₁) == xdim(dyn)
 
     N = length(us)
@@ -61,7 +61,7 @@ function unroll_raw_controls(dyn::Dynamics, us, x₁)
     us = [zeros(udim(dyn, ii), horizon) for ii in 1:N]
     for tt in 2:horizon
         us_prev = [us[i][:, tt-1] for i in 1:N]
-        time_range = (tt-1, tt)
+        time_range = (times[tt-1], times[tt])
         xs[:, tt] = propagate_dynamics(dyn, time_range, xs[:, tt-1], us_prev)
     end
 
