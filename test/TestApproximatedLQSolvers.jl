@@ -18,6 +18,7 @@ seed!(0)
     x₁ = vcat(x₁, x₁)
     num_states = size(x₁, 1)
     horizon = 10
+    times = cumsum(ones(horizon)) .- 1 .+ t0
 
     # Ensure that for an LQ optimal control problem, both the LQ optimal control solution and approximate LQ Nash
     # optimal control with the solution to the LQ optimal control problem as reference, are identical!
@@ -27,7 +28,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
 
         Ps, future_costs_expected = solve_lqr_feedback(dyn, costs[1], horizon)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy([Ps]), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy([Ps]), x₁)
         P̃s, future_costs_actual = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
 
         @test Ps == P̃s
@@ -46,7 +47,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
 
         Ps, future_costs_expected = solve_lq_nash_feedback(dyn, costs, horizon)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ps), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ps), x₁)
         P̃s, future_costs_actual = solve_approximated_lq_nash_feedback(dyn, costs, horizon, t0, xs, us)
 
         @test Ps == P̃s
@@ -69,7 +70,7 @@ seed!(0)
         costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
 
         Ss, future_costs_expected = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
         S̃s, future_costs_actual = solve_approximated_lq_stackelberg_feedback(dyn, costs, horizon, t0, xs, us, stackelberg_leader_idx)
 
         @test Ss == S̃s

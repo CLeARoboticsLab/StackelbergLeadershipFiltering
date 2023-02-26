@@ -43,6 +43,7 @@ seed!(0)
 
     x₁ = [1., 0, 1, 0]
     horizon = 10
+    times = cumsum(ones(horizon)) .- 1.
 
 
     # Ensure that the feedback solution satisfies Nash conditions of optimality
@@ -51,7 +52,7 @@ seed!(0)
     #       conditions.
     @testset "CheckFeedbackSatisfiesNash" begin
         Ps, _ = solve_lq_nash_feedback(dyn, costs, horizon)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ps), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ps), x₁)
         nash_costs = [evaluate(c, xs, us) for c in costs]
 
         # Perturb each strategy a little bit and confirm that cost only
@@ -62,7 +63,7 @@ seed!(0)
                 P̃s = deepcopy(Ps)
                 P̃s[ii][:, :, tt] += ϵ * randn(udim(dyn, ii), xhdim(dyn))
 
-                x̃s, ũs = unroll_feedback(dyn, FeedbackGainControlStrategy(P̃s), x₁)
+                x̃s, ũs = unroll_feedback(dyn, times, FeedbackGainControlStrategy(P̃s), x₁)
                 new_nash_costs = [evaluate(c, x̃s, ũs) for c in costs]
                 @test new_nash_costs[ii] ≥ nash_costs[ii]
             end
@@ -73,7 +74,7 @@ seed!(0)
     # Ensure that the costs match up at each time step with manually calculate cost matrices.
     @testset "CheckNashCostsAreConsistentAtEquilibrium" begin
         Ps, future_costs = solve_lq_nash_feedback(dyn, costs, horizon)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ps), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ps), x₁)
 
         # Compute the costs using the t+1 cost matrix and compare with the cost using the cost matrix at time t.
         num_players = num_agents(dyn)
@@ -110,7 +111,7 @@ seed!(0)
     #       conditions.
     @testset "CheckFeedbackSatisfiesStackelbergEquilibriumForLeader" begin
         Ss, future_costs = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
         optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
         # Define some useful constants.
@@ -163,7 +164,7 @@ seed!(0)
             # The costs from time t+1 of the perturbed and optimal trajectories should also satisfy this condition.
             @test new_P1_cost ≥ opt_P1_cost
 
-            x̃s = unroll_raw_controls(dyn, ũs, x₁)
+            x̃s = unroll_raw_controls(dyn, times, ũs, x₁)
             new_stack_costs = [evaluate(c, x̃s, ũs) for c in costs]
             optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
@@ -177,7 +178,7 @@ seed!(0)
     # for player 2, holding others' strategies fixed.
     @testset "CheckFeedbackSatisfiesStackelbergEquilibriumForFollower" begin
         Ss, Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
         optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
         # Define some useful constants.
@@ -193,7 +194,7 @@ seed!(0)
             P̃s = deepcopy(Ss)
             P̃s[follower_idx][:, :, tt] += ϵ * randn(udim(dyn, follower_idx), xhdim(dyn))
 
-            x̃s, ũs = unroll_feedback(dyn, FeedbackGainControlStrategy(P̃s), x₁)
+            x̃s, ũs = unroll_feedback(dyn, times, FeedbackGainControlStrategy(P̃s), x₁)
             new_stack_costs = [evaluate(c, x̃s, ũs) for c in costs]
             @test new_stack_costs[follower_idx] ≥ optimal_stackelberg_costs[follower_idx]
         end
@@ -203,7 +204,7 @@ seed!(0)
     # Ensure that the costs match up at each time step with manually calculate cost matrices.
     @testset "CheckStackelbergCostsAreConsistentAtEquilibrium" begin
         Ss, future_costs = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
+        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
 
         # For each player, compute the costs using the t+1 cost matrix and compare with the cost using the cost matrix
         # at time t.
