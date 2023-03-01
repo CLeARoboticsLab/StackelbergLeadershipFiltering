@@ -37,6 +37,7 @@ function homogenize_ctrls(dyn::Dynamics, us::AbstractVector{<:AbstractArray{Floa
     num_players = num_agents(dyn)
     uhs = [homogenize_vector(us[ii]) for ii in 1:num_players]
     for ii in 1:num_players
+        println(size(uhs[ii], 1), " ", uhdim(dyn, ii))
         @assert size(uhs[ii], 1) == uhdim(dyn, ii)
     end
     return uhs

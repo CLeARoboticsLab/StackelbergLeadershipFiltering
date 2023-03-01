@@ -29,6 +29,11 @@ LinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(
                                                     D,
                                                     SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
 
+# Get the linear term.
+function get_constant_term(dyn::Dynamics)
+    return A[1:size(A, 1)-1, size(A, 2)]
+end
+
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
 function propagate_dynamics(dyn::Dynamics,
                             time_range,

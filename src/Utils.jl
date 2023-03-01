@@ -56,3 +56,11 @@ function homogenize_vector(vs::AbstractMatrix{Float64})
 end
 
 export homogenize_vector
+
+
+function wrap_angle(angle_rad)
+    wrapped_angle = (angle_rad + pi) % (2*pi)
+    return wrapped_angle - pi
+end
+
+export wrap_angle

@@ -46,7 +46,6 @@ function unroll_feedback(dyn::Dynamics, times::AbstractVector{Float64}, control_
 end
 
 # As above, but replacing feedback matrices `P` with raw control inputs `u`.
-
 function unroll_raw_controls(dyn::Dynamics, times::AbstractVector{Float64}, us, x₁)
     @assert length(x₁) == xdim(dyn)
 
@@ -58,7 +57,6 @@ function unroll_raw_controls(dyn::Dynamics, times::AbstractVector{Float64}, us, 
     # Populate state trajectory.
     xs = zeros(xdim(dyn), horizon)
     xs[:, 1] = x₁
-    us = [zeros(udim(dyn, ii), horizon) for ii in 1:N]
     for tt in 2:horizon
         us_prev = [us[i][:, tt-1] for i in 1:N]
         time_range = (times[tt-1], times[tt])

@@ -13,11 +13,13 @@ abstract type Cost end
 abstract type NonQuadraticCost <: Cost end
 
 # Produces a symmetric matrix.
-# If we need to perform a spectral shift to enforce PD-ness, we can set rho accordingly.
+# If we need to perform a spectral shift to enforce PD-ness, we can set ρ accordingly.
 function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
     # If we're gonna have problems with singularity, then spectral shift the matrix.
     if all(m .== iszero.(size(M, 1))) && cm == 0.0 && ρ == nothing
         ρ = 1e-32
+    elseif (ρ == nothing)
+        ρ = 0.0
     end
 
     M_dim = size(M, 1)
@@ -25,11 +27,11 @@ function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1)):
                 hcat(m', cm)) + ρ * I
 end
 
-# Creates a homgenized cost matrix which doesn't have the extra column entries and a 1 on the bottom right.
-function homogenize_cost_matrix(M::AbstractMatrix{Float64})
-    return homogenize_cost_matrix(M, zeros(size(M, 1)), 0.0)
-end
-export homogenize_cost_matrix
+# # Creates a homgenized cost matrix which doesn't have the extra column entries and a 1 on the bottom right.
+# function homogenize_cost_matrix(M::AbstractMatrix{Float64})
+#     return homogenize_cost_matrix(M, zeros(size(M, 1)), 0.0)
+# end
+# export homogenize_cost_matrix
 
 # Homogenize state - by default, this adds a 1 to the bottom. If a custom one is needed, define it elsewhere.
 function homogenize_state(c::Cost, xs::AbstractArray{Float64})
@@ -42,7 +44,7 @@ function homogenize_ctrls(c::Cost, us::AbstractVector{<:AbstractArray{Float64}})
     uhs = [homogenize_vector(us[ii]) for ii in 1:num_players]
     return uhs
 end
-export homogenize_state, homogenize_ctrls
+export homogenize_cost_matrix, homogenize_state, homogenize_ctrls
 
 
 # Evaluates the cost across a time horizon.
@@ -59,8 +61,9 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     total = 0.0
     for tt in 1:horizon
         prev_time = (tt == 1) ? tt : tt-1
-        us_tt = [us[ii][:, tt] for ii in 1:num_players]
+        us_tt = (tt != horizon) ? [us[ii][:, tt] for ii in 1:num_players] : [zeros(size(us[ii][:, tt])) for ii in 1:num_players]
         total += compute_cost(c, (prev_time, tt), xs[:, tt], us_tt)
+        # println(tt, " total until now - ", total)
     end
     return total
 end

@@ -29,11 +29,11 @@ seed!(0)
 
         # Generate the game.
         dyn = generate_random_linear_dynamics(sys_info)
-        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true)
+        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
 
         # Expected solutions.
         Ss, Ls = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, Ss, x₁)
+        xs, us = unroll_feedback(dyn, FeedbackGainControlStrategy(Ss), x₁)
 
         initial_ctrl_strats = StackelbergControlStrategy(horizon, Ss, Ls)
         current_ctrl_strats, is_converged, num_iters = stackelberg_ilqgames(stackelberg_leader_idx, 

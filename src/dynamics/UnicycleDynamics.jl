@@ -24,10 +24,11 @@ function propagate_dynamics(dyn::UnicycleDynamics,
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
-        @assert size(us[ii]) == 2 * N
+        @assert size(us[ii], 1) == 2 * N
     end
 
-    x_dot = zeros(xdim(dyn))
+    x_tp1 = zeros(xdim(dyn), 1)
+    dt = time_range[2] - time_range[1]
 
     for ii in 1:N
         start_idx = 4 * (ii-1)
@@ -39,10 +40,13 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         turn_rate = us[ii][1]
         accel = us[ii][2]
 
-        x_dot[start_idx+1:start_idx+4] = [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+        x_tp1[start_idx+1:start_idx+4] = x[start_idx+1:start_idx+4] + dt * [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+
+        # Wrap angle before propagation
+        x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
     end
 
-    return x_dot
+    return x_tp1
 end
 
 # TODO: Unicycle dynamics doesn't currently support process noise.
@@ -59,11 +63,13 @@ function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
-        @assert size(us[ii]) == 2 * N
+        @assert size(us[ii], 1) == 2 * N
     end
 
+    prev_time, curr_time = time_range
+    dt = curr_time - prev_time
     num_states = xdim(dyn)
-    As = [Matrix(sparse(zeros(num_states, num_states))) for ii in 1:N]
+    As = [sparse(zeros(num_states, num_states)) for ii in 1:N]
     a = zeros(N * num_states)
     Bs = [zeros(xdim(dyn), udim(dyn, ii)) for ii in 1:N]
 
@@ -75,11 +81,11 @@ function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector
         # Compute the state and controls for each actor.
         s = sin(theta)
         c = cos(theta)
-        As[ii][1:2, 3:4] = [-v*s c; v*c s]
-        Bs[ii][start_idx+3:start_idx+4, 1:2] = [1 0; 0 1]
+        As[ii][1:2, 3:4] = dt * [-v*s c; v*c s]
+        Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
 
         # Compute the constant term of the linear approximation.
-        a[start_idx:start_idx+num_states] = propagate_dynamics(dyn, time_range, x[start_idx:start_idx+num_states], us)
+        # a[start_idx+1:start_idx+num_states] = propagate_dynamics(dyn, time_range, x[start_idx+1:start_idx+num_states], us)
     end
     # Combine the As into one large A matrix and add in the zeroth order term of the Taylor expansion.
     A = I + Matrix(blockdiag(As...))

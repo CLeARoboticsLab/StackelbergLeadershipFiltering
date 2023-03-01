@@ -52,7 +52,7 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
         r_terms = R + B' * Zₜ₊₁ * B
 
         # This is equivalent to inv(r_terms) * B' * Zₜ₊₁ * A
-        Ps[:, :, tt] = r_terms \ B' * Zₜ₊₁ * A
+        Ps[:, :, tt] = r_terms \ (B' * Zₜ₊₁ * A)
         
         # Update Zₜ₊₁ at t+1 to be the one at t as we go to t-1.
         Zₜ₊₁ = Q + A' * Zₜ₊₁ * A - A' * Zₜ₊₁ * B * Ps[:, :, tt]

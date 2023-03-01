@@ -5,7 +5,6 @@
 mutable struct PureQuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
     Rs
-    # is_pure::Bool # TODO(hamzah) Find a way to identify pureness of quadratic matrices for cost computation purposes.
 end
 PureQuadraticCost(Q) = PureQuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
 
@@ -19,15 +18,21 @@ end
 
 # TODO(hamzah): Use Julia's conversion and promotion for this? Or at least for affine costs.
 function quadraticize_costs(cost::PureQuadraticCost, time_range, x, us)
+    # new_c = deepcopy(cost)
+    # Q_dim = size(x, 1) - 1
+    # Q = new_c.Q[1:Q_dim, 1:Q_dim]
+    # new_c.Q[1:Q_dim, Q_dim+1] += Q * x
+    # new_c.Q[Q_dim+1, 1:Q_dim] += (Q * x)'
     return cost
 end
 
 # Evaluate cost on a state/control trajectory at a particule time.
 function compute_cost(c::PureQuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
-    @assert size(xh, 1) == size(c.Q, 1)
-    cost = (1/2.) * xh' * c.Q * xh
+    x = xh[1:size(c.Q, 1)]
+    # @assert size(xh, 1)-1 == size(c.Q, 1)
+    cost = (1/2.) * x' * c.Q * x
     if !isempty(c.Rs)
-        cost += (1/2.) * sum(uhs[jj]' * Rij * uhs[jj] for (jj, Rij) in c.Rs)
+        cost += (1/2.) * sum(uhs[jj][1:size(Rij, 1)]' * Rij * uhs[jj][1:size(Rij, 1)] for (jj, Rij) in c.Rs)
     end
     return cost
 end
