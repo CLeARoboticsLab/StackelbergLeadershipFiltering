@@ -38,7 +38,8 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
 
     # Construct the matrices we will use to solve for P.
     lhs_matrix = lhs_rows
-    rhs_matrix_terms = [get_homogenized_control_dynamics_matrix(dyn_at_t, ii)' * Zₜ₊₁[ii] * A for ii in 1:num_players]
+    B(dyn, ii) = get_homogenized_control_dynamics_matrix(dyn, ii) 
+    rhs_matrix_terms = [B(dyn_at_t, ii)' * Zₜ₊₁[ii] * A for ii in 1:num_players]
     rhs_matrix = vcat(rhs_matrix_terms...)
 
     # Finally compute P.
@@ -69,7 +70,8 @@ function solve_lq_nash_feedback(
     all_Ps = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
 
     # 1. Start at the final timestep (t=T), setting Z^i_T = Q^i_T.
-    Zₜ₊₁ = [get_homogenized_state_cost_matrix(all_costs[horizon][ii]) for ii in 1:num_players]
+    Q(ii) = get_homogenized_state_cost_matrix(all_costs[horizon][ii]) 
+    Zₜ₊₁ = [Q(ii) for ii in 1:num_players]
     Zₜ = [zeros(size(Zₜ₊₁[ii])) for ii in 1:num_players]
 
     for ii in 1:num_players
