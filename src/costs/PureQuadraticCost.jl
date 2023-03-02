@@ -35,7 +35,6 @@ end
 # Evaluate cost on a state/control trajectory at a particule time.
 function compute_cost(c::PureQuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
     x = xh[1:size(c.Q, 1)]
-    # @assert size(xh, 1)-1 == size(c.Q, 1)
     cost = (1/2.) * x' * c.Q * x
     if !isempty(c.Rs)
         cost += (1/2.) * sum(uhs[jj][1:size(Rij, 1)]' * Rij * uhs[jj][1:size(Rij, 1)] for (jj, Rij) in c.Rs)
