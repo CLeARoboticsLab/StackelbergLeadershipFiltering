@@ -73,7 +73,6 @@ function solve_lq_nash_feedback(
     Zₜ = [zeros(size(Zₜ₊₁[ii])) for ii in 1:num_players]
 
     for ii in 1:num_players
-        println(size(all_costs[horizon][ii].Q), size(get_homogenized_state_cost_matrix(all_costs[horizon][ii])))
         all_Zs[ii][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][ii])
     end
 
