@@ -1,6 +1,8 @@
 # TODO(hamzah) Add better tests for the LinearDynamics struct and associated functions.
+# Describes the dynamics x_{t+1} = Ax_t + a + ∑Buᵢ_t + Dv_t; x = state, u = inputs, v = process noise
 struct LinearDynamics <: Dynamics
     A  # linear state dynamics term
+    a  # constant state dynamics term
     Bs # controls
     D  # process noise
     sys_info::SystemInfo
@@ -9,33 +11,23 @@ end
 # TODO(hamzah) Add [:,:] as necessary for auto-sizing - fixes bug if 1D vector passed in when a 2D matrix is expected.
 # Constructor for linear dynamics that auto-generates the system info and has no process noise.
 # TODO(hamzah): Add an optional bs argument that defaults to zero vector of proper size.
-LinearDynamics(A, Bs; a=zeros(size(A, 1))) = LinearDynamics(
-                                                homogenize_dynamics_matrix(A; m=a),
-                                                [homogenize_dynamics_matrix(B) for B in Bs],
-                                                nothing,
+LinearDynamics(A, Bs; a=zeros(size(A, 1))) = LinearDynamics(A, a, Bs, nothing,
                                                 SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)]))
 
 # Constructor for linear dynamics that is provided the system info and has no process noise.
-LinearDynamics(A, Bs, sys_info::SystemInfo; a=zeros(size(A, 1))) = LinearDynamics(
-                                                                    homogenize_dynamics_matrix(A; m=a),[
-                                                                    homogenize_dynamics_matrix(B) for B in Bs],
-                                                                    nothing,
-                                                                    sys_info)
+LinearDynamics(A, Bs, sys_info::SystemInfo; a=zeros(size(A, 1))) = LinearDynamics(A, a, Bs, nothing, sys_info)
 
 # Constructor for linear dynamics that auto-generates the system info with process noise.
-LinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(
-                                                    homogenize_dynamics_matrix(A; m=a),
-                                                    [homogenize_dynamics_matrix(B) for B in Bs],
-                                                    D,
-                                                    SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
+LinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(A, a, Bs, D,
+                                                               SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
 
 # Helpers that get the homogenized A and B matrices.
 function get_homogenized_state_dynamics_matrix(dyn::Dynamics)
-    return dyn.A
+    return homogenize_dynamics_matrix(dyn.A; m=dyn.a)
 end
 
 function get_homogenized_control_dynamics_matrix(dyn::Dynamics, player_idx::Int)
-    return dyn.Bs[player_idx]
+    return homogenize_dynamics_matrix(dyn.Bs[player_idx])
 end
 
 export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_matrix
@@ -43,11 +35,11 @@ export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_m
 
 # Get the linear term.
 function get_linear_dynamics_term(dyn::Dynamics)
-    return A[1:size(A, 1)-1, 1:size(A, 2)-2]
+    return dyn.A
 end
 
 function get_constant_dynamics_term(dyn::Dynamics)
-    return A[size(A, 1), 1:size(A, 2)]
+    return dyn.a
 end
 
 
@@ -70,27 +62,21 @@ function propagate_dynamics(dyn::LinearDynamics,
                             v::Union{Nothing, AbstractVector{Float64}})
     N = num_agents(dyn)
 
-    xh = homogenize_state(dyn, x)
-    uhs = homogenize_ctrls(dyn, us)
-
     # Assertions to confirm sizes.
-    @assert size(xh, 1) == xhdim(dyn)
+    @assert size(x, 1) == xdim(dyn)
     for ii in 1:N
-        @assert size(uhs[ii], 1) == uhdim(dyn, ii)
+        @assert size(us[ii], 1) == udim(dyn, ii)
     end
 
-    xh_next = dyn.A * xh
-    for i in 1:N
-        uhi = reshape(uhs[i], uhdim(dyn, i))
-        xh_next += dyn.Bs[i] * uhi
-    end
+    # Incorporate the dynamics based on the state and the controls.
+    x_next = dyn.A * x + dyn.a + sum(dyn.Bs[ii] * us[ii] for ii in 1:N)
 
     if dyn.D != nothing && v != nothing
         xh_next += dyn.D * v
     end
 
     # Remove the extra dimension before returning the propagated state.
-    return xh_next[1:xdim(dyn)]
+    return x_next
 end
 
 function linearize_dynamics(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
