@@ -41,8 +41,8 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
     # to be constant over time.
     all_Ss = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
     all_Ls = [zeros(num_states, num_states, horizon) for _ in 1:num_players]
-    all_Ls[leader_idx][:, :, horizon] = all_costs[horizon][leader_idx].Q
-    all_Ls[follower_idx][:, :, horizon] = all_costs[horizon][follower_idx].Q
+    all_Ls[leader_idx][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][leader_idx])
+    all_Ls[follower_idx][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][follower_idx])
 
     # t will increment from 1 ... K-1. k will decrement from K-1 ... 1.
     for tt = horizon-1:-1:1
@@ -52,17 +52,17 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         costs = all_costs[tt]
 
         # Define control variables which are the same over all horizon.
-        A = dyn.A
-        B_leader = dyn.Bs[leader_idx]
-        B_follower = dyn.Bs[follower_idx]
+        A = get_homogenized_state_dynamics_matrix(dyn)
+        B_leader = get_homogenized_control_dynamics_matrix(dyn, leader_idx)
+        B_follower = get_homogenized_control_dynamics_matrix(dyn, follower_idx)
 
-        Q_leader = costs[leader_idx].Q
-        Q_follower = costs[follower_idx].Q
+        Q_leader = get_homogenized_state_cost_matrix(costs[leader_idx])
+        Q_follower = get_homogenized_state_cost_matrix(costs[follower_idx])
 
-        R₁₁ = costs[leader_idx].Rs[leader_idx]
-        R₂₂ = costs[follower_idx].Rs[follower_idx]
-        R₁₂ = costs[leader_idx].Rs[follower_idx]
-        R₂₁ = costs[follower_idx].Rs[leader_idx]
+        R₁₁ = get_homogenized_control_cost_matrix(costs[leader_idx], leader_idx)
+        R₂₂ = get_homogenized_control_cost_matrix(costs[follower_idx], follower_idx)
+        R₁₂ = get_homogenized_control_cost_matrix(costs[leader_idx], follower_idx)
+        R₂₁ = get_homogenized_control_cost_matrix(costs[follower_idx], leader_idx)
 
         Lₖ₊₁ = [all_Ls[leader_idx][:, :, tt+1], all_Ls[follower_idx][:, :, tt+1]]
 

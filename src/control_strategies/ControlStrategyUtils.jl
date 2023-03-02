@@ -46,7 +46,6 @@ function unroll_feedback(dyn::Dynamics, times::AbstractVector{Float64}, control_
 end
 
 # As above, but replacing feedback matrices `P` with raw control inputs `u`.
-
 function unroll_raw_controls(dyn::Dynamics, times::AbstractVector{Float64}, us, x₁)
     @assert length(x₁) == xdim(dyn)
 

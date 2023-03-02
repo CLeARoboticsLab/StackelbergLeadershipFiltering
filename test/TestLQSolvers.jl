@@ -35,16 +35,16 @@ seed!(0)
     add_control_cost!(c₂, 2, ones(1, 1))
     add_control_cost!(c₂, 1, zeros(1, 1))
 
-    dummy_time_range = (-1.0, -1.0)
-    dummy_x = zeros(xdim(dyn))
-    dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
-    costs = [quadraticize_costs(c₁, dummy_time_range, dummy_x, dummy_us),
-             quadraticize_costs(c₂, dummy_time_range, dummy_x, dummy_us)]
-
     x₁ = [1., 0, 1, 0]
     horizon = 10
     times = cumsum(ones(horizon)) .- 1.
 
+    dummy_time_range = (times[1], times[horizon])
+    dummy_x = zeros(xdim(dyn))
+    dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
+    quad_costs = [c₁, c₂]
+    costs = [quadraticize_costs(c₁, dummy_time_range, dummy_x, dummy_us),
+             quadraticize_costs(c₂, dummy_time_range, dummy_x, dummy_us)]
 
     # Ensure that the feedback solution satisfies Nash conditions of optimality
     # for each player, holding others' strategies fixed.
@@ -134,13 +134,14 @@ seed!(0)
             ũhs = homogenize_ctrls(dyn, ũs)
 
             # Re-solve for the optimal follower input given the perturbed leader trajectory.
-            B₂ = dyn.Bs[follower_idx]
-            L₂_ttp1 = future_costs[follower_idx][tt+1].Q
-            G = costs[follower_idx].Rs[follower_idx] + B₂' * L₂_ttp1 * B₂
+            A = get_homogenized_state_dynamics_matrix(dyn)
+            B₂ = get_homogenized_control_dynamics_matrix(dyn, follower_idx)
+            L₂_ttp1 = get_homogenized_state_cost_matrix(future_costs[follower_idx][tt+1])
+            G = get_homogenized_control_cost_matrix(costs[follower_idx], follower_idx) + B₂' * L₂_ttp1 * B₂
 
-            B₁ = dyn.Bs[leader_idx]
+            B₁ = get_homogenized_control_dynamics_matrix(dyn, leader_idx)
             ũh1ₜ = ũhs[leader_idx][:, tt]
-            ũh2ₜ = - G \ (B₂' * L₂_ttp1 * (dyn.A * xhs[:,tt] + B₁ * ũh1ₜ))
+            ũh2ₜ = - G \ (B₂' * L₂_ttp1 * (A * xhs[:,tt] + B₁ * ũh1ₜ))
             ũh_tt = [ũh1ₜ, ũh2ₜ]
 
             ũhs[follower_idx][:, tt] = ũh2ₜ

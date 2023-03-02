@@ -32,7 +32,7 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
 
     Ps = zeros((num_ctrls, num_states, horizon))
     Zs = zeros((num_states, num_states, horizon))
-    Zₜ₊₁ = costs[horizon].Q
+    Zₜ₊₁ = get_homogenized_state_cost_matrix(costs[horizon]) # Q at last horizon
     Zs[:, :, horizon] = Zₜ₊₁
 
     # base case
@@ -43,10 +43,10 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     # At each horizon running backwards, solve the LQR problem inductively.
     for tt in horizon:-1:1
 
-        A = dyns[tt].A
-        Q = costs[tt].Q
-        B = dyns[tt].Bs[1]
-        R = costs[tt].Rs[1]
+        A = get_homogenized_state_dynamics_matrix(dyns[tt])
+        B = get_homogenized_control_dynamics_matrix(dyns[tt], 1)
+        Q = get_homogenized_state_cost_matrix(costs[tt])
+        R = get_homogenized_control_cost_matrix(costs[tt], 1)
 
         # Solve the LQR using induction and optimizing the quadratic cost for P and Z.
         r_terms = R + B' * Zₜ₊₁ * B

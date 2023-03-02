@@ -7,7 +7,7 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
 
     num_players = num_agents(dyn_at_t)
     num_states = xhdim(dyn_at_t)
-    A = dyn_at_t.A
+    A = get_homogenized_state_dynamics_matrix(dyn_at_t)
 
     # TODO: This line breaks very easily under weirdly-dimensioned systems. Change the code here.
     lhs_dim = uhdim(dyn_at_t)
@@ -16,8 +16,8 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
     for ii in 1:num_players
 
         # Identify terms.
-        B = dyn_at_t.Bs[ii]
-        Rⁱⁱ = costs_at_t[ii].Rs[ii]
+        B = get_homogenized_control_dynamics_matrix(dyn_at_t, ii)
+        Rⁱⁱ = get_homogenized_control_cost_matrix(costs_at_t[ii], ii)
 
         # Compute terms for the matrices. Self term is (*) in class notes, cross term is (**).
         lhs_ith_rows = Array{Float64}(undef, uhdim(dyn_at_t, ii), 0)
@@ -68,11 +68,11 @@ function solve_lq_nash_feedback(
     all_Ps = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
 
     # 1. Start at the final timestep (t=T), setting Z^i_T = Q^i_T.
-    Zₜ₊₁ = [all_costs[horizon][ii].Q for ii in 1:num_players]
+    Zₜ₊₁ = [get_homogenized_state_cost_matrix(all_costs[horizon][ii]) for ii in 1:num_players]
     Zₜ = [zeros(size(Zₜ₊₁[ii])) for ii in 1:num_players]
 
     for ii in 1:num_players
-        all_Zs[ii][:, :, horizon] = all_costs[horizon][ii].Q
+        all_Zs[ii][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][ii])
     end
 
     for tt = horizon-1:-1:1
@@ -93,15 +93,16 @@ function solve_lq_nash_feedback(
 
         for ii in 1:num_players
             # Extract other values.
-            Qₜ = [costs[ii].Q for i in 1:num_players]
+            Qₜ = [get_homogenized_state_cost_matrix(costs[ii]) for i in 1:num_players]
             Pⁱₜ = all_Ps[ii][:, :, tt]
 
             # Compute Z terms. There are no nonzero off diagonal Rij terms, so we just need to compute the terms with Rii.
-            summation_1_terms = [Pⁱₜ' * costs[ii].Rs[ii] * Pⁱₜ]
+            summation_1_terms = [Pⁱₜ' * get_homogenized_control_cost_matrix(costs[ii], ii) * Pⁱₜ]
             summation_1 = sum(summation_1_terms)
 
             summation_2_terms = [dyn.Bs[jj] * all_Ps[jj][:, :, tt] for jj in 1:num_players]
-            summation_2 = dyn.A - sum(summation_2_terms)
+            A = get_homogenized_state_dynamics_matrix(dyn)
+            summation_2 = A - sum(summation_2_terms)
 
             Zₜ[ii] = Qₜ[ii] + summation_1 + summation_2' * Zₜ₊₁[ii] * summation_2
         end

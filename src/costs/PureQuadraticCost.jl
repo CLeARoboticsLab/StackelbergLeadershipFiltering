@@ -5,7 +5,6 @@
 mutable struct PureQuadraticCost <: Cost
     Q::AbstractMatrix{Float64}
     Rs
-    # is_pure::Bool # TODO(hamzah) Find a way to identify pureness of quadratic matrices for cost computation purposes.
 end
 PureQuadraticCost(Q) = PureQuadraticCost(Q, Dict{Int, Matrix{eltype(Q)}}())
 
@@ -22,12 +21,24 @@ function quadraticize_costs(cost::PureQuadraticCost, time_range, x, us)
     return cost
 end
 
+# Helpers that get the homogenized Q and R matrices for this cost.
+# TODO(hmzh) - remove these when I get rid of pure quadratic cost.
+function get_homogenized_state_cost_matrix(c::PureQuadraticCost)
+    return c.Q
+end
+
+function get_homogenized_control_cost_matrix(c::PureQuadraticCost, player_idx::Int)
+    return c.Rs[player_idx]
+end
+
+
 # Evaluate cost on a state/control trajectory at a particule time.
 function compute_cost(c::PureQuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
-    @assert size(xh, 1) == size(c.Q, 1)
-    cost = (1/2.) * xh' * c.Q * xh
+    x = xh[1:size(c.Q, 1)]
+    # @assert size(xh, 1)-1 == size(c.Q, 1)
+    cost = (1/2.) * x' * c.Q * x
     if !isempty(c.Rs)
-        cost += (1/2.) * sum(uhs[jj]' * Rij * uhs[jj] for (jj, Rij) in c.Rs)
+        cost += (1/2.) * sum(uhs[jj][1:size(Rij, 1)]' * Rij * uhs[jj][1:size(Rij, 1)] for (jj, Rij) in c.Rs)
     end
     return cost
 end

@@ -32,7 +32,8 @@ seed!(0)
         P̃s, future_costs_actual = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
 
         @test Ps == P̃s
-        @test all([future_costs_expected[tt].Q == future_costs_actual[tt].Q for tt in 1:horizon])
+        # Compare the Q matrices.
+        @test all([get_homogenized_state_cost_matrix(future_costs_expected[tt]) == get_homogenized_state_cost_matrix(future_costs_actual[tt]) for tt in 1:horizon])
     end
 
     # Ensure that for an LQ game, both the LQ Nash solution and approximate LQ Nash solution with the solution to the
@@ -52,7 +53,8 @@ seed!(0)
 
         @test Ps == P̃s
         for ii in 1:num_players
-            @test all([future_costs_expected[ii][tt].Q == future_costs_actual[ii][tt].Q for tt in 1:horizon])
+            # Compare the Q matrices.
+            @test all([get_homogenized_state_cost_matrix(future_costs_expected[ii][tt]) == get_homogenized_state_cost_matrix(future_costs_actual[ii][tt]) for tt in 1:horizon])
         end
     end
 
@@ -75,7 +77,8 @@ seed!(0)
 
         @test Ss == S̃s
         for ii in 1:num_players
-            @test all([future_costs_expected[ii][tt].Q == future_costs_actual[ii][tt].Q for tt in 1:horizon])
+            # Compare the Q matrices.
+            @test all([get_homogenized_state_cost_matrix(future_costs_expected[ii][tt]) == get_homogenized_state_cost_matrix(future_costs_actual[ii][tt]) for tt in 1:horizon])
         end
     end
 end

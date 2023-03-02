@@ -1,6 +1,6 @@
 # TODO(hamzah) Add better tests for the LinearDynamics struct and associated functions.
 struct LinearDynamics <: Dynamics
-    A  # linear state; can have a constant vector term attached, of dimension n+1 by n+1
+    A  # linear state dynamics term
     Bs # controls
     D  # process noise
     sys_info::SystemInfo
@@ -28,6 +28,28 @@ LinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(
                                                     [homogenize_dynamics_matrix(B) for B in Bs],
                                                     D,
                                                     SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
+
+# Helpers that get the homogenized A and B matrices.
+function get_homogenized_state_dynamics_matrix(dyn::Dynamics)
+    return dyn.A
+end
+
+function get_homogenized_control_dynamics_matrix(dyn::Dynamics, player_idx::Int)
+    return dyn.Bs[player_idx]
+end
+
+export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_matrix
+
+
+# Get the linear term.
+function get_linear_dynamics_term(dyn::Dynamics)
+    return A[1:size(A, 1)-1, 1:size(A, 2)-2]
+end
+
+function get_constant_dynamics_term(dyn::Dynamics)
+    return A[size(A, 1), 1:size(A, 2)]
+end
+
 
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
 function propagate_dynamics(dyn::Dynamics,
