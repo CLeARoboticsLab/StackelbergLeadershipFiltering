@@ -16,17 +16,18 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
     for ii in 1:num_players
 
         # Identify terms.
-        B = get_homogenized_control_dynamics_matrix(dyn_at_t, ii)
+        Bⁱ = get_homogenized_control_dynamics_matrix(dyn_at_t, ii)
         Rⁱⁱ = get_homogenized_control_cost_matrix(costs_at_t[ii], ii)
 
         # Compute terms for the matrices. Self term is (*) in class notes, cross term is (**).
         lhs_ith_rows = Array{Float64}(undef, uhdim(dyn_at_t, ii), 0)
         for jj in 1:num_players
+            Bʲ = get_homogenized_control_dynamics_matrix(dyn_at_t, jj)
             if ii == jj
-                self_term = Rⁱⁱ + B' *  Zₜ₊₁[ii] * B
+                self_term = Rⁱⁱ + Bⁱ' *  Zₜ₊₁[ii] * Bⁱ
                 lhs_ith_rows = hcat(lhs_ith_rows, self_term)
             else
-                cross_term = B' * Zₜ₊₁[ii] * dyn_at_t.Bs[jj]
+                cross_term = Bⁱ' * Zₜ₊₁[ii] * Bʲ
                 lhs_ith_rows = hcat(lhs_ith_rows, cross_term)
             end
         end
@@ -37,7 +38,7 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
 
     # Construct the matrices we will use to solve for P.
     lhs_matrix = lhs_rows
-    rhs_matrix_terms = [dyn_at_t.Bs[ii]' * Zₜ₊₁[ii] * A for ii in 1:num_players]
+    rhs_matrix_terms = [get_homogenized_control_dynamics_matrix(dyn_at_t, ii)' * Zₜ₊₁[ii] * A for ii in 1:num_players]
     rhs_matrix = vcat(rhs_matrix_terms...)
 
     # Finally compute P.
@@ -72,6 +73,7 @@ function solve_lq_nash_feedback(
     Zₜ = [zeros(size(Zₜ₊₁[ii])) for ii in 1:num_players]
 
     for ii in 1:num_players
+        println(size(all_costs[horizon][ii].Q), size(get_homogenized_state_cost_matrix(all_costs[horizon][ii])))
         all_Zs[ii][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][ii])
     end
 
@@ -100,7 +102,7 @@ function solve_lq_nash_feedback(
             summation_1_terms = [Pⁱₜ' * get_homogenized_control_cost_matrix(costs[ii], ii) * Pⁱₜ]
             summation_1 = sum(summation_1_terms)
 
-            summation_2_terms = [dyn.Bs[jj] * all_Ps[jj][:, :, tt] for jj in 1:num_players]
+            summation_2_terms = [get_homogenized_control_dynamics_matrix(dyn, jj) * all_Ps[jj][:, :, tt] for jj in 1:num_players]
             A = get_homogenized_state_dynamics_matrix(dyn)
             summation_2 = A - sum(summation_2_terms)
 

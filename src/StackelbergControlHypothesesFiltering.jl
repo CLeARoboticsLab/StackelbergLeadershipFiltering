@@ -13,6 +13,8 @@ include("dynamics/UnicycleDynamics.jl")
 include("control_strategies/ControlStrategyUtils.jl")
 include("control_strategies/FeedbackGainControlStrategy.jl")
 
+include("games/ShepherdAndSheepGame.jl")
+
 include("solvers/LQNashFeedbackSolver.jl")
 include("solvers/LQStackelbergFeedbackSolver.jl")
 include("solvers/LQRFeedbackSolver.jl")

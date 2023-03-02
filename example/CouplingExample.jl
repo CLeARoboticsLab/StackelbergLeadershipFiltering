@@ -14,48 +14,9 @@ stackelberg_leader_idx = 2
 
 function coupling_example()
 
-    # Dynamics (Euler-discretized double integrator equations with Δt = 0.1s).
-    # State for each player is layed out as [x, ẋ, y, ẏ].
-    Ã = [1 0.1 0 0;
-         0 1   0 0;
-         0 0   1 0.1;
-         0 0   0 1]
-    A = vcat(hcat(Ã, zeros(4, 4)), hcat(zeros(4, 4), Ã))
-
-    B₁ = vcat([0   0;
-               0.1 0;
-               0   0;
-               0   0.1],
-               zeros(4, 2))
-    B₂ = vcat(zeros(4, 2),
-              [0   0;
-               0.1 0;
-               0   0;
-               0   0.1])
-    dyn = LinearDynamics(A, [B₁, B₂])
-
-    # Costs reflecting the preferences above.
-    Q₁ = zeros(8, 8)
-    Q₁[5, 5] = 1.0
-    Q₁[7, 7] = 1.0
-    c₁ = PureQuadraticCost(Q₁)
-    add_control_cost!(c₁, 1, 1 * diagm([1, 1]))
-    add_control_cost!(c₁, 2, zeros(2, 2))
-
-    Q₂ = zeros(8, 8)
-    Q₂[1, 1] = 1.0
-    Q₂[5, 5] = 1.0
-    Q₂[1, 5] = -1.0
-    Q₂[5, 1] = -1.0
-    Q₂[3, 3] = 1.0
-    Q₂[7, 7] = 1.0
-    Q₂[3, 7] = -1.0
-    Q₂[7, 3] = -1.0
-    c₂ = PureQuadraticCost(Q₂)
-    add_control_cost!(c₂, 2, 1 * diagm([1, 1]))
-    add_control_cost!(c₂, 1, zeros(2, 2))
-
-    costs = [c₁, c₂]
+    dt = 0.1
+    dyn = ShepherdAndSheepDynamics(dt)
+    costs = ShepherdAndSheepCosts()
 
     # Initial condition chosen randomly. Ensure both have relatively low speed.
     x₁ = randn(8)
