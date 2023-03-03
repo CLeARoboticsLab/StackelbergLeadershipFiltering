@@ -48,102 +48,104 @@ seed!(0)
     costs = [quadraticize_costs(c₁, dummy_time_range, dummy_x, dummy_us),
              quadraticize_costs(c₂, dummy_time_range, dummy_x, dummy_us)]
 
-    # @testset "CheckPureNonpureLQRMatch" begin
-    #     num_loops = 1
-    #     horizon_lqr = 3
-    #     dt = 0.02
-    #     times_lqr = dt * (cumsum(ones(horizon_lqr)) .- 1.)
-
-    #     for _ in 1:num_loops
-    #         # # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
-    #         # # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
-    #         # dt = 0.01
-    #         # num_states = 4
-    #         # num_ctrls = 2
-    #         # A = rand(num_states, num_states) 
-    #         # B = rand(num_states, num_ctrls)
-    #         # a = rand(num_states)
-    #         # lin_dyn = LinearDynamics(A, [B]; a=a)
-
-    #         # Q = make_symmetric_pos_def_matrix(num_states)
-    #         # q = zeros(num_states)
-    #         # cq = 0. #rand()
-    #         # R = make_symmetric_pos_def_matrix(num_ctrls)
-    #         # r = zeros(num_ctrls)
-    #         # cr = 0. #rand()
-
-    #         # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
-    #         # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
-    #         num_states = 2
-    #         lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
-    #         q_cost = QuadraticCost([1. 0.; 0. 0.], ones(2), 12.)
-    #         add_control_cost!(q_cost, 1, ones(1, 1); r=2*ones(1), cr=2.)
-
-    #         # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
-    #         # q_cost = QuadraticCost([1. 0.; 0. 0.])
-    #         # add_control_cost!(q_cost, 1, ones(1, 1))
-
-    #         # q_cost = QuadraticCost(Q, q, cq)
-    #         # add_control_cost!(q_cost, 1, R; r=r, cr=cr)
-
-    #         new_x₁ = ones(num_states)
-
-    #         # New LQR
-    #         strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon_lqr)
-    #         xs, us = unroll_feedback(lin_dyn, times_lqr, strategy, new_x₁)
-    #         eval_cost = evaluate(q_cost, xs, us)
-
-    #         # OG homogenized LQR
-    #         p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
-
-    #         # Ensure no dumb mistakes with cost input type.
-    #         @test evaluate(q_cost, ones(2, 1), [ones(1,1)]) ≈ evaluate(p_cost, ones(2, 1), [ones(1,1)])
-
-    #         strategy_p, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon_lqr)
-    #         strategy_p = FeedbackGainControlStrategy([strategy_p])
-    #         xs_p, us_p = unroll_feedback(lin_dyn, times_lqr, strategy_p, new_x₁)
-    #         eval_cost_p = evaluate(p_cost, xs_p, us_p)
-
-    #         @test eval_cost ≈ eval_cost_p
-    #         println(xs - xs_p)
-    #         @test all(xs .≈ xs_p)
-    #         @test all(us .≈ us_p)
-    #     end
-    # end
-
-    @testset "CheckFeedbackSatisfiesLQROptimum" begin
-        # This is similar to the LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator
-        # with state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in
-        # dynamics.
+    @testset "CheckPureNonpureLQRMatch" begin
+        num_loops = 1
+        horizon_lqr = 3
         dt = 0.02
-        lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
-        q_cost = QuadraticCost([1. 0.; 0. 0.], zeros(2), 1.)
-        add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
+        times_lqr = dt * (cumsum(ones(horizon_lqr)) .- 1.)
 
+        for _ in 1:num_loops
+            # # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
+            # # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
+            # dt = 0.01
+            # num_states = 4
+            # num_ctrls = 2
+            # A = rand(num_states, num_states) 
+            # B = rand(num_states, num_ctrls)
+            # a = rand(num_states)
+            # lin_dyn = LinearDynamics(A, [B]; a=a)
 
-        # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
-        # q_cost = QuadraticCost([1. 0.; 0. 0.])
-        # add_control_cost!(q_cost, 1, ones(1, 1))
-        new_x₁ = ones(2)
+            # Q = make_symmetric_pos_def_matrix(num_states)
+            # q = zeros(num_states)
+            # cq = 0. #rand()
+            # R = make_symmetric_pos_def_matrix(num_ctrls)
+            # r = zeros(num_ctrls)
+            # cr = 0. #rand()
 
-        strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon)
-        xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
-        eval_cost = evaluate(q_cost, xs, us)
+            # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
+            # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
+            num_states = 2
+            lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
+            q_cost = QuadraticCost([1. 0.; 0. 0.], ones(2), 12.)
+            add_control_cost!(q_cost, 1, ones(1, 1); r=2*ones(1), cr=2.)
 
-        # Perturb each strategy a little bit and confirm that cost only
-        # increases for that player.
-        ϵ = 1e-1
-        for tt in 1:horizon
-            P̃s = deepcopy(get_linear_feedback_gains(strategy, 1))
-            p̃s = deepcopy(get_constant_feedback_gains(strategy, 1))
-            P̃s[:, :, tt] += ϵ * randn(udim(lin_dyn, 1), xdim(lin_dyn))
-            # p̃s[:, tt] += ϵ * randn(udim(lin_dyn, 1))
+            # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
+            # q_cost = QuadraticCost([1. 0.; 0. 0.])
+            # add_control_cost!(q_cost, 1, ones(1, 1))
 
-            x̃s, ũs = unroll_feedback(lin_dyn, times, FeedbackGainControlStrategy([P̃s], [p̃s]), new_x₁)
-            new_eval_cost = evaluate(q_cost, x̃s, ũs)
-            @test new_eval_cost ≥ eval_cost
+            # q_cost = QuadraticCost(Q, q, cq)
+            # add_control_cost!(q_cost, 1, R; r=r, cr=cr)
+
+            new_x₁ = ones(num_states)
+
+            # New LQR
+            strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon_lqr)
+            xs, us = unroll_feedback(lin_dyn, times_lqr, strategy, new_x₁)
+            eval_cost = evaluate(q_cost, xs, us)
+
+            # OG homogenized LQR
+            p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
+
+            # Ensure no dumb mistakes with cost input type.
+            @test evaluate(q_cost, ones(2, 1), [ones(1,1)]) ≈ evaluate(p_cost, ones(2, 1), [ones(1,1)])
+
+            strategy_p, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon_lqr)
+            strategy_p = FeedbackGainControlStrategy([strategy_p])
+            xs_p, us_p = unroll_feedback(lin_dyn, times_lqr, strategy_p, new_x₁)
+            eval_cost_p = evaluate(p_cost, xs_p, us_p)
+
+            println("costs (old, new): ", eval_cost, " ", eval_cost_p)
+            @test eval_cost ≈ eval_cost_p
+            println("dx: ", xs - xs_p)
+            println("du: ", us - us_p)
+            @test all(xs .≈ xs_p)
+            @test all(us .≈ us_p)
         end
     end
+
+    # @testset "CheckFeedbackSatisfiesLQROptimum" begin
+    #     # This is similar to the LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator
+    #     # with state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in
+    #     # dynamics.
+    #     dt = 0.02
+    #     lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
+    #     q_cost = QuadraticCost([1. 0.; 0. 0.], zeros(2), 1.)
+    #     add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
+
+
+    #     # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
+    #     # q_cost = QuadraticCost([1. 0.; 0. 0.])
+    #     # add_control_cost!(q_cost, 1, ones(1, 1))
+    #     new_x₁ = ones(2)
+
+    #     strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon)
+    #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
+    #     eval_cost = evaluate(q_cost, xs, us)
+
+    #     # Perturb each strategy a little bit and confirm that cost only
+    #     # increases for that player.
+    #     ϵ = 1e-1
+    #     for tt in 1:horizon
+    #         P̃s = deepcopy(get_linear_feedback_gains(strategy, 1))
+    #         p̃s = deepcopy(get_constant_feedback_gains(strategy, 1))
+    #         P̃s[:, :, tt] += ϵ * randn(udim(lin_dyn, 1), xdim(lin_dyn))
+    #         # p̃s[:, tt] += ϵ * randn(udim(lin_dyn, 1))
+
+    #         x̃s, ũs = unroll_feedback(lin_dyn, times, FeedbackGainControlStrategy([P̃s], [p̃s]), new_x₁)
+    #         new_eval_cost = evaluate(q_cost, x̃s, ũs)
+    #         @test new_eval_cost ≥ eval_cost
+    #     end
+    # end
 
     # # Ensure that the costs match up at each time step with manually calculate cost matrices.
     # @testset "CheckLQRCostsAreConsistentAtEquilibrium" begin
@@ -186,40 +188,40 @@ seed!(0)
     # end
 
 
-    @testset "CheckPureFeedbackSatisfiesLQROptimum" begin
-        # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
-        # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
-        dt = 0.02
-        lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
-        q_cost = QuadraticCost([1. 0.; 0. 0.], zeros(2), 1.)
-        add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
+    # @testset "CheckPureFeedbackSatisfiesLQROptimum" begin
+    #     # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
+    #     # state [x ẋ] and input control α acceleration. We've added a constrant drift of +1 m and +1 m/s in dynamics.
+    #     dt = 0.02
+    #     lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
+    #     q_cost = QuadraticCost([1. 0.; 0. 0.], zeros(2), 1.)
+    #     add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
 
-        # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
-        # q_cost = QuadraticCost([1. 0.; 0. 0.])
-        # add_control_cost!(q_cost, 1, ones(1, 1))
-        new_x₁ = ones(2)
+    #     # lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]])
+    #     # q_cost = QuadraticCost([1. 0.; 0. 0.])
+    #     # add_control_cost!(q_cost, 1, ones(1, 1))
+    #     new_x₁ = ones(2)
 
-        p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
+    #     p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
 
-        strategy, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon)
-        strategy = FeedbackGainControlStrategy([strategy])
-        xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
-        eval_cost = evaluate(p_cost, xs, us)
+    #     strategy, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon)
+    #     strategy = FeedbackGainControlStrategy([strategy])
+    #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
+    #     eval_cost = evaluate(p_cost, xs, us)
 
-        # Perturb each strategy a little bit and confirm that cost only
-        # increases for that player.
-        ϵ = 1e-1
-        for tt in 1:horizon
-            P̃s = deepcopy(get_linear_feedback_gains(strategy, 1))
-            p̃s = deepcopy(get_constant_feedback_gains(strategy, 1))
-            P̃s[:, :, tt] += ϵ * randn(udim(lin_dyn, 1), xhdim(lin_dyn))
-            # p̃s[:, tt] += ϵ * randn(udim(lin_dyn, 1))
+    #     # Perturb each strategy a little bit and confirm that cost only
+    #     # increases for that player.
+    #     ϵ = 1e-1
+    #     for tt in 1:horizon
+    #         P̃s = deepcopy(get_linear_feedback_gains(strategy, 1))
+    #         p̃s = deepcopy(get_constant_feedback_gains(strategy, 1))
+    #         P̃s[:, :, tt] += ϵ * randn(udim(lin_dyn, 1), xhdim(lin_dyn))
+    #         # p̃s[:, tt] += ϵ * randn(udim(lin_dyn, 1))
 
-            x̃s, ũs = unroll_feedback(lin_dyn, times, FeedbackGainControlStrategy([P̃s], [p̃s]), new_x₁)
-            new_eval_cost = evaluate(p_cost, x̃s, ũs)
-            @test new_eval_cost ≥ eval_cost
-        end
-    end
+    #         x̃s, ũs = unroll_feedback(lin_dyn, times, FeedbackGainControlStrategy([P̃s], [p̃s]), new_x₁)
+    #         new_eval_cost = evaluate(p_cost, x̃s, ũs)
+    #         @test new_eval_cost ≥ eval_cost
+    #     end
+    # end
 
     # Ensure that the costs match up at each time step with manually calculate cost matrices.
     # @testset "CheckPureLQRCostsAreConsistentAtEquilibrium" begin

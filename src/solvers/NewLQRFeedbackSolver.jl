@@ -42,9 +42,9 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     Zs[:, :, horizon] = Zₜ₊₁
 
     # base case
-    if horizon == 1
-        return Ps, costs[horizon]
-    end
+    # if horizon == 1
+    #     return Ps, costs[horizon]
+    # end
 
     # At each horizon running backwards, solve the LQR problem inductively.
     for tt in horizon:-1:1
@@ -85,13 +85,19 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
         println(tt, " - new P: ", Pₜ)
         println(tt, " - new p: ", pₜ)
         Zₜ = Q + Pₜ' * R * Pₜ + (A - B * Pₜ)' * Zₜ₊₁ * (A - B * Pₜ)
+        # println(tt, " - new Zₜ: ", Zₜ, Zₜ')
+        # Zₜ = (Zₜ + Zₜ')/2.
+        # @assert Zₜ == Zₜ'
         zₜ = q 
         zₜ += Pₜ' * (R * pₜ - r)
         zₜ += (A - B * Pₜ)' * Zₜ₊₁ * (a - B * pₜ)
         zₜ += (A - B * Pₜ)' * zₜ₊₁
         czₜ = czₜ₊₁ + cq
+        println(tt, " - new cz 1: ", czₜ₊₁ + cq)
         czₜ += pₜ' * (R * pₜ - 2 * r)
+        println(tt, " - new cz 2: ", pₜ' * (R * pₜ - 2 * r))
         czₜ += ((a - B * pₜ)' * Zₜ₊₁ + 2 * zₜ₊₁') * (a - B * pₜ)
+        println(tt, " - new cz 3: ", ((a - B * pₜ)' * Zₜ₊₁ + 2 * zₜ₊₁') * (a - B * pₜ))
         println(tt, " - new Z: ", Zₜ)
         println(tt, " - new z: ", zₜ)
         println(tt, " - new cz: ", czₜ)
