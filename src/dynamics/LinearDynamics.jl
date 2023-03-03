@@ -34,12 +34,16 @@ export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_m
 
 
 # Get the linear term.
-function get_linear_dynamics_term(dyn::Dynamics)
+function get_linear_state_dynamics(dyn::Dynamics)
     return dyn.A
 end
 
-function get_constant_dynamics_term(dyn::Dynamics)
+function get_constant_state_dynamics(dyn::Dynamics)
     return dyn.a
+end
+
+function get_control_dynamics(dyn::Dynamics, player_idx::Int)
+    return dyn.Bs[player_idx]
 end
 
 

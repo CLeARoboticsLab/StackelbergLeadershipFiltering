@@ -34,7 +34,7 @@ function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Floa
     # Fill control costs.
     num_players = length(c.Rs)
     for ii in 1:num_players
-        R̃ = homogenize_cost_matrix(c.Rs[ii], c.rs[ii], c.crs[ii];)
+        R̃ = homogenize_cost_matrix(c.Rs[ii], c.rs[ii], c.crs[ii])
         add_control_cost!(q_cost, ii, R̃)
     end
 
@@ -44,9 +44,8 @@ end
 function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(uhs)
     out_size = size(c.Q, 1)
-    x = xh[1:out_size]
-    ctrl_sizes = [size(c.rs[ii], 1) for ii in 1:num_players]
-    us = [uhs[ii][1:ctrl_sizes[ii]] for ii in 1:num_players]
+    x = xh[1:size(xh,1)-1]
+    us = [uhs[ii][1:size(uhs[ii], 1)-1] for ii in 1:num_players]
 
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
     if !isempty(c.Rs)
@@ -91,6 +90,10 @@ end
 function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
     return c.crs[player_idx]
 end
+
+# Export the helpers.
+export get_quadratic_state_cost_term, get_linear_state_cost_term, get_constant_state_cost_term,
+       get_quadratic_control_cost_term, get_linear_control_cost_term, get_constant_control_cost_term
 
 
 # Export all the cost type.

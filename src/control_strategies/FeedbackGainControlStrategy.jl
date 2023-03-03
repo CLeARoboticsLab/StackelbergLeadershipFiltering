@@ -21,21 +21,21 @@ end
 
 
 # Define some getters.
-function get_linear_feedback_term(strategy::FeedbackGainControlStrategy)
+function get_linear_feedback_gains(strategy::FeedbackGainControlStrategy)
     return strategy.Ps
 end
 
-function get_linear_feedback_term(strategy::FeedbackGainControlStrategy, player_idx::Int)
+function get_linear_feedback_gains(strategy::FeedbackGainControlStrategy, player_idx::Int)
     return strategy.Ps[player_idx]
 end
 
-function get_constant_feedback_term(strategy::FeedbackGainControlStrategy)
+function get_constant_feedback_gains(strategy::FeedbackGainControlStrategy)
     return strategy.ps
 end
 
-function get_constant_feedback_term(strategy::FeedbackGainControlStrategy, player_idx::Int)
+function get_constant_feedback_gains(strategy::FeedbackGainControlStrategy, player_idx::Int)
     return strategy.ps[player_idx]
 end
 
 # Export a commonly used control strategy for convenience and its required method.
-export FeedbackGainControlStrategy, apply_control_strategy, get_linear_feedback_terms, get_constant_feedback_terms
+export FeedbackGainControlStrategy, apply_control_strategy, get_linear_feedback_gains, get_constant_feedback_gains

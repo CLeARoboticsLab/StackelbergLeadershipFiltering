@@ -50,13 +50,20 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
 
         # Solve the LQR using induction and optimizing the quadratic cost for P and Z.
         r_terms = R + B' * Zₜ₊₁ * B
+        # println(tt, " - old r_terms", r_terms)
 
         # This is equivalent to inv(r_terms) * B' * Zₜ₊₁ * A
         Ps[:, :, tt] = r_terms \ B' * Zₜ₊₁ * A
+        # println(tt, " - old divider, ", B' * Zₜ₊₁ * A)
+        println(tt, " - old P: ",  Ps[1, 1:2, tt])
+        println(tt, " - old p: ",  Ps[1, 3, tt])
         
         # Update Zₜ₊₁ at t+1 to be the one at t as we go to t-1.
-        Zₜ₊₁ = Q + A' * Zₜ₊₁ * A - A' * Zₜ₊₁ * B * Ps[:, :, tt]
-        Zs[:, :, tt] = Zₜ₊₁
+        Zₜ₊₁ = Q +  A' * Zₜ₊₁ * (A - B * Ps[:, :, tt])
+        println(tt, " - old Z: ", Zₜ₊₁[1:2, 1:2])
+        println(tt, " - old z: ", Zₜ₊₁[1:2, 3], " ", Zₜ₊₁[3, 1:2]', " ", Zₜ₊₁[1:2, 3] == Zₜ₊₁[3, 1:2]')
+        println(tt, " - old cz: ", Zₜ₊₁[3, 3])
+        Zs[:, :, tt] = Zₜ₊₁ # 0.5 * (Zₜ₊₁ + Zₜ₊₁')
     end
 
     # Cut off the extra dimension of the homgenized coordinates system.

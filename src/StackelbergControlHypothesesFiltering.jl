@@ -19,6 +19,8 @@ include("solvers/LQNashFeedbackSolver.jl")
 include("solvers/LQStackelbergFeedbackSolver.jl")
 include("solvers/LQRFeedbackSolver.jl")
 
+include("solvers/NewLQRFeedbackSolver.jl")
+
 include("TwoStateParticleFilter.jl")
 
 end # module
