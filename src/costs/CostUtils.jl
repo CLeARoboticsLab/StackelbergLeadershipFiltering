@@ -27,11 +27,6 @@ function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1)):
                 hcat(m', cm)) + ρ * I
 end
 
-# # Creates a homgenized cost matrix which doesn't have the extra column entries and a 1 on the bottom right.
-# function homogenize_cost_matrix(M::AbstractMatrix{Float64})
-#     return homogenize_cost_matrix(M, zeros(size(M, 1)), 0.0)
-# end
-# export homogenize_cost_matrix
 
 # Homogenize state - by default, this adds a 1 to the bottom. If a custom one is needed, define it elsewhere.
 function homogenize_state(c::Cost, xs::AbstractArray{Float64})
@@ -53,10 +48,6 @@ export homogenize_cost_matrix, homogenize_state, homogenize_ctrls
 function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:AbstractMatrix{Float64}})
     horizon = last(size(xs))
     num_players = size(us, 1)
-
-    # Homogenize the inputs.
-    xs = homogenize_state(c, xs)
-    us = homogenize_ctrls(c, us)
 
     total = 0.0
     for tt in 1:horizon

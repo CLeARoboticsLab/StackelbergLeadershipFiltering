@@ -3,11 +3,11 @@
 
 # A helper function to compute P for all players at time t.
 # TODO: The solver as currently written doesn't handle different sized control vectors. Fix this (p. 33 of class notes).
-function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{PureQuadraticCost}, Zₜ₊₁)
+function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{QuadraticCost}, Zₜ₊₁)
 
     num_players = num_agents(dyn_at_t)
     num_states = xhdim(dyn_at_t)
-    A = dyn_at_t.A
+    A = get_homogenized_state_dynamics_matrix(dyn_at_t)
 
     # TODO: This line breaks very easily under weirdly-dimensioned systems. Change the code here.
     lhs_dim = uhdim(dyn_at_t)
@@ -16,17 +16,18 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
     for ii in 1:num_players
 
         # Identify terms.
-        B = dyn_at_t.Bs[ii]
-        Rⁱⁱ = costs_at_t[ii].Rs[ii]
+        Bⁱ = get_homogenized_control_dynamics_matrix(dyn_at_t, ii)
+        Rⁱⁱ = get_homogenized_control_cost_matrix(costs_at_t[ii], ii)
 
         # Compute terms for the matrices. Self term is (*) in class notes, cross term is (**).
         lhs_ith_rows = Array{Float64}(undef, uhdim(dyn_at_t, ii), 0)
         for jj in 1:num_players
+            Bʲ = get_homogenized_control_dynamics_matrix(dyn_at_t, jj)
             if ii == jj
-                self_term = Rⁱⁱ + B' *  Zₜ₊₁[ii] * B
+                self_term = Rⁱⁱ + Bⁱ' *  Zₜ₊₁[ii] * Bⁱ
                 lhs_ith_rows = hcat(lhs_ith_rows, self_term)
             else
-                cross_term = B' * Zₜ₊₁[ii] * dyn_at_t.Bs[jj]
+                cross_term = Bⁱ' * Zₜ₊₁[ii] * Bʲ
                 lhs_ith_rows = hcat(lhs_ith_rows, cross_term)
             end
         end
@@ -37,7 +38,8 @@ function compute_P_at_t(dyn_at_t::LinearDynamics, costs_at_t::AbstractVector{Pur
 
     # Construct the matrices we will use to solve for P.
     lhs_matrix = lhs_rows
-    rhs_matrix_terms = [dyn_at_t.Bs[ii]' * Zₜ₊₁[ii] * A for ii in 1:num_players]
+    B(dyn, ii) = get_homogenized_control_dynamics_matrix(dyn, ii) 
+    rhs_matrix_terms = [B(dyn_at_t, ii)' * Zₜ₊₁[ii] * A for ii in 1:num_players]
     rhs_matrix = vcat(rhs_matrix_terms...)
 
     # Finally compute P.
@@ -48,7 +50,7 @@ end
 # Returns feedback matrices P[player][:, :, time] and state costs matrices Z[player][:, :, time]
 # The number of players, states, and control sizes are assumed to be constant over time.
 function solve_lq_nash_feedback(
-    dyns::AbstractVector{LinearDynamics}, all_costs::AbstractVector{<:AbstractVector{PureQuadraticCost}}, horizon::Int)
+    dyns::AbstractVector{LinearDynamics}, all_costs::AbstractVector{<:AbstractVector{QuadraticCost}}, horizon::Int)
 
     # Ensure the number of dynamics and costs are the same as the horizon.
     @assert !isempty(dyns) && size(dyns, 1) == horizon
@@ -68,11 +70,12 @@ function solve_lq_nash_feedback(
     all_Ps = [zeros(uhdim(dyns[1], ii), num_states, horizon) for ii in 1:num_players]
 
     # 1. Start at the final timestep (t=T), setting Z^i_T = Q^i_T.
-    Zₜ₊₁ = [all_costs[horizon][ii].Q for ii in 1:num_players]
+    Q(ii) = get_homogenized_state_cost_matrix(all_costs[horizon][ii]) 
+    Zₜ₊₁ = [Q(ii) for ii in 1:num_players]
     Zₜ = [zeros(size(Zₜ₊₁[ii])) for ii in 1:num_players]
 
     for ii in 1:num_players
-        all_Zs[ii][:, :, horizon] = all_costs[horizon][ii].Q
+        all_Zs[ii][:, :, horizon] = get_homogenized_state_cost_matrix(all_costs[horizon][ii])
     end
 
     for tt = horizon-1:-1:1
@@ -93,15 +96,16 @@ function solve_lq_nash_feedback(
 
         for ii in 1:num_players
             # Extract other values.
-            Qₜ = [costs[ii].Q for i in 1:num_players]
+            Qₜ = [get_homogenized_state_cost_matrix(costs[ii]) for i in 1:num_players]
             Pⁱₜ = all_Ps[ii][:, :, tt]
 
             # Compute Z terms. There are no nonzero off diagonal Rij terms, so we just need to compute the terms with Rii.
-            summation_1_terms = [Pⁱₜ' * costs[ii].Rs[ii] * Pⁱₜ]
+            summation_1_terms = [Pⁱₜ' * get_homogenized_control_cost_matrix(costs[ii], ii) * Pⁱₜ]
             summation_1 = sum(summation_1_terms)
 
-            summation_2_terms = [dyn.Bs[jj] * all_Ps[jj][:, :, tt] for jj in 1:num_players]
-            summation_2 = dyn.A - sum(summation_2_terms)
+            summation_2_terms = [get_homogenized_control_dynamics_matrix(dyn, jj) * all_Ps[jj][:, :, tt] for jj in 1:num_players]
+            A = get_homogenized_state_dynamics_matrix(dyn)
+            summation_2 = A - sum(summation_2_terms)
 
             Zₜ[ii] = Qₜ[ii] + summation_1 + summation_2' * Zₜ₊₁[ii] * summation_2
         end
@@ -115,24 +119,34 @@ function solve_lq_nash_feedback(
         # 3. Go to (2) until t=1.
     end
 
-    out_Ps = [all_Ps[ii][1:udim(dyns[1], ii),:,:] for ii in 1:num_players]
-    Z_future_costs = [[PureQuadraticCost(all_Zs[ii][:, :, tt]) for tt in 1:horizon] for ii in 1:num_players]
-    return out_Ps, Z_future_costs
+    # Cut off the extra dimension of the homogenized coordinates system.
+    extra_dim = xhdim(dyns[1])
+    Ks = [all_Ps[ii][1:udim(dyns[1], ii), 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    ks = [all_Ps[ii][1:udim(dyns[1], ii), extra_dim, :] for ii in 1:num_players]
+
+    Qs = [all_Zs[ii][1:xdim(dyns[1]), 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    qs = [all_Zs[ii][extra_dim, 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    cqs = [all_Zs[ii][extra_dim, extra_dim, :] for ii in 1:num_players]
+
+    Ps_strategies = FeedbackGainControlStrategy(Ks, ks)
+    Zs_future_costs = [[QuadraticCost(Qs[ii][:,:,tt], qs[ii][:, tt], cqs[ii][tt]) for tt in 1:horizon] for ii in 1:num_players]
+
+    return Ps_strategies, Zs_future_costs
 end
 
 # Shorthand function for LQ time-invariant dynamics and costs.
-function solve_lq_nash_feedback(dyn::LinearDynamics, costs::AbstractVector{PureQuadraticCost}, horizon::Int)
+function solve_lq_nash_feedback(dyn::LinearDynamics, costs::AbstractVector{QuadraticCost}, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
     all_costs = [costs for _ in 1:horizon]
     return solve_lq_nash_feedback(dyns, all_costs, horizon)
 end
 
-function solve_lq_nash_feedback(dyn::LinearDynamics, all_costs::AbstractVector{<:AbstractVector{PureQuadraticCost}}, horizon::Int)
+function solve_lq_nash_feedback(dyn::LinearDynamics, all_costs::AbstractVector{<:AbstractVector{QuadraticCost}}, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
     return solve_lq_nash_feedback(dyns, all_costs, horizon)
 end
 
-function solve_lq_nash_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{PureQuadraticCost}, horizon::Int)
+function solve_lq_nash_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{QuadraticCost}, horizon::Int)
     all_costs = [costs for _ in 1:horizon]
     return solve_lq_nash_feedback(dyns, all_costs, horizon)
 end
@@ -149,12 +163,12 @@ function solve_approximated_lq_nash_feedback(dyn::Dynamics,
     N = num_agents(dyn)
 
     lin_dyns = Vector{LinearDynamics}(undef, T)
-    all_quad_costs = Vector{Vector{PureQuadraticCost}}(undef, T)
+    all_quad_costs = Vector{Vector{QuadraticCost}}(undef, T)
 
     for tt in 1:T
         prev_time = t0 + ((tt == 1) ? 0 : tt-1)
 
-        quad_costs = Vector{PureQuadraticCost}(undef, N)
+        quad_costs = Vector{QuadraticCost}(undef, N)
         u_refs_at_tt = [u_refs[ii][:, tt] for ii in 1:N]
         current_time = t0 + tt
 

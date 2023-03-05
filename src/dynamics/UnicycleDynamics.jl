@@ -83,10 +83,8 @@ function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector
         c = cos(theta)
         As[ii][1:2, 3:4] = dt * [-v*s c; v*c s]
         Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
-
-        # Compute the constant term of the linear approximation.
-        # a[start_idx+1:start_idx+num_states] = propagate_dynamics(dyn, time_range, x[start_idx+1:start_idx+num_states], us)
     end
+
     # Combine the As into one large A matrix and add in the zeroth order term of the Taylor expansion.
     A = I + Matrix(blockdiag(As...))
     return LinearDynamics(A, Bs, dyn.sys_info; a=a)

@@ -57,7 +57,7 @@ end
 
 export homogenize_vector
 
-
+# Wraps angles to the range [-pi, pi).
 function wrap_angle(angle_rad)
     wrapped_angle = (angle_rad + pi) % (2*pi)
     return wrapped_angle - pi

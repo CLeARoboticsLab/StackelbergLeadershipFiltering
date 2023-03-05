@@ -41,29 +41,19 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R
     c.crs[other_player_idx] = cr
 end
 
-function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    new_q = (c.offset == nothing) ? c.q : c.Q * (x - c.offset)
-
-    Q̃ = homogenize_cost_matrix(c.Q, new_q, c.cq)
-    q_cost = PureQuadraticCost(Q̃)
-
-    # Fill control costs.
-    num_players = length(c.Rs)
-    for ii in 1:num_players
-        R̃ = homogenize_cost_matrix(c.Rs[ii], c.rs[ii], c.crs[ii];)
-        add_control_cost!(q_cost, ii, R̃)
-    end
-
-    return q_cost
+# TODO(hmzh) - make pure quadratic code more detailed
+function is_pure_quadratic(c::QuadraticCost)
+    is_state_cost_pure_quadratic = all(iszero.(c.q) && iszero(c.cq))
+    is_control_cost_pure_quadratic = all([all(iszero.(c.r[ii]) && iszero(c.cr[ii])) for (ii, r) in c.rs])
+    return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
 end
 
-function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
-    num_players = length(uhs)
-    out_size = size(c.Q, 1)
-    x = xh[1:out_size]
-    ctrl_sizes = [size(c.rs[ii], 1) for ii in 1:num_players]
-    us = [uhs[ii][1:ctrl_sizes[ii]] for ii in 1:num_players]
+function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c
+end
 
+function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(us)
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
     if !isempty(c.Rs)
         total += (1/2.) * sum(us[jj]' * R * us[jj] + 2 * us[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
@@ -71,8 +61,46 @@ function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64},
     return total
 end
 
+# Helpers that get the homogenized Q and R matrices for this cost.
+function get_homogenized_state_cost_matrix(c::QuadraticCost)
+    return homogenize_cost_matrix(c.Q, c.q, c.cq)
+end
+
+function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
+    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
+end
+
+export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
+
+
+# Helpers specific to quadratic costs.
+function get_quadratic_state_cost_term(c::QuadraticCost)
+    return c.Q
+end
+
+function get_linear_state_cost_term(c::QuadraticCost)
+    return c.q
+end
+
+function get_constant_state_cost_term(c::QuadraticCost)
+    return c.cq
+end
+
+function get_quadratic_control_cost_term(c::QuadraticCost, player_idx::Int)
+    return c.Rs[player_idx]
+end
+
+function get_linear_control_cost_term(c::QuadraticCost, player_idx::Int)
+    return c.rs[player_idx]
+end
+
+function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
+    return c.crs[player_idx]
+end
+
+
 # Export all the cost type.
 export QuadraticCost, make_quadratic_cost_with_offset
 
 # Export all the cost types/structs and functionality.
-export add_control_cost!, quadraticize_costs, compute_cost, compute_control_cost
+export add_control_cost!, quadraticize_costs, compute_cost
