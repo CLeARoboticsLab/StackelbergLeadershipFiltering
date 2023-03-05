@@ -48,10 +48,6 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     horizon = last(size(xs))
     num_players = size(us, 1)
 
-    # Homogenize the inputs.
-    xs = homogenize_state(c, xs)
-    us = homogenize_ctrls(c, us)
-
     total = 0.0
     for tt in 1:horizon
         prev_time = (tt == 1) ? tt : tt-1
