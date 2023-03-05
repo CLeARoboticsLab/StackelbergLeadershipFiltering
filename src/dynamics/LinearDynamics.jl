@@ -83,6 +83,11 @@ function propagate_dynamics(dyn::LinearDynamics,
     return x_next
 end
 
+function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return dyn
+end
+
+
 # These are the continuous derivative matrices of the f function.
 function dfdx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return dyn.A - I
@@ -96,4 +101,4 @@ end
 
 
 
-export LinearDynamics, propagate_dynamics, dfdx, dfdu
+export LinearDynamics, propagate_dynamics, linearize_dynamics, dfdx, dfdu

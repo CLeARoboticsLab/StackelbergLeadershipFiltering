@@ -50,7 +50,7 @@ end
 
 function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     t₀, t = time_range
-    dt = t - t0
+    dt = t - t₀
     @assert t₀ ≤ t
 
     A = I + dt * dfdx(dyn, time_range, x, us)
