@@ -34,12 +34,16 @@ export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_m
 
 
 # Get the linear term.
-function get_linear_dynamics_term(dyn::Dynamics)
+function get_linear_state_dynamics(dyn::Dynamics)
     return dyn.A
 end
 
-function get_constant_dynamics_term(dyn::Dynamics)
+function get_constant_state_dynamics(dyn::Dynamics)
     return dyn.a
+end
+
+function get_control_dynamics(dyn::Dynamics, player_idx::Int)
+    return dyn.Bs[player_idx]
 end
 
 
@@ -79,8 +83,17 @@ function propagate_dynamics(dyn::LinearDynamics,
     return x_next
 end
 
-function linearize_dynamics(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return dyn
+# These are the continuous derivative matrices of the f function.
+function dfdx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return dyn.A - I
 end
 
-export LinearDynamics, propagate_dynamics, linearize_dynamics
+function dfdu(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return dyn.Bs
+end
+
+# TODO(hmzh) - may need dfdv as well
+
+
+
+export LinearDynamics, propagate_dynamics, dfdx, dfdu
