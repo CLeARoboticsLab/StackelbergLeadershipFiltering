@@ -27,27 +27,19 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R
     c.crs[other_player_idx] = cr
 end
 
-function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    Q̃ = homogenize_cost_matrix(c.Q, c.q, c.cq)
-    q_cost = PureQuadraticCost(Q̃)
-
-    # Fill control costs.
-    num_players = length(c.Rs)
-    for ii in 1:num_players
-        R̃ = homogenize_cost_matrix(c.Rs[ii], c.rs[ii], c.crs[ii];)
-        add_control_cost!(q_cost, ii, R̃)
-    end
-
-    return q_cost
+# TODO(hmzh) - make pure quadratic code more detailed
+function is_pure_quadratic(c::QuadraticCost)
+    is_state_cost_pure_quadratic = all(iszero.(c.q) && iszero(c.cq))
+    is_control_cost_pure_quadratic = all([all(iszero.(c.r[ii]) && iszero(c.cr[ii])) for (ii, r) in c.rs])
+    return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
 end
 
-function compute_cost(c::QuadraticCost, time_range, xh::AbstractVector{Float64}, uhs::AbstractVector{<:AbstractVector{Float64}})
-    num_players = length(uhs)
-    out_size = size(c.Q, 1)
-    x = xh[1:out_size]
-    ctrl_sizes = [size(c.rs[ii], 1) for ii in 1:num_players]
-    us = [uhs[ii][1:ctrl_sizes[ii]] for ii in 1:num_players]
+function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c
+end
 
+function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(us)
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
     if !isempty(c.Rs)
         total += (1/2.) * sum(us[jj]' * R * us[jj] + 2 * us[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)

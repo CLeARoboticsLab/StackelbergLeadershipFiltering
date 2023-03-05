@@ -3,7 +3,6 @@ module StackelbergControlHypothesesFiltering
 include("Utils.jl")
 
 include("costs/CostUtils.jl")
-include("costs/PureQuadraticCost.jl")
 include("costs/QuadraticCost.jl")
 
 include("dynamics/DynamicsUtils.jl")

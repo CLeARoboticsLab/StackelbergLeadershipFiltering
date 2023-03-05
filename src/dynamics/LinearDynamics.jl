@@ -72,7 +72,7 @@ function propagate_dynamics(dyn::LinearDynamics,
     x_next = dyn.A * x + dyn.a + sum(dyn.Bs[ii] * us[ii] for ii in 1:N)
 
     if dyn.D != nothing && v != nothing
-        xh_next += dyn.D * v
+        x_next += dyn.D * v
     end
 
     # Remove the extra dimension before returning the propagated state.

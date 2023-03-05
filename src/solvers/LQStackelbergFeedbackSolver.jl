@@ -24,7 +24,7 @@ end
 # Solve a finite horizon, discrete time LQ game to feedback Stackelberg equilibrium.
 # Returns feedback matrices P[player][:, :, time]
 function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
-                                       all_costs::AbstractVector{<:AbstractVector{PureQuadraticCost}},
+                                       all_costs::AbstractVector{<:AbstractVector{QuadraticCost}},
                                        horizon::Int,
                                        leader_idx::Int)
 
@@ -75,26 +75,34 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         all_Ls[follower_idx][:, :, tt] = outputs[4]
     end
 
-    # Adjust the matrices so the output has xdim/udim number of dimensions, not xhdim/uhdim number of dims.
-    out_Ss = [all_Ss[ii][1:udim(dyns[1], ii),:,:] for ii in 1:num_players]
-    # out_Ls = [all_Ls[ii][1:xdim(dyns[1]),:,:] for ii in 1:num_players]
-    L_future_costs = [[PureQuadraticCost(all_Ls[ii][:, :, tt]) for tt in 1:horizon] for ii in 1:num_players]
-    return out_Ss, L_future_costs
+    # Cut off the extra dimension of the homogenized coordinates system.
+    extra_dim = xhdim(dyns[1])
+    Ks = [all_Ss[ii][1:udim(dyns[1], ii), 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    ks = [all_Ss[ii][1:udim(dyns[1], ii), extra_dim, :] for ii in 1:num_players]
+
+    Qs = [all_Ls[ii][1:xdim(dyns[1]), 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    qs = [all_Ls[ii][extra_dim, 1:xdim(dyns[1]), :] for ii in 1:num_players]
+    cqs = [all_Ls[ii][extra_dim, extra_dim, :] for ii in 1:num_players]
+
+    Ps_strategies = FeedbackGainControlStrategy(Ks, ks)
+    Zs_future_costs = [[QuadraticCost(Qs[ii][:,:,tt], qs[ii][:, tt], cqs[ii][tt]) for tt in 1:horizon] for ii in 1:num_players]
+
+    return Ps_strategies, Zs_future_costs
 end
 
 # Shorthand function for LQ time-invariant dynamics and costs.
-function solve_lq_stackelberg_feedback(dyn::LinearDynamics, costs::AbstractVector{PureQuadraticCost}, horizon::Int, leader_idx::Int)
+function solve_lq_stackelberg_feedback(dyn::LinearDynamics, costs::AbstractVector{QuadraticCost}, horizon::Int, leader_idx::Int)
     dyns = [dyn for _ in 1:horizon]
     all_costs = [costs for _ in 1:horizon]
     return solve_lq_stackelberg_feedback(dyns, all_costs, horizon, leader_idx)
 end
 
-function solve_lq_stackelberg_feedback(dyn::LinearDynamics, all_costs::AbstractVector{<:AbstractVector{PureQuadraticCost}}, horizon::Int, leader_idx::Int)
+function solve_lq_stackelberg_feedback(dyn::LinearDynamics, all_costs::AbstractVector{<:AbstractVector{QuadraticCost}}, horizon::Int, leader_idx::Int)
     dyns = [dyn for _ in 1:horizon]
     return solve_lq_stackelberg_feedback(dyns, all_costs, horizon, leader_idx)
 end
 
-function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{PureQuadraticCost}, horizon::Int, leader_idx::Int)
+function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{QuadraticCost}, horizon::Int, leader_idx::Int)
     all_costs = [costs for _ in 1:horizon]
     return solve_lq_stackelberg_feedback(dyns, all_costs, horizon, leader_idx)
 end
@@ -112,14 +120,14 @@ function solve_approximated_lq_stackelberg_feedback(dyn::Dynamics,
     N = num_agents(dyn)
 
     lin_dyns = Vector{LinearDynamics}(undef, T)
-    all_quad_costs = Vector{Vector{PureQuadraticCost}}(undef, T)
+    all_quad_costs = Vector{Vector{QuadraticCost}}(undef, T)
 
     for tt in 1:T
         prev_time = t0 + ((tt == 1) ? 0 : tt-1)
         current_time = t0 + tt
         time_range = (prev_time, current_time)
 
-        quad_costs = Vector{PureQuadraticCost}(undef, N)
+        quad_costs = Vector{QuadraticCost}(undef, N)
         u_refs_at_tt = [u_refs[ii][:, tt] for ii in 1:N]
 
         # Linearize and quadraticize the dynamics/costs.

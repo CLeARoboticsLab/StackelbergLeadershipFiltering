@@ -4,23 +4,23 @@ using LinearAlgebra
 # Returns feedback matrices P[:, :, time].
 
 # Shorthand function for LQ time-invariant dynamics and costs.
-function solve_lqr_feedback(dyn::LinearDynamics, cost::PureQuadraticCost, horizon::Int)
+function solve_lqr_feedback(dyn::LinearDynamics, cost::QuadraticCost, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
     costs = [cost for _ in 1:horizon]
     return solve_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyn::LinearDynamics, costs::AbstractVector{PureQuadraticCost}, horizon::Int)
+function solve_lqr_feedback(dyn::LinearDynamics, costs::AbstractVector{QuadraticCost}, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
     return solve_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, cost::PureQuadraticCost, horizon::Int)
+function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, cost::QuadraticCost, horizon::Int)
     costs = [cost for _ in 1:horizon]
     return solve_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{PureQuadraticCost}, horizon::Int)
+function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{QuadraticCost}, horizon::Int)
 
     # Ensure the number of dynamics and costs are the same as the horizon.
     @assert !isempty(dyns) && size(dyns, 1) == horizon
@@ -60,8 +60,17 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     end
 
     # Cut off the extra dimension of the homgenized coordinates system.
-    Z_future_costs = [PureQuadraticCost(Zs[:, :, tt]) for tt in 1:horizon]
-    return Ps[1:udim(dyns[1], 1),:,:], Z_future_costs
+    extra_dim = xhdim(dyns[1])
+    Ks = Ps[1:udim(dyns[1], 1), 1:xdim(dyns[1]), :]
+    ks = Ps[1:udim(dyns[1], 1), extra_dim, :]
+
+    Qs = Zs[1:xdim(dyns[1]), 1:xdim(dyns[1]), :]
+    qs = Zs[extra_dim, 1:xdim(dyns[1]), :]
+    cqs = Zs[extra_dim, extra_dim, :]
+
+    Ps_strategies = FeedbackGainControlStrategy([Ks], [ks])
+    Zs_future_costs = [QuadraticCost(Qs[:,:,tt], qs[:, tt], cqs[tt]) for tt in 1:horizon]
+    return Ps_strategies, Zs_future_costs
 end
 
 
@@ -79,7 +88,7 @@ function solve_approximated_lqr_feedback(dyn::Dynamics,
     N = num_agents(dyn)
 
     lin_dyns = Array{LinearDynamics}(undef, T)
-    quad_costs = Array{PureQuadraticCost}(undef, T)
+    quad_costs = Array{QuadraticCost}(undef, T)
 
     for tt in 1:T
         prev_time = t0 + ((tt == 1) ? 0 : tt-1)
