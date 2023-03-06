@@ -4,23 +4,23 @@ using LinearAlgebra
 # Returns feedback matrices P[:, :, time].
 
 # Shorthand function for LQ time-invariant dynamics and costs.
-function solve_lqr_feedback(dyn::LinearDynamics, cost::QuadraticCost, horizon::Int)
+function solve_new_lqr_feedback(dyn::LinearDynamics, cost::QuadraticCost, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
     costs = [cost for _ in 1:horizon]
-    return solve_lqr_feedback(dyns, costs, horizon)
+    return solve_new_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyn::LinearDynamics, costs::AbstractVector{QuadraticCost}, horizon::Int)
+function solve_new_lqr_feedback(dyn::LinearDynamics, costs::AbstractVector{QuadraticCost}, horizon::Int)
     dyns = [dyn for _ in 1:horizon]
-    return solve_lqr_feedback(dyns, costs, horizon)
+    return solve_new_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, cost::QuadraticCost, horizon::Int)
+function solve_new_lqr_feedback(dyns::AbstractVector{LinearDynamics}, cost::QuadraticCost, horizon::Int)
     costs = [cost for _ in 1:horizon]
-    return solve_lqr_feedback(dyns, costs, horizon)
+    return solve_new_lqr_feedback(dyns, costs, horizon)
 end
 
-function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{QuadraticCost}, horizon::Int)
+function solve_new_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::AbstractVector{QuadraticCost}, horizon::Int)
 
     # Ensure the number of dynamics and costs are the same as the horizon.
     @assert !isempty(dyns) && size(dyns, 1) == horizon
@@ -124,4 +124,4 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     return Ps_feedback_strategies, Zs_future_costs
 end
 
-export solve_lqr_feedback
+export solve_new_lqr_feedback
