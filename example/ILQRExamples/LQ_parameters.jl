@@ -34,10 +34,9 @@ dyn = LinearDynamics([1. 0. dt 0.;
 #####################################
 Q = Matrix(Diagonal(1*[1., 1., 1., 1.]))
 R = Matrix(Diagonal(1*[1., 1.]))
-# quad_cost = make_quadratic_cost_with_offset(Q, xf)
 quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
-quad_cost = QuadraticCostWithOffset(quad_cost, xf)
+quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
 
 
 #####################################
