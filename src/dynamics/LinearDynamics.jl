@@ -83,7 +83,7 @@ function propagate_dynamics(dyn::LinearDynamics,
     return x_next
 end
 
-function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize_dynamics(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return dyn
 end
 
