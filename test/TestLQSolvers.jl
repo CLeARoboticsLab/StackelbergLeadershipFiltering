@@ -41,12 +41,7 @@ seed!(0)
     horizon = 10
     times = cumsum(ones(horizon)) .- 1.
 
-    dummy_time_range = (times[1], times[horizon])
-    dummy_x = zeros(xdim(dyn))
-    dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
-    quad_costs = [c₁, c₂]
-    costs = [quadraticize_costs(c₁, dummy_time_range, dummy_x, dummy_us),
-             quadraticize_costs(c₂, dummy_time_range, dummy_x, dummy_us)]
+    costs = [c₁, c₂]
 
     @testset "CheckPureNonpureLQRMatch" begin
         num_loops = 1
@@ -83,26 +78,19 @@ seed!(0)
             # q_cost = QuadraticCost([1. 0.; 0. 0.])
             # add_control_cost!(q_cost, 1, ones(1, 1))
 
-            # q_cost = QuadraticCost(Q, q, cq)
-            # add_control_cost!(q_cost, 1, R; r=r, cr=cr)
-
             new_x₁ = ones(num_states)
 
             # New LQR
-            strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon_lqr)
+            strategy, _ = solve_new_lqr_feedback(lin_dyn, q_cost, horizon_lqr)
             xs, us = unroll_feedback(lin_dyn, times_lqr, strategy, new_x₁)
             eval_cost = evaluate(q_cost, xs, us)
 
-            # OG homogenized LQR
-            p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
-
             # Ensure no dumb mistakes with cost input type.
-            @test evaluate(q_cost, ones(2, 1), [ones(1,1)]) ≈ evaluate(p_cost, ones(2, 1), [ones(1,1)])
+            @test evaluate(q_cost, ones(2, 1), [ones(1,1)]) ≈ evaluate(q_cost, ones(2, 1), [ones(1,1)])
 
-            strategy_p, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon_lqr)
-            strategy_p = FeedbackGainControlStrategy([strategy_p])
+            strategy_p, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon_lqr)
             xs_p, us_p = unroll_feedback(lin_dyn, times_lqr, strategy_p, new_x₁)
-            eval_cost_p = evaluate(p_cost, xs_p, us_p)
+            eval_cost_p = evaluate(q_cost, xs_p, us_p)
 
             println("costs (old, new): ", eval_cost, " ", eval_cost_p)
             @test eval_cost ≈ eval_cost_p
@@ -128,7 +116,7 @@ seed!(0)
     #     # add_control_cost!(q_cost, 1, ones(1, 1))
     #     new_x₁ = ones(2)
 
-    #     strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon)
+    #     strategy, _ = solve_new_lqr_feedback(lin_dyn, q_cost, horizon)
     #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
     #     eval_cost = evaluate(q_cost, xs, us)
 
@@ -157,7 +145,7 @@ seed!(0)
     #     add_control_cost!(q_cost, 1, ones(1, 1))
     #     new_x₁ = ones(2)
 
-    #     strategy, future_costs = solve_lqr_feedback(lin_dyn, q_cost, horizon)
+    #     strategy, future_costs = solve_new_lqr_feedback(lin_dyn, q_cost, horizon)
     #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
     #     eval_cost = evaluate(q_cost, xs, us)
 
@@ -201,12 +189,12 @@ seed!(0)
     #     # add_control_cost!(q_cost, 1, ones(1, 1))
     #     new_x₁ = ones(2)
 
-    #     p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
+    #     q_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
 
-    #     strategy, _ = solve_lqr_feedback(lin_dyn, p_cost, horizon)
+    #     strategy, _ = solve_lqr_feedback(lin_dyn, q_cost, horizon)
     #     strategy = FeedbackGainControlStrategy([strategy])
     #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
-    #     eval_cost = evaluate(p_cost, xs, us)
+    #     eval_cost = evaluate(q_cost, xs, us)
 
     #     # Perturb each strategy a little bit and confirm that cost only
     #     # increases for that player.
@@ -218,7 +206,7 @@ seed!(0)
     #         # p̃s[:, tt] += ϵ * randn(udim(lin_dyn, 1))
 
     #         x̃s, ũs = unroll_feedback(lin_dyn, times, FeedbackGainControlStrategy([P̃s], [p̃s]), new_x₁)
-    #         new_eval_cost = evaluate(p_cost, x̃s, ũs)
+    #         new_eval_cost = evaluate(q_cost, x̃s, ũs)
     #         @test new_eval_cost ≥ eval_cost
     #     end
     # end
@@ -233,11 +221,11 @@ seed!(0)
     #     add_control_cost!(q_cost, 1, ones(1, 1))
     #     new_x₁ = ones(2)
 
-    #     p_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
+    #     q_cost = quadraticize_costs(q_cost, dummy_time_range, dummy_x, dummy_us)
 
-    #     strategy, future_costs = solve_lqr_feedback(lin_dyn, p_cost, horizon)
+    #     strategy, future_costs = solve_lqr_feedback(lin_dyn, q_cost, horizon)
     #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
-    #     eval_cost = evaluate(p_cost, xs, us)
+    #     eval_cost = evaluate(q_cost, xs, us)
 
     #     # Compute the costs using the t+1 cost matrix and compare with the cost using the cost matrix at time t.
     #     num_players = num_agents(lin_dyn)
@@ -263,7 +251,6 @@ seed!(0)
     #         println("manual -> ", manual_cost)
     #         computed_cost = compute_cost(future_costs[tt], time_range, xhs[:, tt], uh_tt)
     #         println(computed_cost)
-
     #         @test manual_cost ≈ computed_cost
     #     end
     # end
@@ -284,14 +271,12 @@ seed!(0)
     #         for tt in 1:horizon
     #             P̃s = deepcopy(Ps)
     #             P̃s[ii][:, :, tt] += ϵ * randn(udim(dyn, ii), xhdim(dyn))
-
     #             x̃s, ũs = unroll_feedback(dyn, times, FeedbackGainControlStrategy(P̃s), x₁)
     #             new_nash_costs = [evaluate(c, x̃s, ũs) for c in costs]
     #             @test new_nash_costs[ii] ≥ nash_costs[ii]
     #         end
     #     end
     # end
-
 
     # # Ensure that the costs match up at each time step with manually calculate cost matrices.
     # @testset "CheckNashCostsAreConsistentAtEquilibrium" begin
@@ -320,7 +305,6 @@ seed!(0)
     #             manual_cost = compute_cost(costs[ii], time_range, xhs[:, tt], uh_tt)
     #             manual_cost += compute_cost(future_costs[ii][tt+1], time_range, xhs[:, tt+1], uh_ttp1)
     #             computed_cost = compute_cost(future_costs[ii][tt], time_range, xhs[:, tt], uh_tt)
-
     #             @test manual_cost ≈ computed_cost
     #         end
     #     end

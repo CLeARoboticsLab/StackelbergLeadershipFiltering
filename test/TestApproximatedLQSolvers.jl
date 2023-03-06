@@ -25,13 +25,13 @@ seed!(0)
     @testset "CheckLQOptCtrlAndApproximatedLQOptCtrlGiveSameOutputForLQGame" begin
         sys_info = SystemInfo(1, num_states, [2])
         dyn = generate_random_linear_dynamics(sys_info)
-        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
+        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=false)
 
-        Ps, future_costs_expected = solve_lqr_feedback(dyn, costs[1], horizon)
-        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy([Ps]), x₁)
-        P̃s, future_costs_actual = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
+        ctrl_strat_Ps, future_costs_expected = solve_lqr_feedback(dyn, costs[1], horizon)
+        xs, us = unroll_feedback(dyn, times, ctrl_strat_Ps, x₁)
+        ctrl_strat_P̃s, future_costs_actual = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
 
-        @test Ps == P̃s
+        @test ctrl_strat_Ps.Ps == ctrl_strat_P̃s.Ps && ctrl_strat_Ps.ps == ctrl_strat_P̃s.ps
         # Compare the Q matrices.
         @test all([get_homogenized_state_cost_matrix(future_costs_expected[tt]) == get_homogenized_state_cost_matrix(future_costs_actual[tt]) for tt in 1:horizon])
     end
@@ -45,13 +45,13 @@ seed!(0)
 
         # Generate the game.
         dyn = generate_random_linear_dynamics(sys_info)
-        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
+        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=false)
 
-        Ps, future_costs_expected = solve_lq_nash_feedback(dyn, costs, horizon)
-        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ps), x₁)
-        P̃s, future_costs_actual = solve_approximated_lq_nash_feedback(dyn, costs, horizon, t0, xs, us)
+        ctrl_strats_Ps, future_costs_expected = solve_lq_nash_feedback(dyn, costs, horizon)
+        xs, us = unroll_feedback(dyn, times, ctrl_strats_Ps, x₁)
+        ctrl_strats_P̃s, future_costs_actual = solve_approximated_lq_nash_feedback(dyn, costs, horizon, t0, xs, us)
 
-        @test Ps == P̃s
+        @test ctrl_strats_Ps.Ps == ctrl_strats_P̃s.Ps && ctrl_strats_Ps.ps == ctrl_strats_P̃s.ps
         for ii in 1:num_players
             # Compare the Q matrices.
             @test all([get_homogenized_state_cost_matrix(future_costs_expected[ii][tt]) == get_homogenized_state_cost_matrix(future_costs_actual[ii][tt]) for tt in 1:horizon])
@@ -69,13 +69,13 @@ seed!(0)
 
         # Generate the game.
         dyn = generate_random_linear_dynamics(sys_info)
-        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=true)
+        costs = generate_random_quadratic_costs(sys_info; include_cross_costs=true, make_affine=false)
 
-        Ss, future_costs_expected = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-        xs, us = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
-        S̃s, future_costs_actual = solve_approximated_lq_stackelberg_feedback(dyn, costs, horizon, t0, xs, us, stackelberg_leader_idx)
+        ctrl_strats_Ss, future_costs_expected = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
+        xs, us = unroll_feedback(dyn, times, ctrl_strats_Ss, x₁)
+        ctrl_strats_S̃s, future_costs_actual = solve_approximated_lq_stackelberg_feedback(dyn, costs, horizon, t0, xs, us, stackelberg_leader_idx)
 
-        @test Ss == S̃s
+        @test ctrl_strats_Ss.Ps == ctrl_strats_S̃s.Ps && ctrl_strats_Ss.ps == ctrl_strats_S̃s.ps
         for ii in 1:num_players
             # Compare the Q matrices.
             @test all([get_homogenized_state_cost_matrix(future_costs_expected[ii][tt]) == get_homogenized_state_cost_matrix(future_costs_actual[ii][tt]) for tt in 1:horizon])

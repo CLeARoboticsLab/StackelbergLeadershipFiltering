@@ -13,9 +13,7 @@ FeedbackGainControlStrategy(Ps::AbstractVector{<:AbstractArray{Float64, 3}},
                             ps::AbstractVector{<:AbstractMatrix{Float64}}=[zeros(size(Ps[ii], 1), size(Ps[ii], 3)) for ii in 1:length(Ps)]) = FeedbackGainControlStrategy(length(Ps), size(Ps[1], 3), Ps, ps)
 
 # This function accepts a feedback gain control strategy and applies it to a state at a given time (i.e. index).
-function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, xh::AbstractArray{Float64})
-    num_x = size(strategy.Ps[1], 2)
-    x = xh[1:num_x]
+function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, x::AbstractArray{Float64})
     return [-strategy.Ps[ii][:, :, tt] * x - strategy.ps[ii][:, tt] for ii in 1:strategy.num_players]
 end
 

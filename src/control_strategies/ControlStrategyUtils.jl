@@ -24,8 +24,7 @@ function unroll_feedback(dyn::Dynamics, times::AbstractVector{Float64}, control_
     xs[:, 1] = x₁
     us = [zeros(udim(dyn, ii), horizon) for ii in 1:N]
     for tt in 2:horizon
-        xh = homogenize_vector(xs[:, tt-1])
-        ctrls_at_ttm1 = apply_control_strategy(tt-1, control_strategy, xh)
+        ctrls_at_ttm1 = apply_control_strategy(tt-1, control_strategy, xs[:, tt-1])
         for ii in 1:N
             us[ii][:, tt - 1] = ctrls_at_ttm1[ii]
         end
@@ -36,8 +35,7 @@ function unroll_feedback(dyn::Dynamics, times::AbstractVector{Float64}, control_
     end
 
     # Controls at final time.
-    xh = homogenize_vector(xs[:, horizon])
-    final_ctrls = apply_control_strategy(horizon, control_strategy, xh)
+    final_ctrls = apply_control_strategy(horizon, control_strategy, xs[:, horizon])
     for ii in 1:N
         us[ii][:, horizon] = final_ctrls[ii]
     end
