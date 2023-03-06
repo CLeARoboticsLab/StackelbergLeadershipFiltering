@@ -30,22 +30,16 @@ dyn = LinearDynamics([1. 0. dt 0.;
 
 # Costs
 Q = Matrix(Diagonal([1., 1., 1., 1.]))
-R = Matrix(Diagonal(1*[1., 1.]))
-quad_cost = make_quadratic_cost_with_offset(Q, xf)
+R = Matrix(Diagonal([1., 1.]))
+# quad_cost = make_quadratic_cost_with_offset(Q, xf)
+quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
-dummy_time_range = (0.0, dt)
-dummy_x = zeros(xdim(dyn))
-dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
-pure_quad_cost = quadraticize_costs(quad_cost, dummy_time_range, dummy_x, dummy_us)
-
 
 # Solve optimal control problem.
-K̃s, _ = solve_lqr_feedback(dyn, pure_quad_cost, T)
+ctrl_strats, _ = solve_lqr_feedback(dyn, quad_cost, T)
+xs_i, us_i = unroll_feedback(dyn, times, ctrl_strats, x0-xf)
 
-# println(size(dyn.A), size(K̃s), size(x0))
-xs_i, us_i = unroll_feedback(dyn, times, FeedbackGainControlStrategy([K̃s]), x0)
-
-final_cost_total = evaluate(pure_quad_cost, xs_i, us_i)
+final_cost_total = evaluate(quad_cost, xs_i, us_i)
 println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)
 
 # TODO(hamzah) - Plot time vs. cost
@@ -61,10 +55,11 @@ println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)
 
 q = @layout [a b; c d]
 
+xs_i = xs_i .+ xf
+
 q1 = plot(xs_i[1,:], xs_i[2,:], label="", legend=:outertopright)
 q1 = scatter!([x0[1]], [x0[2]], color="red", label="start")
 q1 = scatter!([xf[1]], [xf[2]], color="blue", label="goal")
-# q1 = scatter!([-xf[1]], [-xf[2]], color="yellow", label="nope")
 
 q2 = plot(times, xs_i[1,:], label="px", legend=:outertopright)
 plot!(times, xs_i[2,:], label="py")

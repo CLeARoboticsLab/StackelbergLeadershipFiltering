@@ -4,8 +4,7 @@ abstract type Cost end
 # Every Cost is assumed to have the following functions defined on it:
 # - quadraticize_costs(cost, time_range, x, us) - this function produces a PureQuadraticCost at time t given the state and controls
 # - compute_cost(cost, xs, us) - this function evaluates the cost of a trajectory given the states and controls
-# - homogenize_state(cost, xs) - needs to be defined if cost requires linear/constant terms
-# - homogenize_ctrls(cost, us) - needs to be defined if cost requires linear/constant terms
+# - dgdx, dgdu, d2gdx2, d2gdu2 - derivatives of cost wrt to state and controls with arguments (cost, time_range, x, us)
 
 # No costs should require homogenized inputs. The evaluate function will homogenize the inputs as needed.
 
@@ -54,7 +53,6 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
         prev_time = (tt == 1) ? tt : tt-1
         us_tt = (tt != horizon) ? [us[ii][:, tt] for ii in 1:num_players] : [zeros(size(us[ii][:, tt])) for ii in 1:num_players]
         total += compute_cost(c, (prev_time, tt), xs[:, tt], us_tt)
-        # println(tt, " total until now - ", total)
     end
     return total
 end

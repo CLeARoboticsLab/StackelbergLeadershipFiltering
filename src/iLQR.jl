@@ -17,6 +17,7 @@ function ilqr(T::Int,
     # TODO(hamzah) - Don't require the use of references as initial control trajectory.
     # TODO(hamzah) - update for affine ness
     xs_1 = unroll_raw_controls(dyn, times, [us_1], x₁)
+    println(xs_1[1,:])
 
     xs_im1 = xs_1
     @assert all(xs_im1[:, 1] .== x₁)
@@ -35,7 +36,7 @@ function ilqr(T::Int,
 
         # 1. Extract linear dynamics and quadratic costs wrt to the current guess for the state and controls.
         lin_dyns = Array{LinearDynamics}(undef, T)
-        quad_costs = Array{PureQuadraticCost}(undef, T)
+        quad_costs = Array{QuadraticCost}(undef, T)
 
         for tt in 1:T
             prev_time = (tt == 1) ? t0 : times[tt-1]
@@ -46,11 +47,11 @@ function ilqr(T::Int,
         end
 
         # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
-        K̃s, _ = solve_lqr_feedback(lin_dyns, quad_costs, T)
+        ctrl_strats, _ = solve_lqr_feedback(lin_dyns, quad_costs, T)
 
         # 3. Extract the feedback matrices from the homogeneous matrix.
-        Ks = K̃s[1:num_u, 1:num_x, :]
-        ks = K̃s[1:num_u, num_x+1, :]
+        Ks = ctrl_strats.Ps[1] # K̃s[1:num_u, 1:num_x, :]
+        ks = ctrl_strats.ps[1] # K̃s[1:num_u, num_x+1, :]
 
         # II. Forward pass
         # TODO(hamzah) - turn this into a control strategy/generalize the other one.
@@ -63,6 +64,7 @@ function ilqr(T::Int,
             curr_time = times[ttp1]
 
             # println("iter ", num_iters, " - dx @t=", tt, ": \n", xs_i[:, tt], "\n", xs_im1[:, tt], "\n", xs_i[:, tt] - xs_im1[:, tt])
+            # println(size(us_im1[:, tt]), size(Ks[:,:,tt]), size(step_size), size(ks[:, tt]))
             us_i[:, tt] = us_im1[:, tt] - Ks[:, :, tt] * (xs_i[:, tt] - xs_im1[:, tt]) - step_size * ks[:, tt]
             time_range = (prev_time, curr_time)
             xs_i[:, ttp1] = propagate_dynamics(dyn, time_range, xs_i[:, tt], [us_i[:, tt]])
@@ -77,14 +79,14 @@ function ilqr(T::Int,
 
         # TODO(hmzh): Do we perform convergence based on quadratic cost in dx or quadratic cost in x^k?
         new_cost = evaluate(cost, xs_i, [us_i])
-        new_cost = norm(ks)
+        # new_cost = norm(ks)
 
         cost_im1 = costs[num_iters + 1]
         costs[num_iters + 2] = new_cost
         cost_diff = new_cost - cost_im1
         
         is_converged = abs(cost_diff) < threshold
-        is_converged = norm(ks) < threshold
+        # is_converged = norm(ks) < threshold
 
         # if cost_diff > 0
         #     step_size /= 2.

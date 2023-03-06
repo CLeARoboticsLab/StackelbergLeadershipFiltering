@@ -11,11 +11,11 @@ mutable struct QuadraticCost <: Cost
     crs::Dict{Int, Float64}
 end
 # Quadratic costs always homogeneous
-QuadraticCost(Q::AbstractMatrix{Float64}) = QuadraticCost(Q, zeros(size(Q, 1)), 0, nothing,
+QuadraticCost(Q::AbstractMatrix{Float64}) = QuadraticCost(Q, zeros(size(Q, 1)), 0, zeros(size(Q, 1)),
                                                           Dict{Int, Matrix{eltype(Q)}}(),
                                                           Dict{Int, Vector{eltype(Q)}}(),
                                                           Dict{Int, eltype(Q)}())
-QuadraticCost(Q::AbstractMatrix{Float64}, q::AbstractVector{Float64}, cq::Float64) = QuadraticCost(Q, q, cq, nothing,
+QuadraticCost(Q::AbstractMatrix{Float64}, q::AbstractVector{Float64}, cq::Float64) = QuadraticCost(Q, q, cq, zeros(size(Q, 1)),
                                                                                                    Dict{Int, Matrix{eltype(Q)}}(),
                                                                                                    Dict{Int, Vector{eltype(q)}}(),
                                                                                                    Dict{Int, eltype(cq)}())
@@ -25,7 +25,7 @@ function make_quadratic_cost_with_offset(Q::AbstractMatrix{Float64},
     xf = offset
     return QuadraticCost(Q,
                          -Q*xf,
-                         0.5*xf'*Q*xf,
+                         xf'*Q*xf,
                          xf,
                          Dict{Int, Matrix{eltype(Q)}}(),
                          Dict{Int, Vector{eltype(Q)}}(),
@@ -53,8 +53,12 @@ function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Floa
 end
 
 function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    # new_q = c.q + c.Q*x
+    # new_q = (c.offset == nothing) ? c.q : c.Q * (x - c.offset)
+    new_q = c.q
+
     num_players = length(us)
-    total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
+    total = (1/2.) * (x' * c.Q * x + 2 * new_q' * x + c.cq)
     if !isempty(c.Rs)
         total += (1/2.) * sum(us[jj]' * R * us[jj] + 2 * us[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
     end
