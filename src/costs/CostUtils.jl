@@ -57,5 +57,18 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     return total
 end
 
+function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    eval = compute_cost(c, time_range, x, us)
+    ddx2 = d2gdx2(c, time_range, x, us)
+    dx = dgdx(c, time_range, x, us)
+    ddu2s = d2gdu2(c, time_range, x, us)
+    dus = dgdu(c, time_range, x, us)
+
+
+
+    return c
+end
+
+
 # Export all the cost types/structs.
 export Cost, NonQuadraticCost, evaluate
