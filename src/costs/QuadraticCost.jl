@@ -42,7 +42,6 @@ function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, 
     num_players = length(us)
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
     if !isempty(c.Rs)
-        println(c.Rs, c.rs, c.crs)
         total += (1/2.) * sum(us[jj]' * R * us[jj] + 2 * us[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
     end
     return total

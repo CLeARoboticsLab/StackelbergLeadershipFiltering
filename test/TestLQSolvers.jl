@@ -36,7 +36,7 @@ seed!(0)
     add_control_cost!(c₂, 1, zeros(1, 1))
 
     x₁ = [1., 0, 1, 0]
-    horizon = 10
+    horizon = 100
     times = cumsum(ones(horizon)) .- 1.
 
     costs = [c₁, c₂]
@@ -47,7 +47,7 @@ seed!(0)
         # dynamics.
         dt = 0.02
         times_lqr = dt * (cumsum(ones(horizon)) .- 1.)
-        lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=zeros(2))
+        lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
         q_cost = QuadraticCost([1. 0.; 0. 0.], ones(2), 1.)
         add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
 
@@ -76,45 +76,43 @@ seed!(0)
         end
     end
 
-    # # Ensure that the costs match up at each time step with manually calculate cost matrices.
-    # @testset "CheckLQRCostsAreConsistentAtEquilibrium" begin
-    #     # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
-    #     # state [x ẋ] and input control α acceleration.
-    #     dt = 0.01
-    #     lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=ones(2))
-    #     q_cost = QuadraticCost([1. 0.; 0. 0.])
-    #     add_control_cost!(q_cost, 1, ones(1, 1))
-    #     new_x₁ = ones(2)
+    # Ensure that the costs match up at each time step with manually calculate cost matrices.
+    @testset "CheckLQRCostsAreConsistentAtEquilibrium" begin
+        # This is the same LQR problem that MATLAB has as an example - dt = 0.02s and it's a double integrator with
+        # state [x ẋ] and input control α acceleration.
+        dt = 0.02
+        times_lqr = dt * (cumsum(ones(horizon)) .- 1.)
+        lin_dyn = LinearDynamics([1. dt; 0 1.], [[0.; dt][:,:]]; a=zeros(2))
+        q_cost = QuadraticCost([1. 0.; 0. 0.], zeros(2), 1.)
+        add_control_cost!(q_cost, 1, ones(1, 1); r=zeros(1), cr=2.)
+        new_x₁ = ones(2)
 
-    #     strategy, future_costs = solve_new_lqr_feedback(lin_dyn, q_cost, horizon)
-    #     xs, us = unroll_feedback(lin_dyn, times, strategy, new_x₁)
-    #     eval_cost = evaluate(q_cost, xs, us)
+        strategy, future_costs = solve_lqr_feedback(lin_dyn, q_cost, horizon)
+        xs, us = unroll_feedback(lin_dyn, times_lqr, strategy, new_x₁)
+        eval_cost = evaluate(q_cost, xs, us)
 
-    #     # Compute the costs using the t+1 cost matrix and compare with the cost using the cost matrix at time t.
-    #     num_players = num_agents(lin_dyn)
+        # Compute the costs using the t+1 cost matrix and compare with the cost using the cost matrix at time t.
+        num_players = num_agents(lin_dyn)
 
-    #     # Homgenize states and controls.
-    #     xhs = homogenize_vector(xs)
+        # Homgenize states and controls.
+        # xhs = homogenize_vector(xs)
 
-    #     for tt in 1:horizon-1
-    #         time_range = (tt, tt+1)
+        for tt in 1:horizon-1
+            time_range = (tt, tt+1)
 
-    #         u_tt = us[1][:, tt]
-    #         uh_tt = homogenize_ctrls(lin_dyn, [u_tt])
+            u_tt = us[1][:, tt]
+            u_ttp1 = us[1][:, tt+1]
 
-    #         u_ttp1 = us[1][:, tt+1]
-    #         uh_ttp1 = homogenize_ctrls(lin_dyn, [u_ttp1])
+            # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
 
-    #         # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
+            # Manual cost is formed by the sum of the current state/ctrls costs and the future costs.
+            manual_cost = compute_cost(q_cost, time_range, xs[:, tt], [u_tt])
+            manual_cost += compute_cost(future_costs[tt+1], time_range, xs[:, tt+1], [u_ttp1])
+            computed_cost = compute_cost(future_costs[tt], time_range, xs[:, tt], [u_tt])
 
-    #         # Manual cost is formed by the sum of the current state/ctrls costs and the future costs.
-    #         manual_cost = compute_cost(q_cost, time_range, xhs[:, tt], uh_tt)
-    #         manual_cost += compute_cost(future_costs[tt+1], time_range, xhs[:, tt+1], uh_ttp1)
-    #         computed_cost = compute_cost(future_costs[tt], time_range, xhs[:, tt], uh_tt)
-
-    #         @test manual_cost ≈ computed_cost
-    #     end
-    # end
+            @test manual_cost ≈ computed_cost
+        end
+    end
 
     # # Ensure that the feedback solution satisfies Nash conditions of optimality
     # # for each player, holding others' strategies fixed.
