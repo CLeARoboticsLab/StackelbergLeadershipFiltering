@@ -47,6 +47,8 @@ function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, 
     return total
 end
 
+export is_pure_quadratic
+
 # Helpers that get the homogenized Q and R matrices for this cost.
 function get_homogenized_state_cost_matrix(c::QuadraticCost)
     return homogenize_cost_matrix(c.Q, c.q, c.cq)
@@ -57,6 +59,26 @@ function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
 end
 
 export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
+
+
+# Derivative terms
+function dgdx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return x' * c.Q + c.q'
+end
+
+function dgdu(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return [us[ii]' * R + c.rs[ii] for (ii, R) in c.Rs]
+end
+
+function d2gdx2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c.Q
+end
+
+function d2gdu2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return [R for (ii, R) in c.Rs]
+end
+
+export dgdx, dgdu, d2gdx2, d2gdu2
 
 
 # Helpers specific to quadratic costs.
@@ -84,9 +106,12 @@ function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
     return c.crs[player_idx]
 end
 
-
 # Export all the cost type.
 export QuadraticCost
+
+# Export the helpers.
+export get_quadratic_state_cost_term, get_linear_state_cost_term, get_constant_state_cost_term,
+       get_quadratic_control_cost_term, get_linear_control_cost_term, get_constant_control_cost_term
 
 # Export all the cost types/structs and functionality.
 export add_control_cost!, quadraticize_costs, compute_cost
