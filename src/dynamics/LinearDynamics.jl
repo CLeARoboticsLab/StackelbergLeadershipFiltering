@@ -100,5 +100,4 @@ end
 # TODO(hmzh) - may need dfdv as well
 
 
-
 export LinearDynamics, propagate_dynamics, linearize_dynamics, dfdx, dfdu
