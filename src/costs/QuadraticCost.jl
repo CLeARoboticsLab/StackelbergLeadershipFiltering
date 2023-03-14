@@ -34,10 +34,6 @@ function is_pure_quadratic(c::QuadraticCost)
     return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
 end
 
-function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c
-end
-
 function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(us)
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
@@ -66,19 +62,19 @@ function dgdx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::Abst
     return x' * c.Q + c.q'
 end
 
-function dgdu(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return [us[ii]' * R + c.rs[ii] for (ii, R) in c.Rs]
+function dgdus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return Dict(ii => us[ii]' * R + c.rs[ii] for (ii, R) in c.Rs)
 end
 
 function d2gdx2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return c.Q
 end
 
-function d2gdu2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return [R for (ii, R) in c.Rs]
+function d2gdu2s(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c.Rs
 end
 
-export dgdx, dgdu, d2gdx2, d2gdu2
+export dgdx, dgdus, d2gdx2, d2gdu2s
 
 
 # Helpers specific to quadratic costs.
