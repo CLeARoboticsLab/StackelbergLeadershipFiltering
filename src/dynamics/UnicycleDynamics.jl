@@ -60,7 +60,7 @@ end
 
 # These are the continuous derivatives of the unicycle dynamics with respect to x and u.
 
-function dfdx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -82,7 +82,7 @@ function dfdx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us:
     return Matrix(blockdiag(As...))
 end
 
-function dfdu(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -100,4 +100,4 @@ function dfdu(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us:
     return Bs
 end
 
-export UnicycleDynamics, propagate_dynamics, linearize_dynamics, dfdx, dfdu
+export UnicycleDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus

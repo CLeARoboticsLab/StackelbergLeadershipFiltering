@@ -53,8 +53,8 @@ function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64
     dt = t - t₀
     @assert t₀ ≤ t
 
-    A = I + dt * dfdx(dyn, time_range, x, us)
-    Bs = dfdu(dyn, time_range, x, us)
+    A = I + dt * Fx(dyn, time_range, x, us)
+    Bs = Fus(dyn, time_range, x, us)
     return LinearDynamics(A, Bs)
 end
 

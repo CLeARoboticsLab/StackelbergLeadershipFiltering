@@ -90,15 +90,15 @@ end
 
 
 # These are the continuous derivative matrices of the f function.
-function dfdx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return dyn.A - I
 end
 
-function dfdu(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return dyn.Bs
 end
 
 # TODO(hmzh) - may need dfdv as well
 
 
-export LinearDynamics, propagate_dynamics, linearize_dynamics, dfdx, dfdu
+export LinearDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus

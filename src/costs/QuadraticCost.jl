@@ -62,23 +62,23 @@ export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
 
 
 # Derivative terms
-function dgdx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return x' * c.Q + c.q'
 end
 
-function dgdus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return Dict(ii => us[ii]' * R + c.rs[ii]' for (ii, R) in c.Rs)
 end
 
-function d2gdx2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gxx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return c.Q
 end
 
-function d2gdu2s(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Guus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     return c.Rs
 end
 
-export dgdx, dgdus, d2gdx2, d2gdu2s
+export Gx, Gus, Gxx, Guus
 
 
 # Helpers specific to quadratic costs.

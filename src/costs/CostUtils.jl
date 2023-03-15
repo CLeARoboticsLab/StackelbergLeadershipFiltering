@@ -61,10 +61,10 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
     num_players = length(us)
 
     cost_eval = compute_cost(c, time_range, x, us)
-    ddx2 = d2gdx2(c, time_range, x, us)
-    dx = dgdx(c, time_range, x, us)
-    ddu2s = d2gdu2s(c, time_range, x, us)
-    dus = dgdus(c, time_range, x, us)
+    ddx2 = Gxx(c, time_range, x, us)
+    dx = Gx(c, time_range, x, us)
+    ddu2s = Guus(c, time_range, x, us)
+    dus = Gus(c, time_range, x, us)
 
     # Used to compute the way the constant cost terms are divided.
     num_cost_mats = length(ddu2s)
