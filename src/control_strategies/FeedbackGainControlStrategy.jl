@@ -18,6 +18,7 @@ function apply_control_strategy(tt::Int, strategy::FeedbackGainControlStrategy, 
 end
 
 
+# Define some getters.
 function get_linear_feedback_gains(strategy::FeedbackGainControlStrategy)
     return strategy.Ps
 end
