@@ -70,9 +70,9 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
     num_cost_mats = length(ddu2s)
     const_cost_term = (2/num_cost_mats) * cost_eval
 
-    quad_cost = QuadraticCost(ddx2, q=dx, cq=const_cost_term)
-    for ii in 1:num_players
-        add_control_cost!(quad_cost, ddu2s[ii], r=dus[ii], cr=const_cost_term)
+    quad_cost = QuadraticCost(ddx2, dx', const_cost_term)
+    for (ii, du) in dus
+        add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=const_cost_term)
     end
 
     return quad_cost

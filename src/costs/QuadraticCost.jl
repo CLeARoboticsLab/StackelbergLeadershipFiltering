@@ -63,7 +63,7 @@ function dgdx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::Abst
 end
 
 function dgdus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return Dict(ii => us[ii]' * R + c.rs[ii] for (ii, R) in c.Rs)
+    return Dict(ii => us[ii]' * R + c.rs[ii]' for (ii, R) in c.Rs)
 end
 
 function d2gdx2(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
