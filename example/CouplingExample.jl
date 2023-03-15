@@ -25,11 +25,11 @@ function coupling_example()
     # Solve over a horizon of 100 timesteps.
     horizon = 100
 
-    Ps, _ = solve_lq_nash_feedback(dyn, costs, horizon)
+    strats_nash, _ = solve_lq_nash_feedback(dyn, costs, horizon)
     times = cumsum(ones(horizon)) .- 1.
-    xs_nash_feedback, us_nash_feedback = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ps), x₁)
-    Ss, _ = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
-    xs_stackelberg_feedback, us_stackelberg_feedback = unroll_feedback(dyn, times, FeedbackGainControlStrategy(Ss), x₁)
+    xs_nash_feedback, us_nash_feedback = unroll_feedback(dyn, times, strats_nash, x₁)
+    strats_stack, _ = solve_lq_stackelberg_feedback(dyn, costs, horizon, stackelberg_leader_idx)
+    xs_stackelberg_feedback, us_stackelberg_feedback = unroll_feedback(dyn, times, strats_stack, x₁)
 
     return xs_nash_feedback, us_nash_feedback, xs_stackelberg_feedback, us_stackelberg_feedback
 end
