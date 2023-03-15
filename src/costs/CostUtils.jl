@@ -57,5 +57,27 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     return total
 end
 
+function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(us)
+
+    cost_eval = compute_cost(c, time_range, x, us)
+    ddx2 = Gxx(c, time_range, x, us)
+    dx = Gx(c, time_range, x, us)
+    ddu2s = Guus(c, time_range, x, us)
+    dus = Gus(c, time_range, x, us)
+
+    # Used to compute the way the constant cost terms are divided.
+    num_cost_mats = length(ddu2s)
+    const_cost_term = (2/num_cost_mats) * cost_eval
+
+    quad_cost = QuadraticCost(ddx2, dx', const_cost_term)
+    for (ii, du) in dus
+        add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=const_cost_term)
+    end
+
+    return quad_cost
+end
+
+
 # Export all the cost types/structs.
 export Cost, NonQuadraticCost, evaluate

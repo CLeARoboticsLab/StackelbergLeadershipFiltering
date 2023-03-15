@@ -27,15 +27,15 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R
     c.crs[other_player_idx] = cr
 end
 
+function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c
+end
+
 # TODO(hmzh) - make pure quadratic code more detailed
 function is_pure_quadratic(c::QuadraticCost)
     is_state_cost_pure_quadratic = all(iszero.(c.q) && iszero(c.cq))
     is_control_cost_pure_quadratic = all([all(iszero.(c.r[ii]) && iszero(c.cr[ii])) for (ii, r) in c.rs])
     return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
-end
-
-function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c
 end
 
 function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
@@ -47,6 +47,8 @@ function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, 
     return total
 end
 
+export is_pure_quadratic
+
 # Helpers that get the homogenized Q and R matrices for this cost.
 function get_homogenized_state_cost_matrix(c::QuadraticCost)
     return homogenize_cost_matrix(c.Q, c.q, c.cq)
@@ -57,6 +59,26 @@ function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
 end
 
 export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
+
+
+# Derivative terms
+function Gx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return x' * c.Q + c.q'
+end
+
+function Gus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return Dict(ii => us[ii]' * R + c.rs[ii]' for (ii, R) in c.Rs)
+end
+
+function Gxx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c.Q
+end
+
+function Guus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    return c.Rs
+end
+
+export Gx, Gus, Gxx, Guus
 
 
 # Helpers specific to quadratic costs.
@@ -84,9 +106,12 @@ function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
     return c.crs[player_idx]
 end
 
-
 # Export all the cost type.
 export QuadraticCost
+
+# Export the helpers.
+export get_quadratic_state_cost_term, get_linear_state_cost_term, get_constant_state_cost_term,
+       get_quadratic_control_cost_term, get_linear_control_cost_term, get_constant_control_cost_term
 
 # Export all the cost types/structs and functionality.
 export add_control_cost!, quadraticize_costs, compute_cost

@@ -58,21 +58,17 @@ function propagate_dynamics(dyn::UnicycleDynamics,
     throw(MethodError("propagate_dynamics not implemented with process noise for UnicycleDynamics"))
 end
 
-function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+# These are the continuous derivatives of the unicycle dynamics with respect to x and u.
+
+function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
         @assert size(us[ii], 1) == 2 * N
     end
-
-    prev_time, curr_time = time_range
-    dt = curr_time - prev_time
     num_states = xdim(dyn)
     As = [sparse(zeros(num_states, num_states)) for ii in 1:N]
-    a = zeros(N * num_states)
-    Bs = [zeros(xdim(dyn), udim(dyn, ii)) for ii in 1:N]
-
     for ii in 1:N
         start_idx = num_states * (ii-1)
         theta = x[start_idx + 3]
@@ -81,13 +77,27 @@ function linearize_dynamics(dyn::UnicycleDynamics, time_range, x::AbstractVector
         # Compute the state and controls for each actor.
         s = sin(theta)
         c = cos(theta)
-        As[ii][1:2, 3:4] = dt * [-v*s c; v*c s]
-        Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
+        As[ii][1:2, 3:4] = [-v*s c; v*c s]
     end
-
-    # Combine the As into one large A matrix and add in the zeroth order term of the Taylor expansion.
-    A = I + Matrix(blockdiag(As...))
-    return LinearDynamics(A, Bs, dyn.sys_info; a=a)
+    return Matrix(blockdiag(As...))
 end
 
-export UnicycleDynamics, propagate_dynamics, linearize_dynamics
+function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    N = num_agents(dyn)
+    @assert N == length(us)
+    @assert size(x, 1) == 4 * N
+    for ii in 1:N
+        @assert size(us[ii], 1) == 2 * N
+    end
+    num_states = xdim(dyn)
+    Bs = [zeros(xdim(dyn), udim(dyn, ii)) for ii in 1:N]
+    prev_time, curr_time = time_range
+    dt = curr_time - prev_time
+    for ii in 1:N
+        start_idx = num_states * (ii-1)
+        Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
+    end
+    return Bs
+end
+
+export UnicycleDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus
