@@ -74,7 +74,7 @@ function propagate_dynamics(dyn::LinearDynamics,
 
     # Incorporate the dynamics based on the state and the controls.
     dt = time_range[2] - time_range[1]
-    x_next = dyn.A * x + dyn.a * dt + sum(dyn.Bs[ii] * us[ii] for ii in 1:N)
+    x_next = dyn.A * x + dyn.a + sum(dyn.Bs[ii] * us[ii] for ii in 1:N)
 
     if dyn.D != nothing && v != nothing
         x_next += dyn.D * v

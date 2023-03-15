@@ -31,7 +31,7 @@ function get_constant_feedback_gains(strategy::FeedbackGainControlStrategy)
     return strategy.ps
 end
 
-function get_constant_feedback_gains(strategy::FeedbackGainControlStrategy, player_idx::Int)
+function get_constant_feedback_gain(strategy::FeedbackGainControlStrategy, player_idx::Int)
     return strategy.ps[player_idx]
 end
 
