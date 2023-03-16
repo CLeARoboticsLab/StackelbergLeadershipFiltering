@@ -3,14 +3,14 @@ include("LQ_parameters.jl")
 
 time_range = (0.0, horizon)
 dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
-lqr_quad_cost_x0 = quadraticize_costs(quad_cost, time_range, x0, dummy_us)
+lqr_quad_cost_x0 = quadraticize_costs(quad_w_offset_cost, time_range, x0, dummy_us)
 
 # Solve optimal control problem.
 ctrl_strats, _ = solve_lqr_feedback(dyn, lqr_quad_cost_x0, T)
 
 xs_i, us_i = unroll_feedback(dyn, times, ctrl_strats, x0)
 
-final_cost_total = evaluate(lqr_quad_cost_x0, xs_i, us_i)
+final_cost_total = evaluate(quad_w_offset_cost, xs_i, us_i)
 println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)
 
 

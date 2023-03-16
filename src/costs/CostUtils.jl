@@ -4,8 +4,7 @@ abstract type Cost end
 # Every Cost is assumed to have the following functions defined on it:
 # - quadraticize_costs(cost, time_range, x, us) - this function produces a PureQuadraticCost at time t given the state and controls
 # - compute_cost(cost, xs, us) - this function evaluates the cost of a trajectory given the states and controls
-# - homogenize_state(cost, xs) - needs to be defined if cost requires linear/constant terms
-# - homogenize_ctrls(cost, us) - needs to be defined if cost requires linear/constant terms
+# - Gx, Gus, Gxx, Guus(cost, time_range, x, us) - derivatives must be defined.
 
 # No costs should require homogenized inputs. The evaluate function will homogenize the inputs as needed.
 
