@@ -48,8 +48,18 @@ function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))
 end
 
+function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    t₀, t = time_range
+    dt = t - t₀
+    @assert t₀ ≤ t
+
+    A = I + dt * Fx(dyn, time_range, x, us)
+    Bs = Fus(dyn, time_range, x, us)
+    return LinearDynamics(A, Bs)
+end
+
 # Export the types of dynamics.
-export Dynamics, NonlinearDynamics, generate_process_noise
+export Dynamics, NonlinearDynamics, generate_process_noise, linearize_dynamics
 
 
 # Dimensionality helpers.
