@@ -51,13 +51,7 @@ c₂ = QuadraticCost(Q₂)
 add_control_cost!(c₂, 2, 1 * diagm([1, 1]))
 add_control_cost!(c₂, 1, zeros(2, 2))
 
-dummy_time_range = (-1.0, -1.0)
-dummy_x = zeros(num_states)
-dummy_us = [zeros(num_ctrls[ii]) for ii in 1:num_players]
-costs = [quadraticize_costs(c₁, dummy_time_range, dummy_x, dummy_us),
-         quadraticize_costs(c₂, dummy_time_range, dummy_x, dummy_us)]
-
 # Gets a vector of costs, one per player.
-ShepherdAndSheepCosts() = costs
+ShepherdAndSheepCosts() = [c₁, c₂]
 
 export ShepherdAndSheepDynamics, ShepherdAndSheepCosts
