@@ -19,6 +19,7 @@ include("solvers/IterativeLQR.jl")
 include("solvers/LQNashFeedbackSolver.jl")
 include("solvers/LQStackelbergFeedbackSolver.jl")
 include("solvers/LQRFeedbackSolver.jl")
+include("solvers/StackelbergIterativeLQGames.jl")
 
 include("TwoStateParticleFilter.jl")
 
