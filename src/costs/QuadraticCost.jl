@@ -71,11 +71,11 @@ function Gus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::Abstr
 end
 
 function Gxx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c.Q
+    return deepcopy(c.Q)
 end
 
 function Guus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c.Rs
+    return deepcopy(c.Rs)
 end
 
 export Gx, Gus, Gxx, Guus
@@ -83,27 +83,27 @@ export Gx, Gus, Gxx, Guus
 
 # Helpers specific to quadratic costs.
 function get_quadratic_state_cost_term(c::QuadraticCost)
-    return c.Q
+    return deepcopy(c.Q)
 end
 
 function get_linear_state_cost_term(c::QuadraticCost)
-    return c.q
+    return deepcopy(c.q)
 end
 
 function get_constant_state_cost_term(c::QuadraticCost)
-    return c.cq
+    return deepcopy(c.cq)
 end
 
 function get_quadratic_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return c.Rs[player_idx]
+    return deepcopy(c.Rs[player_idx])
 end
 
 function get_linear_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return c.rs[player_idx]
+    return deepcopy(c.rs[player_idx])
 end
 
 function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return c.crs[player_idx]
+    return deepcopy(c.crs[player_idx])
 end
 
 # Export all the cost type.
