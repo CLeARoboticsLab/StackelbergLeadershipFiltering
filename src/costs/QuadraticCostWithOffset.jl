@@ -35,7 +35,7 @@ function Gx(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, 
 end
 
 function Gus(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return Dict(ii => us[ii]' * R + c.q_cost.rs[ii]' for (ii, R) in c.Rs)
+    return Dict(ii => us[ii]' * R + c.q_cost.rs[ii]' for (ii, R) in c.q_cost.Rs)
 end
 
 function Gxx(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
@@ -43,7 +43,7 @@ function Gxx(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64},
 end
 
 function Guus(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c.Rs
+    return deepcopy(c.q_cost.Rs)
 end
 
 
