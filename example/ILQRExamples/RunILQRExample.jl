@@ -1,14 +1,9 @@
 using Plots
 
+include("params_time.jl")
 # include("params_doubleintegrator_quadoffset.jl")
 # include("params_unicycle_quadoffset.jl")
 include("params_unicycle_nonlinearexample.jl")
-
-# # TODO(hmzh) - Implement this particular non-quadratic cost and test.
-# const_multiplier = 1.0
-# max_accel = 5.
-# max_omega = 1.
-# cost = ExampleILQRCost(quad_w_offset_cost, const_multiplier, max_accel, max_omega, xf, false)
 
 # Initial control strategy.
 #####################################
