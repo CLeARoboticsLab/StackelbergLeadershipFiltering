@@ -1,5 +1,7 @@
 using Plots
-include("LQ_parameters.jl")
+
+include("params_time.jl")
+include("params_doubleintegrator_quadoffset.jl")
 
 time_range = (0.0, horizon)
 dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
