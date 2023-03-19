@@ -24,8 +24,11 @@ function ilqr(T::Int,
     us_im1 = us_1
 
     # Initialize the cost J of the initial trajectory.
-    costs = zeros(max_iters+1)
-    costs[1] = 0.0 #evaluate(cost, xs_1, [us_1])
+    convergence_metrics = zeros(max_iters+1)
+    convergence_metrics[1] = 0.0
+
+    evaluated_costs = zeros(max_iters+1)
+    evaluated_costs[1] = evaluate(cost, xs_1, [us_1])
 
     num_x = size(xs_im1, 1)
     num_u = size(us_im1, 1)
@@ -75,20 +78,23 @@ function ilqr(T::Int,
         us_i[:, T] = us_im1[:, T-1] - Ks[:, :, T-1] * (xs_i[:, T-1] - xs_im1[:, T-1]) - step_size * ks[:, T-1]
 
         # Check convergence based on the norm of the constant feedback term, which should satisfy the KKT conditions for optimality.
-        new_cost = evaluate(cost, xs_i, [us_i])
-        new_cost = norm(ks)
+        evaluated_costs[num_iters+2] = evaluate(cost, xs_i, [us_i])
+        cost_diff = evaluated_costs[num_iters+2] - evaluated_costs[num_iters+1]
 
-        cost_im1 = costs[num_iters + 1]
-        costs[num_iters + 2] = new_cost
-        cost_diff = new_cost - cost_im1
+        # Use norm of ks as the convergence metric.
+        new_conv_metric = norm(ks)
+        conv_metric_im1 = evaluated_costs[num_iters + 1]
+        convergence_metrics[num_iters+2] = new_conv_metric
         
-        is_converged = abs(cost_diff) < threshold
+        # Another possible convergence metric is cost difference.
+        # is_converged = abs(cost_diff) < threshold
         is_converged = norm(ks) < threshold
 
         # TODO(hmzh) - Implement line search here once derivatives are ready.
 
         if verbose
-            println("iteration ", num_iters, ": costs (difference, new, old): ", cost_diff, " ", new_cost, " ", cost_im1)
+            conv_diff = convergence_metrics[num_iters+2] - convergence_metrics[num_iters+1]
+            println("iteration ", num_iters, ": convergence metric (difference, new, old): ", conv_diff, " ", convergence_metrics[num_iters+2], " ", convergence_metrics[num_iters+1])
         end
 
         xs_im1 = xs_i
@@ -100,6 +106,6 @@ function ilqr(T::Int,
     xs_i = xs_im1
     us_i = us_im1
 
-    return xs_i, us_i, is_converged, num_iters, costs
+    return xs_im1, us_im1, is_converged, num_iters, convergence_metrics, evaluated_costs
 end
 export ilqr
