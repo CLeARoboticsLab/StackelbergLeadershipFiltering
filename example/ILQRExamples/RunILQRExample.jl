@@ -1,31 +1,42 @@
 using Plots
-include("LQ_parameters.jl")
 
-# Try out unicycle dynamics.
-dyn = UnicycleDynamics(num_players)
-xf = [5.; 5.; -pi/2; 0.]
+# include("params_doubleintegrator_quadoffset.jl")
+# include("params_unicycle_quadoffset.jl")
+include("params_unicycle_nonlinearexample.jl")
 
-# TODO(hmzh) - Implement this particular non-quadratic cost and test.
+# # TODO(hmzh) - Implement this particular non-quadratic cost and test.
 # const_multiplier = 1.0
 # max_accel = 5.
 # max_omega = 1.
-# cost = ExampleILQRCost(pure_quad_cost, const_multiplier, max_accel, max_omega, xf, true)
+# cost = ExampleILQRCost(quad_w_offset_cost, const_multiplier, max_accel, max_omega, xf, false)
 
+# Initial control strategy.
+#####################################
+#    Define the initial controls.   #
+#####################################
+
+# default zero controls
 us_1 = zeros(udim(dyn), T)
+
+# constant inputs - same as Jake
 us_1[1,:] .= 0.1
 us_1[2,:] .= 0.01
-duration = (T-1) * dt
-us_1[1, :] .= (xf[3] - x0[3]) / duration # omega
-us_1[2, :] .= (xf[4] - x0[4]) / duration # accel
 
+# Linearly interpolate.
+# duration = (T-1) * dt
+# us_1[1, :] .= (xf[3] - x0[3]) / duration # omega
+# us_1[2, :] .= (xf[4] - x0[4]) / duration # accel
+
+# Linearize dynamics about initially solved optimal control problem
 # lin_dyn_0 = linearize_dynamics(dyn, (t0, t0+dt), x0, [zeros(udim(dyn))])
 # ctrl_strats, _ = solve_lqr_feedback(lin_dyn_0, quad_cost, T)
 # _, us_1 = unroll_feedback(dyn, times, ctrl_strats, x0)
-# us_1 = us_1[1] #+ randn(size(us_1[1]))
+# us_1 = us_1[1] + randn(size(us_1[1])) * 0.1
 
-selected_cost = quad_w_offset_cost
+# selected_cost = cost
+# selected_cost = quad_w_offset_cost
 
-xs_i, us_i, is_converged, num_iters, costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1; max_iters=1000, step_size=1., threshold=0.1, verbose=true)
+xs_i, us_i, is_converged, num_iters, costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1; max_iters=100, step_size=0.2, threshold=1., verbose=true)
 final_cost_total = evaluate(selected_cost, xs_i, [us_i])
 
 println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)

@@ -6,6 +6,8 @@ include("costs/CostUtils.jl")
 include("costs/QuadraticCost.jl")
 include("costs/QuadraticCostWithOffset.jl")
 
+include("costs/examples/ExampleILQRCost.jl")
+
 include("dynamics/DynamicsUtils.jl")
 include("dynamics/LinearDynamics.jl")
 include("dynamics/UnicycleDynamics.jl")

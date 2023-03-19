@@ -6,6 +6,9 @@ dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
 lqr_quad_cost_x0 = quadraticize_costs(quad_w_offset_cost, time_range, x0, dummy_us)
 
 # Solve optimal control problem.
+println("initial state: ", x0')
+println("desired state at time T: ", round.(xf', sigdigits=6), " over ", round(horizon, sigdigits=4), " seconds.")
+
 ctrl_strats, _ = solve_lqr_feedback(dyn, lqr_quad_cost_x0, T)
 
 xs_i, us_i = unroll_feedback(dyn, times, ctrl_strats, x0)

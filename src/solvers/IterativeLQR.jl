@@ -25,7 +25,7 @@ function ilqr(T::Int,
 
     # Initialize the cost J of the initial trajectory.
     costs = zeros(max_iters+1)
-    costs[1] = evaluate(cost, xs_1, [us_1])
+    costs[1] = 0.0 #evaluate(cost, xs_1, [us_1])
 
     num_x = size(xs_im1, 1)
     num_u = size(us_im1, 1)
