@@ -5,7 +5,8 @@ include("LQ_parameters.jl")
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 
 # leader_idx=2
-xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(leader_idx,
+xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(
+                              leader_idx,
                               T,
                               times[1],
                               times,
@@ -14,8 +15,8 @@ xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg
                               x₁,
                               us_1;
                               threshold=1.,
-                              max_iters=100,
-                              step_size=0.2,
+                              max_iters=1000,
+                              step_size=0.01,
                               verbose=true)
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
@@ -57,7 +58,7 @@ plot!(times, us_k[2][2, :], label="P2 accel y")
 
 # Plot convergence.
 conv_x = cumsum(ones(num_iters)) .- 1
-q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||) by player", label="p1")
+q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1")
 plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
 
 q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1")

@@ -16,7 +16,7 @@ function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractV
 
     cost = QuadraticCost(Q, q, cq)
     for (ii, R) in c.q_cost.Rs
-        add_control_cost!(cost, ii, c.q_cost.Rs[ii]; r=c.q_cost.rs[ii], cr=c.x_dest' * Q * c.x_dest)
+        add_control_cost!(cost, ii, c.q_cost.Rs[ii]; r=c.q_cost.Rs[ii] * us[ii] + c.q_cost.rs[ii], cr=c.x_dest' * Q * c.x_dest)
     end
 
     return cost

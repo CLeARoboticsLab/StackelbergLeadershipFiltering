@@ -27,9 +27,9 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R
     c.crs[other_player_idx] = cr
 end
 
-function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return c
-end
+# function quadraticize_costs(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+#     return deepcopy(c)
+# end
 
 # TODO(hmzh) - make pure quadratic code more detailed
 function is_pure_quadratic(c::QuadraticCost)

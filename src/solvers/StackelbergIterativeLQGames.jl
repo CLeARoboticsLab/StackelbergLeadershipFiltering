@@ -65,23 +65,10 @@ function stackelberg_ilqgames(leader_idx::Int,
         # ctrl_strats, _ = solve_lq_nash_feedback(lin_dyns, quad_costs, T)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
-        # println("big K norms: ", norm(Ks[1]), " ", norm(Ks[2]))
-        # println("little k norms: ", norm(ks[1]), " ", norm(ks[2]))
 
-        # DELETE later - this shows that until this point, the algorithm works.
-        # xs_km1, us_km1 = unroll_feedback(dyn, times, ctrl_strats, x₁)
-        # is_converged = true
-        # num_iters = 1
-        # evaluated_costs[:, 2] = [evaluate(costs[ii], xs_km1, us_km1) for ii in 1:num_players]
-
-        # convergence_metrics[1, 2] = norm(ks[1])^2
-        # convergence_metrics[2, 2] = norm(ks[2])^2
-
-        # return xs_km1, us_km1, is_converged, num_iters, convergence_metrics, evaluated_costs
-
-        # ##########################
-        # #### II. Forward pass ####
-        # ##########################
+        ##########################
+        #### II. Forward pass ####
+        ##########################
 
         # TODO(hamzah) - turn this into a control strategy/generalize the other one.
         xs_k = zeros(size(xs_km1))
@@ -101,6 +88,7 @@ function stackelberg_ilqgames(leader_idx::Int,
         end
 
         # Final controls because why not...
+
         for ii in 1:num_players
             us_k[ii][:, T-1] = us_km1[ii][:, T-1] - Ks[ii][:, :, T-1] * (xs_k[:, T-1] - xs_km1[:, T-1]) - step_size * ks[ii][:, T-1]
         end
@@ -112,12 +100,9 @@ function stackelberg_ilqgames(leader_idx::Int,
         # Compute the convergence metric to understand whether we are converged.
         for ii in 1:num_players
             convergence_metrics[ii, num_iters+1] = norm(ks[ii])^2
-            # println("little k for player ", ii, ": ", norm(ks[ii])^2)
-            # println("iter ", num_iters+1, " - player ", ii, ": ", convergence_metrics[ii, num_iters+1])
         end
 
         is_converged = sum(convergence_metrics[:, num_iters+1]) < threshold
-        # is_converged = false
 
         # Evaluate and store the costs.
         evaluated_costs[:, num_iters+2] = [evaluate(costs[ii], xs_k, us_k) for ii in 1:num_players]
@@ -127,12 +112,6 @@ function stackelberg_ilqgames(leader_idx::Int,
             new_metric = sum(convergence_metrics[:, num_iters+1])
             println("iteration ", num_iters, ": convergence metric (difference, new, old): ", new_metric - old_metric, " ", new_metric, " ", old_metric)
         end
-
-        # if verbose
-        #     old_metric = (num_iters == 0) ? 0. : sum(evaluated_costs[:, num_iters])
-        #     new_metric = sum(evaluated_costs[:, num_iters+1])
-        #     println("iteration ", num_iters, ": convergence metric (difference, new, old): ", new_metric - old_metric, " ", new_metric, " ", old_metric)
-        # end
 
         xs_km1 = xs_k
         us_km1 = us_k

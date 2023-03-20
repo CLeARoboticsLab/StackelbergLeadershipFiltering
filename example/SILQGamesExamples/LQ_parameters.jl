@@ -13,14 +13,14 @@ leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
-# x₁ = ones()
+# x₁ = rand(8)
 # x₁[[2, 4, 6, 8]] .= 0
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
 for ii in 1:num_players
     us_1[ii][1,:] .= -1.
-    us_1[ii][2,:] .= -1.1
+    us_1[ii][2,:] .= -.1
 end
 # duration = (T-1) * dt
 # us_1[ii][1, :] .= (xf[3] - x0[3]) / duration # omega
