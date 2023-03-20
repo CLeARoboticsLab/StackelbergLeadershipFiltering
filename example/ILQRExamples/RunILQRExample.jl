@@ -5,7 +5,6 @@ include("params_time.jl")
 # include("params_unicycle_quadoffset.jl")
 include("params_unicycle_nonlinearexample.jl")
 
-# Initial control strategy.
 #####################################
 #    Define the initial controls.   #
 #####################################
