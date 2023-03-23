@@ -7,20 +7,6 @@ end
 # Quadratic costs always homogeneous
 QuadraticCostWithOffset(quad_cost::QuadraticCost, x_dest=zeros(size(quad_cost.Q, 1))) = QuadraticCostWithOffset(quad_cost, x_dest)
 
-# TODO(hmzh): Adjust quadraticization for the multi-player case.
-# function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-#     Q = get_quadratic_state_cost_term(c.q_cost)
-#     q = Q * (x - c.x_dest)
-#     cq = c.x_dest' * Q * c.x_dest
-
-#     cost = QuadraticCost(Q, q, cq)
-#     for (ii, R) in c.q_cost.Rs
-#         add_control_cost!(cost, ii, c.q_cost.Rs[ii]; r=c.q_cost.rs[ii], cr=c.x_dest' * Q * c.x_dest)
-#     end
-
-#     return cost
-# end
-
 function compute_cost(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(us)
     dx = x - c.x_dest
