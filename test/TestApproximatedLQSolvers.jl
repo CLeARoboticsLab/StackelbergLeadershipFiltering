@@ -1,4 +1,4 @@
-# Unit tests for LQ Nash solvers.
+# Unit tests for approximated solvers that INCORRECTLY linearize/quadraticize - see iLQR, ILQGames, Stackelberg ILQGames.
 using StackelbergControlHypothesesFiltering
 
 using LinearAlgebra
@@ -7,6 +7,102 @@ using Test: @test, @testset
 include("TestUtils.jl")
 
 seed!(0)
+
+
+# Solve a finite horizon, discrete time LQR problem by approximating non-LQ dynamics/costs as LQ at each timestep.
+# Returns feedback matrices P[:, :, time].
+
+# A function which accepts non-linear dynamics and non-quadratic costs and solves an LQ approximation at each timestep.
+function solve_approximated_lqr_feedback(dyn::Dynamics,
+                                         cost::Cost,
+                                         horizon::Int,
+                                         t0::Float64,
+                                         xs_1::AbstractArray{Float64},
+                                         us_1::AbstractArray{Float64})
+    T = horizon
+    N = num_agents(dyn)
+
+    lin_dyns = Array{LinearDynamics}(undef, T)
+    quad_costs = Array{QuadraticCost}(undef, T)
+
+    for tt in 1:T
+        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
+        current_time = t0 + tt
+        time_range = (prev_time, current_time)
+        lin_dyns[tt] = linearize_dynamics(dyn, time_range, xs_1[:, tt], [us_1[:, tt]])
+        quad_costs[tt] = quadraticize_costs(cost, time_range, xs_1[:, tt], [us_1[:, tt]])
+    end
+
+    return solve_lqr_feedback(lin_dyns, quad_costs, T)
+end
+
+
+# A function which accepts non-linear dynamics and non-quadratic costs and solves an LQ approximation at each timestep.
+function solve_approximated_lq_nash_feedback(dyn::Dynamics,
+                                             costs::AbstractVector{<:Cost},
+                                             horizon::Int,
+                                             t0::Float64,
+                                             x_refs::AbstractArray{Float64},
+                                             u_refs::AbstractVector{<:AbstractArray{Float64}})
+    T = horizon
+    N = num_agents(dyn)
+
+    lin_dyns = Vector{LinearDynamics}(undef, T)
+    all_quad_costs = Vector{Vector{QuadraticCost}}(undef, T)
+
+    for tt in 1:T
+        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
+
+        quad_costs = Vector{QuadraticCost}(undef, N)
+        u_refs_at_tt = [u_refs[ii][:, tt] for ii in 1:N]
+        current_time = t0 + tt
+
+        # Linearize and quadraticize the dynamics/costs.
+        time_range = (prev_time, current_time)
+        lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
+        for ii in 1:N
+            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
+        end
+        all_quad_costs[tt] = quad_costs
+    end
+
+    return solve_lq_nash_feedback(lin_dyns, all_quad_costs, T)
+end
+
+
+# A function which accepts non-linear dynamics and non-quadratic costs and solves an LQ approximation at each timestep.
+function solve_approximated_lq_stackelberg_feedback(dyn::Dynamics,
+                                                    costs::AbstractVector{<:Cost},
+                                                    horizon::Int,
+                                                    t0::Float64,
+                                                    x_refs::AbstractArray{Float64},
+                                                    u_refs::AbstractVector{<:AbstractArray{Float64}},
+                                                    leader_idx::Int)
+    T = horizon
+    N = num_agents(dyn)
+
+    lin_dyns = Vector{LinearDynamics}(undef, T)
+    all_quad_costs = Vector{Vector{QuadraticCost}}(undef, T)
+
+    for tt in 1:T
+        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
+        current_time = t0 + tt
+        time_range = (prev_time, current_time)
+
+        quad_costs = Vector{QuadraticCost}(undef, N)
+        u_refs_at_tt = [u_refs[ii][:, tt] for ii in 1:N]
+
+        # Linearize and quadraticize the dynamics/costs.
+        lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
+        for ii in 1:N
+            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
+        end
+        all_quad_costs[tt] = quad_costs
+    end
+
+    return solve_lq_stackelberg_feedback(lin_dyns, all_quad_costs, T, leader_idx)
+end
+
 
 # These tests run checks to ensure that for the LQ case given appropriate reference trajectories, the approximate
 # linearized, quadraticized solutions are identical to those from the LQ solvers.
@@ -31,6 +127,8 @@ seed!(0)
         xs, us = unroll_feedback(dyn, times, ctrl_strat_Ps, x₁)
         ctrl_strat_P̃s, future_costs_actual = solve_approximated_lqr_feedback(dyn, costs[1], horizon, t0, xs, us[1])
 
+        println(norm(ctrl_strat_Ps.Ps), " ", norm(ctrl_strat_P̃s.Ps))
+        println(norm(ctrl_strat_Ps.ps), " ", norm(ctrl_strat_P̃s.ps))
         @test ctrl_strat_Ps.Ps == ctrl_strat_P̃s.Ps && ctrl_strat_Ps.ps == ctrl_strat_P̃s.ps
         # Compare the Q matrices.
         @test all([get_homogenized_state_cost_matrix(future_costs_expected[tt]) == get_homogenized_state_cost_matrix(future_costs_actual[tt]) for tt in 1:horizon])

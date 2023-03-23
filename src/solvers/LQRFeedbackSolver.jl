@@ -73,32 +73,4 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     return Ps_strategies, Zs_future_costs
 end
 
-
-# Solve a finite horizon, discrete time LQR problem by approximating non-LQ dynamics/costs as LQ at each timestep.
-# Returns feedback matrices P[:, :, time].
-
-# A function which accepts non-linear dynamics and non-quadratic costs and solves an LQ approximation at each timestep.
-function solve_approximated_lqr_feedback(dyn::Dynamics,
-                                         cost::Cost,
-                                         horizon::Int,
-                                         t0::Float64,
-                                         xs_1::AbstractArray{Float64},
-                                         us_1::AbstractArray{Float64})
-    T = horizon
-    N = num_agents(dyn)
-
-    lin_dyns = Array{LinearDynamics}(undef, T)
-    quad_costs = Array{QuadraticCost}(undef, T)
-
-    for tt in 1:T
-        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
-        current_time = t0 + tt
-        time_range = (prev_time, current_time)
-        lin_dyns[tt] = linearize_dynamics(dyn, time_range, xs_1[:, tt], [us_1[:, tt]])
-        quad_costs[tt] = quadraticize_costs(cost, time_range, xs_1[:, tt], [us_1[:, tt]])
-    end
-
-    return solve_lqr_feedback(lin_dyns, quad_costs, T)
-end
-
-export solve_lqr_feedback, solve_approximated_lqr_feedback
+export solve_lqr_feedback
