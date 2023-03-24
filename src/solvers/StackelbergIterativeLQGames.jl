@@ -55,14 +55,10 @@ function stackelberg_ilqgames(leader_idx::Int,
             for ii in 1:num_players
                 quad_costs[tt][ii] = quadraticize_costs(costs[ii], time_range, xs_km1[:, tt], us_km1_tt)
             end
-            # println(norm(dyn.A - lin_dyns[1].A), norm(dyn.a - lin_dyns[1].a))
-            # println(norm(costs[1].Q - quad_costs[1][1].Q), norm(costs[1].q - quad_costs[1][1].q), norm(costs[1].cq - quad_costs[1][1].cq))
-            # println(norm(costs[2].Q - quad_costs[1][2].Q), norm(costs[2].q - quad_costs[1][2].q), norm(costs[2].cq - quad_costs[1][2].cq))
         end
 
          # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
         ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx)
-        # ctrl_strats, _ = solve_lq_nash_feedback(lin_dyns, quad_costs, T)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
 

@@ -4,7 +4,7 @@ include("LQ_parameters.jl")
 
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 
-# leader_idx=2
+leader_idx=1
 xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(
                               leader_idx,
                               T,
