@@ -151,37 +151,4 @@ function solve_lq_nash_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abs
     return solve_lq_nash_feedback(dyns, all_costs, horizon)
 end
 
-
-# A function which accepts non-linear dynamics and non-quadratic costs and solves an LQ approximation at each timestep.
-function solve_approximated_lq_nash_feedback(dyn::Dynamics,
-                                             costs::AbstractVector{<:Cost},
-                                             horizon::Int,
-                                             t0::Float64,
-                                             x_refs::AbstractArray{Float64},
-                                             u_refs::AbstractVector{<:AbstractArray{Float64}})
-    T = horizon
-    N = num_agents(dyn)
-
-    lin_dyns = Vector{LinearDynamics}(undef, T)
-    all_quad_costs = Vector{Vector{QuadraticCost}}(undef, T)
-
-    for tt in 1:T
-        prev_time = t0 + ((tt == 1) ? 0 : tt-1)
-
-        quad_costs = Vector{QuadraticCost}(undef, N)
-        u_refs_at_tt = [u_refs[ii][:, tt] for ii in 1:N]
-        current_time = t0 + tt
-
-        # Linearize and quadraticize the dynamics/costs.
-        time_range = (prev_time, current_time)
-        lin_dyns[tt] = linearize_dynamics(dyn, time_range, x_refs[:, tt], u_refs_at_tt)
-        for ii in 1:N
-            quad_costs[ii] = quadraticize_costs(costs[ii], time_range, x_refs[:, tt], u_refs_at_tt)
-        end
-        all_quad_costs[tt] = quad_costs
-    end
-
-    return solve_lq_nash_feedback(lin_dyns, all_quad_costs, T)
-end
-
-export solve_lq_nash_feedback, solve_approximated_lq_nash_feedback
+export solve_lq_nash_feedback
