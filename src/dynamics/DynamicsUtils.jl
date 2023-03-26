@@ -1,11 +1,10 @@
 # Utilities for managing linear and nonlinear dynamics.
 
 # Every Dynamics is assumed to have the following functions defined on it:
-# - linearize_dynamics(dyn, x, us) - this function linearizes the dynamics given the state and controls.
 # - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
 # - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
-# - homogenize_state(dyn, xs) - needs to be defined if dynamics requires linear/constant terms
-# - homogenize_ctrls(dyn, us) - needs to be defined if dynamics requires linear/constant terms
+# - Fx(dyn, time_range, x, us) - first-order derivatives wrt state x
+# - Fus(dyn, time_range, x, us) - first-order derivatives wrt state us
 
 # No dynamics should require homogenized inputs. The functions themselves should transform the inputs/outputs as needed.
 
@@ -48,6 +47,7 @@ function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))
 end
 
+# A function that produces a first-order Taylor linearization of the dynamics.
 function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     t₀, t = time_range
     dt = t - t₀

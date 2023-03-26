@@ -11,7 +11,9 @@ QuadraticCostWithOffset(quad_cost::QuadraticCost, x_dest=zeros(size(quad_cost.Q,
 function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     # @assert length(us) == 1
     Q = get_quadratic_state_cost_term(c.q_cost)
-    q = Q * (x - c.x_dest)
+    q = get_linear_state_cost_term(c.q_cost)
+
+    q = Q * (x - c.x_dest) + q
     cq = c.x_dest' * Q * c.x_dest
 
     cost = QuadraticCost(Q, q, cq)
@@ -31,7 +33,8 @@ end
 # Define derivative terms.
 function Gx(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     Q = get_quadratic_state_cost_term(c.q_cost)
-    return (x - c.x_dest)' * Q
+    q = get_linear_state_cost_term(c.q_cost)
+    return (x - c.x_dest)' * Q + q'
 end
 
 function Gus(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
