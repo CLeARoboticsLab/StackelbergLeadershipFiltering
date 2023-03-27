@@ -61,13 +61,13 @@ function sample_discrete_state(rng, s_distribution, num_disc_states, Ns)
     return new_s
 end
 
-# TODO(hamzah) - Implement a particle filter that can run iteratively on command, with new arguments (below) each round:
+# A particle filter that can run iteratively on command, with new arguments (below) each round:
+# - Particle Filter object
 # - measurement + uncertainty z, R
 # - f_dynamics
 # - h_measurement model
 # - discrete state transition
 # - u_inputs for the iteration
-# - particles, discrete states, weights
 # TODO(hamzah) - add particle set class?
 # It should contain all the context and derivative data from the filter from time 1 until the most recent time it was
 # stepped to.
@@ -78,11 +78,13 @@ mutable struct ParticleFilter
     rng
     t0
     current_idx::Int
+
     # particle filter estimator data
     particles # particles
     s  # discrete state particles
     w # particle weights
     z_models # measurement models
+
     # track the derivative data we are interested in
     times
     x̂
