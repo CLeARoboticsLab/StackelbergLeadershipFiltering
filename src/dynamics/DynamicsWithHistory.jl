@@ -16,11 +16,11 @@ function get_underlying_dynamics(dyn::DynamicsWithHistory)
     return dyn.dyn
 end
 
-function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64, hist_idx::Int)
+function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64}, hist_idx::Int)
     start_idx = (dyn.num_hist - hist_idx) * xdim(dyn.dyn) + 1
     end_idx = dyn.num_hist * xdim(dyn.dyn)
     @assert start_idx > 0
-    @assert end_idx < xdim(dyn)
+    @assert end_idx <= xdim(dyn)
     return X[start_idx:end_idx]
 end
 
