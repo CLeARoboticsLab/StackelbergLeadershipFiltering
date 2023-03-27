@@ -16,6 +16,8 @@ include("dynamics/UnicycleDynamics.jl")
 include("control_strategies/ControlStrategyUtils.jl")
 include("control_strategies/FeedbackGainControlStrategy.jl")
 
+include("LeadershipFilter.jl")
+
 include("games/ShepherdAndSheepGame.jl")
 
 include("solvers/IterativeLQR.jl")

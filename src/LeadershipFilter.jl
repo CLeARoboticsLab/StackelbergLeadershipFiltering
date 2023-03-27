@@ -35,9 +35,9 @@ function leadership_filter(dyn::Dynamics,
                            s_init_distrib::Distribution{Univariate, Discrete},
                            discrete_state_transition::Function;
                            threshold,
+                           rng,
                            max_iters=1000,
                            step_size=0.01,
-                           seed=1,
                            Ns=1000,
                            verbose=false)
     num_times = length(times)
@@ -66,6 +66,10 @@ function leadership_filter(dyn::Dynamics,
 
     # Define the variables that capture outputs of the SILQGames call (i.e. eval_costs). 
 
+    # The measurements and state are the same size.
+    meas_size = xdim(dyn_w_hist)
+    pf = initialize_particle_filter(X, big_P, s_init_distrib, t0, Ns, num_times, meas_size, rng)
+
     for tt in 1:num_times
 
         # Get inputs.
@@ -73,7 +77,7 @@ function leadership_filter(dyn::Dynamics,
         # stack_times = times[tt-Ts+1:tt]
         ttm1 = (tt == 1) ? tt : tt-1
         stack_times = [times[ttm1], times[tt]]
-        us_by_time = Dict(tau => [us[ii][:, tau] for ii in 1:num_players] for tau in 1:Ts+1)
+        us_at_tt = [us[ii][:, tt] for ii in 1:num_players]
 
         # Initial control trajectory estimate for Stackelberg solutions
         us_1_from_tt = [us[ii][:, tt-Ts+1:tt] for ii in 1:num_players]
@@ -87,36 +91,24 @@ function leadership_filter(dyn::Dynamics,
         # Assumes Ts=1
         # start_idx = max(1, tt-Ts+1)
         # Zₜ = process_measurements(zs[start_idx:tt])
-        Zₜ = zs'
+        Zₜ = zs[:, tt]
         Rₜ = R
 
         f_dynamics(time_range, X, us, rng) = propagate_dynamics(dyn_w_hist, time_range, X, us)
         ttm1 = (tt == 1) ? 1 : tt-1
 
-        x̂, P, z̄, P̄_zz, ϵ_bar, ϵ_hat, N̂s, s_particles, ŝ_probs, particles = two_state_PF(X,
-             P₁, # TODO(hamzah): Update this to run properly.
-             us_by_time,
-             s_init_distrib,
-             [times[ttm1], times[tt]],
-             t0,
-             Zₜ,
-             Rₜ,
-             discrete_state_transition,
-             [f_dynamics, f_dynamics],
-             [h₁, h₂];
-             seed=seed,
-             Ns=Ns)
+        time_range = (times[ttm1], times[tt])
+        step_pf(pf, time_range, [f_dynamics, f_dynamics], [h₁, h₂], discrete_state_transition, us_at_tt, Zₜ, Rₜ)
 
         # Update the variables.
-        X = x̂[:, 2]
-        big_P = P[:, :, 2]
+        X = pf.x̂[:, 2]
+        big_P = pf.P[:, :, 2]
 
         # Store relevant information.
         # TODO(hamzah) - update for multiple states
         x̂s[:, tt] = X
         P̂s[:, :, tt] = big_P
-        # println(size(ŝ_probs))
-        lead_probs[tt] = ŝ_probs[2]
+        lead_probs[tt] = pf.ŝ_probs[tt]
     end
     
     # outputs: (1) state estimates, uncertainty estimates, leadership_probabilities over time, debug data
