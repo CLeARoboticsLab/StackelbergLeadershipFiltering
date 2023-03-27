@@ -20,7 +20,7 @@ f_dynamics_2(t_range, x, u, rng) = f₂(t_range, x, u, gen_process_noise(rng, si
 f_dynamics = [f_dynamics_1, f_dynamics_2]
 
 # set controls
-u_inputs = ones(1, num_data) # inputs should always be 1 or 0
+u_inputs = Dict(i => ones(1) for i in 1:num_data) # inputs should always be 1 or 0
 
 # Run the normal particle filter if needed for sanity checking.
 # x̂✶_PF, P_PF, z̄_PF, P̄_zz_PF, ϵ_bar, ϵ_hat, N̂s_n, particles =
