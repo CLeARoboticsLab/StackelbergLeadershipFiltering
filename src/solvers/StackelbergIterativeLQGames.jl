@@ -83,12 +83,6 @@ function stackelberg_ilqgames(leader_idx::Int,
             xs_k[:, ttp1] = propagate_dynamics(dyn, time_range, xs_k[:, tt], us_k_tt)
         end
 
-        # Final controls because why not...
-
-        for ii in 1:num_players
-            us_k[ii][:, T-1] = us_km1[ii][:, T-1] - Ks[ii][:, :, T-1] * (xs_k[:, T-1] - xs_km1[:, T-1]) - step_size * ks[ii][:, T-1]
-        end
-
         #############################################
         #### III. Compute convergence and costs. ####
         #############################################
