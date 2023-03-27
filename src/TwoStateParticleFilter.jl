@@ -71,7 +71,7 @@ end
 MultiStateIntT = Int8
 function two_state_PF(x̄_prior,
                       P_prior,
-                      u_inputs,
+                      u_inputs, # indexed first by time, then by one or multiple actors, based on dynamics functions
                       s_init_distribution::Distribution{Univariate, Discrete},
                       times,
                       t0,
@@ -140,12 +140,11 @@ function two_state_PF(x̄_prior,
             # [DONE] 3c. Dynamics propagation should update the discrete state. We can use a Bernoulli for simiplicity for now,
             #            but we may eventually want a more complicated Markov Chain.
             s_probs_in = vcat(ŝ_probs[:, k], [1]-ŝ_probs[:, k])[:]
-            s[:,i,k] = discrete_state_transition(time_range, s_prev[:,i], s_probs_in, 𝒳_prev[:,i], u_inputs[:,k], rng)
+            s[:,i,k] = discrete_state_transition(time_range, s_prev[:,i], s_probs_in, 𝒳_prev[:,i], u_inputs[k], rng)
 
             # Resample the state for each particle and extract an index to select the dynamics.
             s_idx = s_prev[:,i][1]
-
-            𝒳[:,i,k] = f_dynamics[s_idx](time_range, 𝒳_prev[:,i], u_inputs[:,k], rng)
+            𝒳[:,i,k] = f_dynamics[s_idx](time_range, 𝒳_prev[:,i], u_inputs[k], rng)
             𝒵[:,i,k] = h_measures[s_idx](𝒳[:,i,k])
 
             distrib = MvNormal(𝒵[:,i,k], R)
