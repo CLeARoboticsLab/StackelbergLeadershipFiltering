@@ -8,7 +8,7 @@ using Random
 include("leadfilt_LQ_parameters.jl")
 
 # Solve an LQ Stackelberg game based on the shepherd and sheep example.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T ,leader_idx)
+Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
 
@@ -18,15 +18,15 @@ xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.01 * I
+R = zeros(xdim(dyn), xdim(dyn)) + 4. * I
 zs = zeros(xdim(dyn), T)
 for tt in 1:T
     zs[:, tt] = rand(rng, MvNormal(xs[:, tt], R))
 end
-Ts = 1
+Ts = 2
 
-p = 0.5
-p_init = 1.0
+p = 0.4
+p_init = 0.6
 
 
 # TODO(hamzah) - vectorize this better
@@ -73,7 +73,7 @@ x̂s, P̂s, probs = leadership_filter(dyn, costs,
                            rng,
                            max_iters=1000,
                            step_size=0.01,
-                           Ns=1000,
+                           Ns=10,
                            verbose=false)
 
 plot(times, probs, xlabel="t (s)", ylabel="prob. leadership")

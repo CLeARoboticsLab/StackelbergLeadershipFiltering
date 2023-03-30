@@ -13,7 +13,7 @@ num_players = num_agents(dyn)
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
-P₁ = 1e-32 * I
+P₁ = Diagonal([1e-32 for _ in 1:xdim(dyn)])
 
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(8)
