@@ -2,7 +2,7 @@ using Plots
 
 include("LQ_parameters.jl")
 
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T ,leader_idx)
+Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
 
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
