@@ -1,4 +1,5 @@
 # Affine costs with quadratic, linear, constant terms.
+# Should always be used when there is a need for Taylor approximations of non-LQ systems.
 
 struct QuadraticCostWithOffset <: Cost
     q_cost::QuadraticCost

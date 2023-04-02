@@ -54,7 +54,7 @@ function initialize_silq_games_object(num_runs, leader_idx, horizon, dyn::Dynami
     Kks = [zeros(num_runs, max_iters, udim(dyn, ii), num_states, horizon) for ii in 1:num_players]
     kks = [zeros(num_runs, max_iters, udim(dyn, ii), horizon) for ii in 1:num_players]
     
-    num_iterations = zeros(num_runs)
+    num_iterations = zeros(Int, num_runs)
     evaluated_costs = zeros(num_runs, num_players, max_iters+1)
     convergence_metrics = zeros(num_runs, num_players, max_iters+1)
 

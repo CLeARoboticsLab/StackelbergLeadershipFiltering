@@ -10,7 +10,7 @@ leader_idx=1
 num_runs=1
 
 # config variables
-threshold=.1
+threshold=1.
 max_iters=1000
 step_size=1e-2
 verbose=true
@@ -18,9 +18,6 @@ verbose=true
 sg_obj = initialize_silq_games_object(num_runs, leader_idx, T, dyn, costs;
                                       threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, times[1], times, x₁, us_1)
-
-
-println("size: ", size(sg_obj.xks))
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
 final_cost_totals = [evaluate(costs[ii], xs_k, us_k) for ii in 1:num_players]
@@ -66,4 +63,6 @@ q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", labe
 plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
 
 plot(q1, q2, q3, q4, q5, q6, layout = q)
+
+
 
