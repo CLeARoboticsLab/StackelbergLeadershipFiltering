@@ -10,7 +10,7 @@ leader_idx=1
 num_runs=1
 
 # config variables
-threshold=1.
+threshold=.1
 max_iters=1000
 step_size=1e-2
 verbose=true
