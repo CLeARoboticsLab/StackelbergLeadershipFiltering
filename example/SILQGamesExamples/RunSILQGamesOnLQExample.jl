@@ -1,23 +1,23 @@
 using StackelbergControlHypothesesFiltering
 
+using LinearAlgebra
+
 include("LQ_parameters.jl")
 
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 
 leader_idx=1
-xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(
-                              leader_idx,
-                              T,
-                              times[1],
-                              times,
-                              dyn,
-                              costs,
-                              x₁,
-                              us_1;
-                              threshold=1.,
-                              max_iters=1000,
-                              step_size=0.01,
-                              verbose=true)
+num_runs=1
+
+# config variables
+threshold=1.
+max_iters=1000
+step_size=1e-2
+verbose=true
+
+sg_obj = initialize_silq_games_object(num_runs, leader_idx, T, dyn, costs;
+                                      threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
+xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, times[1], times, x₁, us_1)
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
 final_cost_totals = [evaluate(costs[ii], xs_k, us_k) for ii in 1:num_players]
@@ -25,10 +25,8 @@ println("final: ", xs_k[:, T], " with trajectory costs: ", final_cost_totals)
 println(size(xs_k), " ", size(us_k[1]), " ", size(us_k[2]))
 
 
-
 using ElectronDisplay
 using Plots
-
 
 # Plot positions, other two states, controls, and convergence.
 q = @layout [a b; c d; e f]
@@ -58,10 +56,13 @@ plot!(times, us_k[2][2, :], label="P2 accel y")
 
 # Plot convergence.
 conv_x = cumsum(ones(num_iters)) .- 1
-q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1")
-plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
+q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1", yaxis=:log)
+plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
 
-q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1")
-plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2")
+q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log)
+plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
 
 plot(q1, q2, q3, q4, q5, q6, layout = q)
+
+
+
