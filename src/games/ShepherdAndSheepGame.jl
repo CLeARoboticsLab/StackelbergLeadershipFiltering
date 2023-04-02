@@ -49,7 +49,7 @@ Q₂[3, 7] = -1.0
 Q₂[7, 3] = -1.0
 c₂ = QuadraticCost(Q₂)
 add_control_cost!(c₂, 2, 1 * diagm([1, 1]))
-add_control_cost!(c₂, 1, 0.01*zeros(2, 2))
+add_control_cost!(c₂, 1, zeros(2, 2))
 
 # Gets a vector of costs, one per player.
 ShepherdAndSheepCosts() = [c₁, c₂]
