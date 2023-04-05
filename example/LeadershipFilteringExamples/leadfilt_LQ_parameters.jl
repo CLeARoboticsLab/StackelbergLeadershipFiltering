@@ -4,7 +4,8 @@ dt = 0.05
 T = 11
 t0 = 0.0
 horizon = T * dt
-times = dt * (cumsum(ones(T)) .- 1)
+# TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
+times = dt * (cumsum(ones(2*T)) .- 1)
 
 dyn = ShepherdAndSheepDynamics(dt)
 costs = ShepherdAndSheepCosts()

@@ -2,9 +2,7 @@ using Distributions
 using Random
 using SparseArrays
 
-# TODO(hamzah) - horizon 1 game should be 50-50 at all times
-
-# TODO(hamzah) - implement dynamics with memory that stacks states
+# TODO(hamzah) - horizon 1 game should be random walk
 # TODO(hamzah) - implement with unicycle dynamics, test on SILQGames too if needed
     # dyn = UnicycleDynamics(num_players)
 # TODO(hamzah) - add process noise if needed
@@ -12,31 +10,123 @@ using SparseArrays
 # used for when previous states don't exist
 LARGE_VARIANCE = 1e6
 
+###############################################
+### Measurement model 2: Filtering approach ###
+###############################################
 
-# Produce windowed measurements
-function process_measurements(zs, R, num_hist; large_var=LARGE_VARIANCE)
-    num_z = size(zs, 1)
-    meas_hist_count = size(zs, 2)
-    out = zeros(num_z, num_hist)
-    
-    # Compute indices for the case where we don't have enough data to fill a history of the desired length.
-    iter_count = min(meas_hist_count, num_hist)
-    start_idx = num_hist-iter_count+1
+# Identifies the start indices and end indices for the player games.
+# Also returns number of games able to be played given the parameters.
+# - tt is current time index
+# - Ng_desired is the desired number of games to play
+# - Ts is the horizon over which each Stackelberg game is player
+# Returns number of played games, indices from most recent game start to oldest
+function get_indices_for_playable_games(tt::Int, Ng_desired::Int, Ts::Int)
+    # Ensure that every played games will reach time tt during the game.
+    @assert Ts > Ng_desired
 
-    # Put the measurements in the proper order with later ones last.
-    out[:, start_idx:num_hist] = zs
+    # If we are at the first step, no games can be played.
+    if tt == 1
+        num_games_played = 0
+        indices = [(1, Ts)]
 
-    # Compute measurement matrix, with placeholder 0 states having high variance.
-    Rs = [sparse(R) for I in 1:num_hist]
-    if meas_hist_count < num_hist
-        m = sparse(large_var * I, num_z, num_z)
-        for tau in 1:num_hist-iter_count
-            Rs[tau] = m
-        end
+    # If this condition is satisfied, there isn't enough history to play the desired number of games.
+    # We can play up to tt-1 of them.
+    elseif tt ≤ Ng_desired
+        num_games_played = tt-1
+        indices = [(tt - ii, tt + Ts - ii) for ii in 1:tt-1]
+
+    # In the general case, we play the desired number of games.
+    else
+        num_games_played = Ng_desired
+        indices = [(tt - ii, tt + Ts - ii) for ii in 1:Ng_desired]
     end
+
+    return num_games_played, indices
+end
+
+# Produce batched measurements at time times[tt].
+function process_measurements_opt2(tt::Int, zs, R, num_games_desired::Int, stack_horizon::Int)
+
+    # Make sure we haven't gone past the end of the measurments in time.
+    @assert tt <= size(zs, 2)
+
+    # Extract the number of games we can play.
+    num_games_playable, _ = get_indices_for_playable_games(tt, num_games_desired, stack_horizon)
+
+    num_meas = num_games_playable
+
+    # If we can't play any games, then we return one measurement at the current time.
+    if iszero(num_games_playable)
+        # this situation should only happen at tt = 1
+        @assert tt == 1
+        num_meas = 1
+    end
+
+    zₜ = zs[:, tt]
+    Rₜ = R
+
+    # Produce the desired augmented measurement matrix.
+    Zₜ = repeat(zₜ, num_meas)
+
+    # Construct a large R matrix that contains the (identical) uncertanties for each of these measurements.
+    Rs = [sparse(R) for I in 1:num_meas]
     big_R = Matrix(blockdiag(Rs...))
 
-    return vec(out), big_R
+    return Zₜ, big_R
+end
+
+
+# Measurement model option 2 - Extract the waypoint at time tt in the simulation from the state trajectory xs, which is
+#                              indexed from 1 to tt.
+function extract_measurements_from_stack_trajectory(xs, start_time_idx::Int, tt::Int)
+    translated_time_idx = tt - start_time_idx + 1
+    return xs[:, translated_time_idx]
+end
+
+
+function make_stackelberg_meas_model(tt::Int, leader_idx::Int, num_games_desired::Int, num_runs_per_game::Int,
+                                     Ts::Int, t0, times, dyn_w_hist::DynamicsWithHistory, costs, us,
+                                     threshold, max_iters, step_size, verbose)
+    # Extract the history-less dynamics.
+    dyn = get_underlying_dynamics(dyn_w_hist)
+
+    # Extract the number of games we can play and the start/end indices.
+    num_games_playable, indices_list = get_indices_for_playable_games(tt, num_games_desired, Ts)
+
+    # TODO(hamzah) - update this to work for multiple timesteps
+    # Extract the start and end indices.
+    @assert num_games_desired == 1
+    s_idx, e_idx = indices_list[1]
+
+    # Extract the desired times and controls.
+    stack_times = times[s_idx:e_idx]
+    us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
+
+    # Initialize an SILQ Games Object for this set of runs.
+    sg_obj = initialize_silq_games_object(num_runs_per_game, leader_idx, Ts+1, dyn, costs;
+                                          threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
+
+    # TODO(hamzah) - For now assumes 1 game played; fix this
+    @assert num_games_desired == 1
+    function h(X)
+        # TODO(hamzah) - revisit this if it becomes a problem
+        # If we are on the first time step, then we can't get a useful history to play a Stackelberg game.
+        # Return the current state.
+        if tt == 1
+            @assert iszero(num_games_playable)
+            return get_current_state(dyn_w_hist, X)
+        end
+
+        # Get the state at the previous time tt-1. This will be the initial state in the game.
+        prev_state = get_state(dyn_w_hist, X, 2)
+
+        # Play a stackelberg games starting at this previous state using the times/controls we extracted.
+        xs, us = stackelberg_ilqgames(sg_obj, stack_times[1], stack_times, prev_state, us_1_from_tt)
+
+        # Process the stackelberg trajectory to get the desired output and vectorize.
+        return extract_measurements_from_stack_trajectory(xs, tt-1, tt)
+    end
+    return h, sg_obj
 end
 
 
@@ -45,7 +135,9 @@ function leadership_filter(dyn::Dynamics,
                            costs,
                            t0,
                            times,
-                           Ts, # horizon over which the stackelberg game should be played,
+                           T,  # simulation horizon
+                           Ts, # horizon-length over which the stackelberg game should be played
+                           num_games, # number of stackelberg games which should be batched in measurement model
                            x₁, # initial state at the beginning of simulation
                            P₁, # initial covariance at the beginning of simulation
                            us, # the control inputs that the actor takes
@@ -59,12 +151,16 @@ function leadership_filter(dyn::Dynamics,
                            step_size=0.01,
                            Ns=1000,
                            verbose=false)
-    num_times = length(times)
+    num_times = T
     num_players = num_agents(dyn)
-    dyn_w_hist = DynamicsWithHistory(dyn, Ts)
+    dyn_w_hist = DynamicsWithHistory(dyn, num_games+1)
 
     num_states = xdim(dyn)
     num_states_w_hist = xdim(dyn_w_hist)
+
+    # Store the results of the SILQGames runs for the leader and follower at each time in the simulation.
+    # This is important because it exposes the debug data.
+    sg_objs = Array{SILQGamesObject}(undef, num_players, num_times)
 
     # Initialize variables for case num_hist == 1.
     X = x₁
@@ -90,56 +186,35 @@ function leadership_filter(dyn::Dynamics,
     lead_probs = zeros(num_times)
 
     # compute number of sim_times
-
-    # Define the variables that capture outputs of the SILQGames call (i.e. eval_costs). 
-
+    # TODO(hamzah) - extrapolate times to the future as needed for Ts to be used
+    #                this is currently done when running it
 
     # The measurements and state are the same size.
-    meas_size = xdim(dyn_w_hist)
+    meas_size = xdim(dyn_w_hist.dyn)
     pf = initialize_particle_filter(X, big_P, s_init_distrib, t0, Ns, num_times, meas_size, rng)
 
     for tt in 1:num_times
         println("leadership_filter tt ", tt)
 
-        # Get inputs.
-        # TODO(hamzah) - update this to work for multiple timesteps
-        start_idx = max(tt-Ts+1, 1)
-
-        # stack_times = times[tt-Ts+1:tt]
-        ttm1 = (tt == 1) ? tt : tt-1
-        stack_times = t0 * ones(Ts)
-
-        if dyn_w_hist.num_hist == 1
-            stack_times = [times[ttm1], times[tt]]
-        end
-
+        # Get inputs at time tt.
         us_at_tt = [us[ii][:, tt] for ii in 1:num_players]
-
-        # Initial control trajectory estimate for Stackelberg solutions
-        us_1_from_tt = [zeros(udim(dyn, ii), Ts) for ii in 1:num_players]
-
-        # number of indices to leave with 0 controls
-        empty_end_idx = (start_idx == 1) ? Ts - tt : 0
-        times[empty_end_idx+1:Ts] = times[start_idx:tt]
-        for ii in 1:num_players
-            us_1_from_tt[ii][:, empty_end_idx+1:Ts] = us[ii][:, start_idx:tt] 
-        end
 
         # Define Stackelberg measurement models that stack the state results.
         # TODO(hamzah) - get the other things out too
-        h₁(X) = vec(stackelberg_ilqgames(1, Ts, stack_times[1], stack_times, dyn, costs, get_state(dyn_w_hist, X, Ts), us_1_from_tt; threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)[1])
-        h₂(X) = vec(stackelberg_ilqgames(2, Ts, stack_times[1], stack_times, dyn, costs, get_state(dyn_w_hist, X, Ts), us_1_from_tt; threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)[1])
+        num_runs_per_game = Ns
+        h₁, sg_objs[1, tt] = make_stackelberg_meas_model(tt, 1, num_games, num_runs_per_game,
+                                                         Ts, t0, times, dyn_w_hist, costs, us,
+                                                         threshold, max_iters, step_size, verbose)
+        h₂, sg_objs[2, tt] = make_stackelberg_meas_model(tt, 2, num_games, num_runs_per_game,
+                                                         Ts, t0, times, dyn_w_hist, costs, us,
+                                                         threshold, max_iters, step_size, verbose)
 
         # TODO(hamzah) - update for multiple historical states
-        # Assumes Ts=1
-        # start_idx = max(1, tt-Ts+1)
-        Zₜ, Rₜ = process_measurements(zs[:, start_idx:tt], R, dyn_w_hist.num_hist)
-        # Zₜ = zs[:, tt]
-        # Rₜ = R
+        Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
 
         f_dynamics(time_range, X, us, rng) = propagate_dynamics(dyn_w_hist, time_range, X, us)
-        ttm1 = (tt == 1) ? 1 : tt-1
 
+        ttm1 = (tt == 1) ? 1 : tt-1
         time_range = (times[ttm1], times[tt])
         step_pf(pf, time_range, [f_dynamics, f_dynamics], [h₁, h₂], discrete_state_transition, us_at_tt, Zₜ, Rₜ)
 
@@ -153,15 +228,15 @@ function leadership_filter(dyn::Dynamics,
         s_idx = (dyn_w_hist.num_hist-1) * num_states+1
         e_idx = xdim(dyn_w_hist)
         P̂s[:, :, tt] = big_P[s_idx:e_idx, s_idx:e_idx]
-        println(tt, " x - ", x̂s[:, tt])
-        println(tt, " P - ", norm(P̂s[:, :, tt]))
+        # println(tt, " x - ", x̂s[:, tt])
+        # println(tt, " P - ", norm(P̂s[:, :, tt]))
 
         lead_probs[tt] = pf.ŝ_probs[tt]
-        println(tt, " prob - ", lead_probs[tt])
+        # println(tt, " prob - ", lead_probs[tt])
     end
     
     # outputs: (1) state estimates, uncertainty estimates, leadership_probabilities over time, debug data
-    return x̂s, P̂s, lead_probs
+    return x̂s, P̂s, lead_probs, sg_objs
 end
 
 export leadership_filter

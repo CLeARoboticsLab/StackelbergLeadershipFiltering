@@ -4,29 +4,33 @@ using StackelbergControlHypothesesFiltering
 using Distributions
 using LinearAlgebra
 using Random
+using Plots
 
 include("leadfilt_LQ_parameters.jl")
 
-# Solve an LQ Stackelberg game based on the shepherd and sheep example.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
-xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
-
-
 # CONFIG: 
-
 # We define an uncertainty for the measurements R arbitrarily - easy for now.
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 4. * I
+R = zeros(xdim(dyn), xdim(dyn)) + 0.1 * I
 zs = zeros(xdim(dyn), T)
+Ts = 3
+num_games = 1
+
+p = 0.6
+p_init = 0.6
+
+
+# Solve an LQ Stackelberg game based on the shepherd and sheep example.
+Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T+Ts-1, leader_idx)
+xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
+
+
+# Fill in z as noisy state measurements.
 for tt in 1:T
     zs[:, tt] = rand(rng, MvNormal(xs[:, tt], R))
 end
-Ts = 2
-
-p = 0.4
-p_init = 0.6
 
 
 # TODO(hamzah) - vectorize this better
@@ -58,14 +62,14 @@ discrete_state_transition, state_trans_P = generate_discrete_state_transition(p,
 s_init_distrib = Bernoulli(p_init)
 
 
-x̂s, P̂s, probs = leadership_filter(dyn, costs,
-                           t0,
-                           times,
-                           Ts, # horizon over which the stackelberg game should be played,
-                           x₁, # initial state at the beginning of simulation
-                           P₁, # initial covariance at the beginning of simulation
-                           us, # the control inputs that the actor takes
-                           zs, # the measurements
+x̂s, P̂s, probs, sg_objs = leadership_filter(dyn, costs, t0, times,
+                           T,         # simulation horizon
+                           Ts,        # horizon over which the stackelberg game should be played,
+                           num_games, # number of stackelberg games played for measurement
+                           x₁,        # initial state at the beginning of simulation
+                           P₁,        # initial covariance at the beginning of simulation
+                           us,        # the control inputs that the actor takes
+                           zs,        # the measurements
                            R,
                            s_init_distrib,
                            discrete_state_transition;
@@ -76,4 +80,5 @@ x̂s, P̂s, probs = leadership_filter(dyn, costs,
                            Ns=10,
                            verbose=false)
 
-plot(times, probs, xlabel="t (s)", ylabel="prob. leadership")
+# TODO(hamzah) - Next step, make these plots better so I can debug what's going on.
+plot(times[1:T], probs, xlabel="t (s)", ylabel="prob. leadership")
