@@ -16,9 +16,10 @@ function get_underlying_dynamics(dyn::DynamicsWithHistory)
     return dyn.dyn
 end
 
+# hist_idx is the index of the desired state in the history with 1 as the current state.
 function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64}, hist_idx::Int)
     start_idx = (dyn.num_hist - hist_idx) * xdim(dyn.dyn) + 1
-    end_idx = dyn.num_hist * xdim(dyn.dyn)
+    end_idx = (dyn.num_hist - hist_idx + 1) * xdim(dyn.dyn)
     @assert start_idx > 0
     @assert end_idx <= xdim(dyn)
     return X[start_idx:end_idx]
