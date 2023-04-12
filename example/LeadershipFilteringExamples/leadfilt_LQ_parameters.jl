@@ -1,7 +1,7 @@
 using StackelbergControlHypothesesFiltering
 
 dt = 0.05
-T = 11
+T = 51
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -11,10 +11,10 @@ dyn = ShepherdAndSheepDynamics(dt)
 costs = ShepherdAndSheepCosts()
 num_players = num_agents(dyn)
 
-leader_idx = 1
+leader_idx = 2
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
-P₁ = Diagonal([1e-32 for _ in 1:xdim(dyn)])
+P₁ = Diagonal([1e-4 for _ in 1:xdim(dyn)])
 
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(8)
