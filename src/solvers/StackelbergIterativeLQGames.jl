@@ -16,7 +16,6 @@ mutable struct SILQGamesObject
     current_idx::Int
 
     # inputs that won't change
-    leader_idx::Int
     horizon::Int
     dyn::Dynamics
     costs::AbstractVector{<:Cost}
@@ -26,6 +25,9 @@ mutable struct SILQGamesObject
     max_iters
     step_size
     verbose
+
+    # who was the leader each time we ran
+    leader_idxs::AbstractVector{<:Int}
 
     # iteration data for states and controls
     xks # num_runs x max_iters x num_states x num_times 4D data on the kth iteration of the run
@@ -39,10 +41,10 @@ mutable struct SILQGamesObject
     evaluated_costs     # num_runs x num_players x max_iters+1
 end
 
-THRESHOLD = 1e-1
+THRESHOLD = 1e-2
 MAX_ITERS = 100
 # initialize_silq_games_object - initializes an SILQ Games Object which contains the data required within the algorithm
-function initialize_silq_games_object(num_runs, leader_idx, horizon, dyn::Dynamics, costs::AbstractVector{<:Cost};
+function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::AbstractVector{<:Cost};
                                       threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS, step_size=1.0, verbose=false)
     num_players = num_agents(dyn)
     @assert length(costs) == num_players
@@ -54,14 +56,17 @@ function initialize_silq_games_object(num_runs, leader_idx, horizon, dyn::Dynami
     Kks = [zeros(num_runs, max_iters, udim(dyn, ii), num_states, horizon) for ii in 1:num_players]
     kks = [zeros(num_runs, max_iters, udim(dyn, ii), horizon) for ii in 1:num_players]
     
+    leader_idxs = zeros(Int, num_runs)
+
     num_iterations = zeros(Int, num_runs)
     evaluated_costs = zeros(num_runs, num_players, max_iters+1)
     convergence_metrics = zeros(num_runs, num_players, max_iters+1)
 
     current_idx = 0
     return SILQGamesObject(num_runs, current_idx,
-                           leader_idx, horizon, dyn, costs,
+                           horizon, dyn, costs,
                            threshold, max_iters, step_size, verbose,
+                           leader_idxs,
                            xks, uks,
                            Kks, kks, convergence_metrics, num_iterations, evaluated_costs)
 end
@@ -69,6 +74,7 @@ export initialize_silq_games_object
 
 
 function stackelberg_ilqgames(sg::SILQGamesObject,
+                              leader_idx::Int,
                               t0,
                               times,
                               x₁::AbstractVector{Float64},
@@ -78,6 +84,9 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
     if sg.current_idx > sg.num_runs
         error("too many runs - please provide fresh SILQGames object.")
     end
+
+    # Store which actor was assumed to be leader.
+    sg.leader_idxs[sg.current_idx] = leader_idx
 
     num_players = num_agents(sg.dyn)
     num_x = xdim(sg.dyn)
@@ -127,7 +136,7 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         end
 
          # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
-        ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, sg.leader_idx)
+        ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
 

@@ -39,8 +39,10 @@ function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVec
 
     # Shift first num_hist-1 states down into the history and propagate the dynamics to get the new one.
     end_idx = (dyn.num_hist - 1) * num_states
-    X_new = vcat(X[1:end_idx],
+    X_new = vcat(X[num_states+1:num_states+end_idx],
                  propagate_dynamics(dyn.dyn, time_range, x_t, us))
+
+    @assert all(X[num_states+1:num_states+end_idx] .== X_new[1:end_idx])
     @assert size(X_new, 1) == num_states_w_hist
     return X_new
 end

@@ -84,9 +84,9 @@ function extract_measurements_from_stack_trajectory(xs, start_time_idx::Int, tt:
 end
 
 
-function make_stackelberg_meas_model(tt::Int, leader_idx::Int, num_games_desired::Int, num_runs_per_game::Int,
-                                     Ts::Int, t0, times, dyn_w_hist::DynamicsWithHistory, costs, us,
-                                     threshold, max_iters, step_size, verbose)
+function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_idx::Int, num_games_desired::Int,
+                                     Ts::Int, t0, times, dyn_w_hist::DynamicsWithHistory, costs, us)
+
     # Extract the history-less dynamics.
     dyn = get_underlying_dynamics(dyn_w_hist)
 
@@ -101,10 +101,6 @@ function make_stackelberg_meas_model(tt::Int, leader_idx::Int, num_games_desired
     # Extract the desired times and controls.
     stack_times = times[s_idx:e_idx]
     us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
-
-    # Initialize an SILQ Games Object for this set of runs.
-    sg_obj = initialize_silq_games_object(num_runs_per_game, leader_idx, Ts+1, dyn, costs;
-                                          threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 
     # TODO(hamzah) - For now assumes 1 game played; fix this
     @assert num_games_desired == 1
@@ -121,12 +117,12 @@ function make_stackelberg_meas_model(tt::Int, leader_idx::Int, num_games_desired
         prev_state = get_state(dyn_w_hist, X, 2)
 
         # Play a stackelberg games starting at this previous state using the times/controls we extracted.
-        xs, us = stackelberg_ilqgames(sg_obj, stack_times[1], stack_times, prev_state, us_1_from_tt)
+        xs, us = stackelberg_ilqgames(sg_obj, leader_idx, stack_times[1], stack_times, prev_state, us_1_from_tt)
 
         # Process the stackelberg trajectory to get the desired output and vectorize.
         return extract_measurements_from_stack_trajectory(xs, tt-1, tt)
     end
-    return h, sg_obj
+    return h
 end
 
 
@@ -160,7 +156,7 @@ function leadership_filter(dyn::Dynamics,
 
     # Store the results of the SILQGames runs for the leader and follower at each time in the simulation.
     # This is important because it exposes the debug data.
-    sg_objs = Array{SILQGamesObject}(undef, num_players, num_times)
+    sg_objs = Array{SILQGamesObject}(undef, num_times)
 
     # Initialize variables for case num_hist == 1.
     X = x₁
@@ -201,13 +197,17 @@ function leadership_filter(dyn::Dynamics,
 
         # Define Stackelberg measurement models that stack the state results.
         # TODO(hamzah) - get the other things out too
-        num_runs_per_game = Ns
-        h₁, sg_objs[1, tt] = make_stackelberg_meas_model(tt, 1, num_games, num_runs_per_game,
-                                                         Ts, t0, times, dyn_w_hist, costs, us,
-                                                         threshold, max_iters, step_size, verbose)
-        h₂, sg_objs[2, tt] = make_stackelberg_meas_model(tt, 2, num_games, num_runs_per_game,
-                                                         Ts, t0, times, dyn_w_hist, costs, us,
-                                                         threshold, max_iters, step_size, verbose)
+        num_runs_per_game = Ns + 2 # two extra runs for metadata
+
+        # Initialize an SILQ Games Object for this set of runs.
+        sg_objs[tt] = initialize_silq_games_object(num_runs_per_game, Ts+1, dyn, costs;
+                                              threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
+
+        # Create the measurement models.
+        h₁ = make_stackelberg_meas_model(tt, sg_objs[tt], 1, num_games,
+                                         Ts, t0, times, dyn_w_hist, costs, us)
+        h₂ = make_stackelberg_meas_model(tt, sg_objs[tt], 2, num_games,
+                                         Ts, t0, times, dyn_w_hist, costs, us)
 
         # TODO(hamzah) - update for multiple historical states
         Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
@@ -236,7 +236,7 @@ function leadership_filter(dyn::Dynamics,
     end
     
     # outputs: (1) state estimates, uncertainty estimates, leadership_probabilities over time, debug data
-    return x̂s, P̂s, lead_probs, sg_objs
+    return x̂s, P̂s, lead_probs, pf, sg_objs
 end
 
 export leadership_filter
