@@ -11,7 +11,7 @@ num_runs=1
 
 # config variables
 threshold=1.
-max_iters=1000
+max_iters=34
 step_size=1e-2
 verbose=true
 

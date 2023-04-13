@@ -30,6 +30,14 @@ function Guus(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::Abstr
     return Dict(jj => sum(c.weights[jj] * G[jj] for G in Gs) for jj in 1:num_players)
 end
 
+# TODO(hamzah) - fix the bug in quadraticization and remove this after that
+function quadraticize_costs(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    quad_costs = [quadraticize_costs(c.costs[ii], time_range, x, us) for ii in 1:length(c.weights)]
+    return sum(quad_costs)
+end
+
+
+
 # Export the derivatives.
 export Gx, Gus, Gxx, Guus
 
