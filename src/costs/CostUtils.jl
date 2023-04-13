@@ -69,6 +69,7 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
     num_cost_mats = length(ddu2s)
     const_cost_term = (2/num_cost_mats) * cost_eval
 
+    # This should be QuadraticCost with offset about x because the taylor approx is (x-x0)
     quad_cost = QuadraticCost(ddx2, dx', const_cost_term)
     for (ii, du) in dus
         add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=const_cost_term)
