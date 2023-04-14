@@ -18,8 +18,8 @@ function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractV
 
     # We need to split this cost over multiple matrices.
     num_mats = length(c.q_cost.Rs) + 1
-    cq = (2.0 / num_mats) * c.x0' * Q * c.x0
-    cr = (2.0 / num_mats) * c.x0' * Q * c.x0
+    cq = (1.0 / num_mats) * c.x0' * Q * c.x0
+    cr = (1.0 / num_mats) * c.x0' * Q * c.x0
 
     cost = QuadraticCost(Q, q, cq)
     for (ii, R) in c.q_cost.Rs
@@ -30,7 +30,6 @@ function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractV
 end
 
 function compute_cost(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    num_players = length(us)
     dx = x - c.x0
     return compute_cost(c.q_cost, time_range, dx, us)
 end
