@@ -29,8 +29,10 @@ plot!(times, xs[3,:], label="P1 py")
 plot!(times, xs[5,:], label="P2 px", legend=:outertopright)
 plot!(times, xs[7,:], label="P2 py")
 
-q3 = plot(times, xs[2,:], label="vel x", legend=:outertopright)
-plot!(times, xs[4,:], label="vel y")
+q3 = plot(times, xs[2,:], label="P1 vx", legend=:outertopright)
+plot!(times, xs[4,:], label="P1 vy")
+plot!(times, xs[6,:], label="P2 vx")
+plot!(times, xs[8,:], label="P2 vy")
 
 q4 = plot(times, us[1][1, :], label="P1 accel x", legend=:outertopright)
 plot!(times, us[1][2, :], label="P1 accel y")
