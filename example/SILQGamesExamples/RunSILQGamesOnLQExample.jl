@@ -10,9 +10,10 @@ leader_idx=1
 num_runs=1
 
 # config variables
+# these ones test that it converges to the same 
 threshold=1.
 max_iters=1000
-step_size=1e-2
+step_size=1e-3
 verbose=true
 
 sg_obj = initialize_silq_games_object(num_runs, leader_idx, T, dyn, costs;
