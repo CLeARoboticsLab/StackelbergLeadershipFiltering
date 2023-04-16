@@ -31,7 +31,8 @@ end
 
 function compute_cost(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     dx = x - c.x0
-    return compute_cost(c.q_cost, time_range, dx, us)
+    dus = us - c.u0s
+    return compute_cost(c.q_cost, time_range, dx, dus)
 end
 
 # Define derivative terms.

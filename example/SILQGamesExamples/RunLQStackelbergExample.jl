@@ -7,7 +7,7 @@ Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, le
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
 final_cost_totals = [evaluate(costs[ii], xs, us) for ii in 1:num_players]
-println("final: ", xs[:, T], " with trajectory costs: ", final_cost_totals)
+println("final: ", xs[:, T], " with trajectory costs: ", final_cost_totals, " sum: ", sum(final_cost_totals))
 println(size(xs), " ", size(us[1]), " ", size(us[2]))
 
 

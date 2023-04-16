@@ -10,9 +10,9 @@ leader_idx=1
 num_runs=1
 
 # config variables
-threshold=1.
-max_iters=10
-step_size=1.
+threshold=1e-2
+max_iters=1000
+step_size=1e-2
 verbose=true
 
 sg_obj = initialize_silq_games_object(num_runs, leader_idx, T, dyn, costs;
@@ -21,7 +21,7 @@ xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
 final_cost_totals = [evaluate(costs[ii], xs_k, us_k) for ii in 1:num_players]
-println("final: ", xs_k[:, T], " with trajectory costs: ", final_cost_totals)
+println("final: ", xs_k[:, T], " with trajectory costs: ", final_cost_totals, " sum: ", sum(final_cost_totals))
 println(size(xs_k), " ", size(us_k[1]), " ", size(us_k[2]))
 
 
