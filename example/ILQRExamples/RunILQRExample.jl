@@ -3,7 +3,7 @@ using Plots
 include("params_time.jl")
 include("params_doubleintegrator_quadoffset.jl")
 # include("params_unicycle_quadoffset.jl")
-# include("params_unicycle_nonlinearexample.jl")
+include("params_unicycle_nonlinearexample.jl")
 
 #####################################
 #    Define the initial controls.   #
@@ -27,8 +27,8 @@ us_1[2,:] .= 0.01
 # _, us_1 = unroll_feedback(dyn, times, ctrl_strats, x0)
 # us_1 = us_1[1] + randn(size(us_1[1])) * 0.1
 
-max_iters=60
-step_size=0.01
+max_iters=100
+step_size=0.1
 threshold=1.
 verbose=true
 

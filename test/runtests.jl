@@ -1,3 +1,3 @@
-
-include("TestLQSolvers.jl")
-include("TestLQStackelbergDerivation.jl")
+include("TestQuadraticCosts.jl")
+# include("TestLQSolvers.jl")
+# include("TestLQStackelbergDerivation.jl")

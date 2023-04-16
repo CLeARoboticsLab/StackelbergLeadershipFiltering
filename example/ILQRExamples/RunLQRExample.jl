@@ -3,10 +3,10 @@ using Plots
 include("params_time.jl")
 include("params_doubleintegrator_quadoffset.jl")
 
-# time_range = (0.0, horizon)
-# dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
-# lqr_quad_cost_x0 = quadraticize_costs(quad_w_offset_cost, time_range, x0, dummy_us)
-lqr_quad_cost_x0 = quad_w_offset_cost
+time_range = (0.0, horizon)
+dummy_us = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
+lqr_quad_cost_x0 = quadraticize_costs(quad_w_offset_cost, time_range, x0, dummy_us)
+# lqr_quad_cost_x0 = quad_w_offset_cost
 
 # Solve optimal control problem.
 println("initial state: ", x0')
