@@ -4,6 +4,9 @@ include("LQ_parameters.jl")
 
 Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
 
+ps = get_constant_feedback_gains(Ps_strategies)
+println("LQ constant feedback gains (||p₁||, ||p₂||): ", norm(ps[1]), " ", norm(ps[2]))
+
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
 final_cost_totals = [evaluate(costs[ii], xs, us) for ii in 1:num_players]

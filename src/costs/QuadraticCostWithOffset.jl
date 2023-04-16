@@ -9,11 +9,44 @@ end
 # Quadratic costs always homogeneous
 QuadraticCostWithOffset(quad_cost::QuadraticCost, x0=zeros(size(quad_cost.Q, 1)), u0s=[zeros(size(quad_cost.Rs[ii], 1)) for ii in 1:length(quad_cost.Rs)]) = QuadraticCostWithOffset(quad_cost, x0, u0s)
 
+# # Shifts a (Q, q, cq) quadratic cost set to transform to (Q̃, q̃, c̃q). Can be used for control sets too.
+# function shift_cost(Q, q, cq, a)
+#     @assert size(q) == size(a)
+#     Q̃ = Q
+#     q̃ = q - Q * a
+#     c̃q = (1/2) * (a' * Q * a) - (q' * a) + cq
+
+#     return Q̃, q̃, c̃q
+# end
+
+# # one helpful use case is designing a cost at the origin x=0 and then shifting it elsewhere.
+# # a is the state shift x-a
+# # bs define the control shifts u^i - b^i
+# function make_shifted_quadratic_cost(c::QuadraticCost, a, bs)
+#     Q = get_quadratic_state_cost_term(c.q_cost)
+#     q = get_linear_state_cost_term(c.q_cost)
+#     cq = get_constant_state_cost_term(c.q_cost)
+
+#     Q̃, q̃, c̃q = shift_cost(Q, q, cq)
+#     cost = QuadraticCost(Q̃, q̃, c̃q, a)
+#     for ii in 1:size(bs, 1)
+#         Ri = get_quadratic_control_cost_term(c.q_cost, ii)
+#         ri = get_linear_control_cost_term(c.q_cost, ii)
+#         cri = get_constant_control_cost_term(c.q_cost, ii)
+#         R̃, r̃, c̃r = shift_cost(Ri, ri, cri, bs[ii])
+#         add_control_cost!(cost, R̃; r=r̃, cr=c̃r)
+#     end
+#     return cost
+# end
+
+
+
 # TODO(hmzh): Adjust quadraticization for the multi-player case.
 function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     Q = get_quadratic_state_cost_term(c.q_cost)
     q = get_linear_state_cost_term(c.q_cost)
 
+    # TODO(hamzah) - need to recenter the quadraticization about the new x0, u0s
     q = Q * (x - c.x0) + q
 
     # We need to split this cost over multiple matrices.
