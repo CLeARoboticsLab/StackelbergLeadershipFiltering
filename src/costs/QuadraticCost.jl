@@ -104,42 +104,42 @@ function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
 end
 
 
-# Define cost addition.
-function +(a::QuadraticCost, b::QuadraticCost)
-    @assert size(a.Q) == size(b.Q)
-    @assert length(a.Rs) == length(b.Rs)
+# # Define cost addition.
+# function +(a::QuadraticCost, b::QuadraticCost)
+#     @assert size(a.Q) == size(b.Q)
+#     @assert length(a.Rs) == length(b.Rs)
 
-    new_cost = QuadraticCost(a.Q + b.Q, a.q + b.q, a.cq + b.cq)
+#     new_cost = QuadraticCost(a.Q + b.Q, a.q + b.q, a.cq + b.cq)
 
-    for ii in 1:length(a.Rs)
-        R = zeros(size(a.Rs[ii]))
-        r = zeros(size(a.rs[ii]))
-        cr = 0
+#     for ii in 1:length(a.Rs)
+#         R = zeros(size(a.Rs[ii]))
+#         r = zeros(size(a.rs[ii]))
+#         cr = 0
 
-        if ii in keys(a.Rs)
-            R += a.Rs[ii]
-        end
-        if ii in keys(b.Rs)
-            R += b.Rs[ii]
-        end
-        if ii in keys(a.rs)
-            r += a.rs[ii]
-        end
-        if ii in keys(b.rs)
-            r += b.rs[ii]
-        end
-        if ii in keys(a.crs)
-            cr += a.crs[ii]
-        end
-        if ii in keys(b.crs)
-            cr += b.crs[ii]
-        end
+#         if ii in keys(a.Rs)
+#             R += a.Rs[ii]
+#         end
+#         if ii in keys(b.Rs)
+#             R += b.Rs[ii]
+#         end
+#         if ii in keys(a.rs)
+#             r += a.rs[ii]
+#         end
+#         if ii in keys(b.rs)
+#             r += b.rs[ii]
+#         end
+#         if ii in keys(a.crs)
+#             cr += a.crs[ii]
+#         end
+#         if ii in keys(b.crs)
+#             cr += b.crs[ii]
+#         end
 
-        add_control_cost!(new_cost, ii, R; r, cr)
-    end
+#         add_control_cost!(new_cost, ii, R; r, cr)
+#     end
 
-    return new_cost
-end
+#     return new_cost
+# end
 
 
 # Export all the cost type.

@@ -65,10 +65,8 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
     ddu2s = Guus(c, time_range, x, us)
     dus = Gus(c, time_range, x, us)
 
-    # println("quad costs: ", ddx2, dx[:], cost_eval)
-
     # Used to compute the way the constant cost terms are divided.
-    num_cost_mats = length(ddu2s) + 1
+    num_cost_mats = length(ddu2s)
     const_cost_term = (2/num_cost_mats) * cost_eval
 
     quad_cost = QuadraticCost(ddx2, dx[:], const_cost_term)
