@@ -31,6 +31,11 @@ Q = Matrix(Diagonal(1*[1., 1., 1., 1.]))
 R = Matrix(Diagonal(1*[1., 1.]))
 quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
+
+# Translate the cost to be minimized at the final state.
+u_shift = [zeros(udim(dyn, ii)) for ii in 1:num_agents(dyn)]
+quad_w_offset_cost = translate_quadratic_cost(quad_cost, xf, u_shift)
+
 quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
 
 println("setting cost to Quadratic Offset Cost")

@@ -11,27 +11,47 @@ QuadraticCostWithOffset(quad_cost::QuadraticCost, x0=zeros(size(quad_cost.Q, 1))
 
 # TODO(hmzh): Adjust quadraticization for the multi-player case.
 function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    Q = get_quadratic_state_cost_term(c.q_cost)
-    q = get_linear_state_cost_term(c.q_cost)
 
-    q = Q * (x - c.x0) + q
+    # step 1. quadraticize original cost around x-x0, us-u0s
+    quadraticized_original_cost = quadraticize_costs(c.q_cost, time_range, x - c.x0, us - c.u0s)
 
-    # We need to split this cost over multiple matrices.
-    num_mats = length(c.q_cost.Rs) + 1
-    cq = (1.0 / num_mats) * c.x0' * Q * c.x0
-    cr = (1.0 / num_mats) * c.x0' * Q * c.x0
-
-    cost = QuadraticCost(Q, q, cq)
-    for (ii, R) in c.q_cost.Rs
-        add_control_cost!(cost, ii, c.q_cost.Rs[ii]; r=c.q_cost.Rs[ii] * (us[ii] - c.u0s[ii]) + c.q_cost.rs[ii], cr=cr)
-    end
-
-    return cost
+    # step 2. return translate the approximated cost, translated back in the same direction.
+    return translate_quadratic_cost(quadraticized_original_cost, c.x0, c.u0s)
 end
+
+# function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+#     Q = get_quadratic_state_cost_term(c.q_cost)
+#     q = get_linear_state_cost_term(c.q_cost)
+#     cq = get_constant_state_cost_term(c.q_cost)
+
+#     # eval = (1/2) * ((x+c.x0)' * Q * (x+c.x0)) - (q' * (x+c.x0)) + cq
+#     # println("eval cost: ", eval)
+
+#     # TODO(hamzah) - need to recenter the quadraticization about the new x0, u0s
+#     q = Q * (x - c.x0) + q
+
+#     # We need to split this cost over multiple matrices.
+#     num_mats = length(c.q_cost.Rs) + 1
+#     # eval = (1/2)*c.x0' * Q * c.x0 # compute_cost(c, time_range, x, us)
+#     # eval = compute_cost(c.q_cost, time_range, c.x0 + x, c.u0s + us)
+#     # println("eval cost: ", eval)
+
+#     cq = (1.0 / num_mats) * eval
+#     cr = cq
+
+#     cost = QuadraticCost(Q, q, cq)
+#     for (ii, R) in c.q_cost.Rs
+#         add_control_cost!(cost, ii, c.q_cost.Rs[ii];
+#                           r=c.q_cost.Rs[ii] * (us[ii] - c.u0s[ii]) + c.q_cost.rs[ii], cr=cr)
+#     end
+
+#     return cost
+# end
 
 function compute_cost(c::QuadraticCostWithOffset, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     dx = x - c.x0
-    return compute_cost(c.q_cost, time_range, dx, us)
+    dus = us - c.u0s
+    return compute_cost(c.q_cost, time_range, dx, dus)
 end
 
 # Define derivative terms.

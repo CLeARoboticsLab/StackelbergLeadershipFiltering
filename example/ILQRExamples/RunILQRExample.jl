@@ -1,7 +1,7 @@
 using Plots
 
 include("params_time.jl")
-# include("params_doubleintegrator_quadoffset.jl")
+include("params_doubleintegrator_quadoffset.jl")
 # include("params_unicycle_quadoffset.jl")
 include("params_unicycle_nonlinearexample.jl")
 
@@ -23,11 +23,17 @@ us_1[2,:] .= 0.01
 
 # Linearize dynamics about initially solved optimal control problem
 # lin_dyn_0 = linearize_dynamics(dyn, (t0, t0+dt), x0, [zeros(udim(dyn))])
-# ctrl_strats, _ = solve_lqr_feedback(lin_dyn_0, quad_cost, T)
+# ctrl_strats, _ = solve_lqr_feedback(lin_dyn_0, selected_cost, T)
 # _, us_1 = unroll_feedback(dyn, times, ctrl_strats, x0)
 # us_1 = us_1[1] + randn(size(us_1[1])) * 0.1
 
-xs_i, us_i, is_converged, num_iters, conv_metrics, evaluated_costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1; max_iters=100, step_size=0.2, threshold=1., verbose=true)
+max_iters=100
+step_size=0.1
+threshold=1.
+verbose=true
+
+xs_i, us_i, is_converged, num_iters, conv_metrics, evaluated_costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1;
+                                                                          max_iters=max_iters, step_size=step_size, threshold=threshold, verbose=verbose)
 final_cost_total = evaluate(selected_cost, xs_i, [us_i])
 
 println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)
