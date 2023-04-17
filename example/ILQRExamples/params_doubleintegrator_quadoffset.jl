@@ -33,5 +33,8 @@ quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
 quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
 
+ufs = [zeros(udim(dyn, ii)) for ii in 1:num_players]
+quad_w_offset_cost = translate_quadratic_cost(quad_cost, xf, ufs)
+
 println("setting cost to Quadratic Offset Cost")
 selected_cost = quad_w_offset_cost

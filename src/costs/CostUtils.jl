@@ -66,8 +66,8 @@ function quadraticize_costs(c::Cost, time_range, x0::AbstractVector{Float64}, u0
     dus = Gus(c, time_range, x0, u0s)
 
     # Used to compute the way the constant cost terms are divided.
-    num_cost_mats = 1 + length(ddu2s)
-    cq = (1/num_cost_mats) * cost_eval
+    num_cost_mats = length(ddu2s)
+    cq = (2/num_cost_mats) * cost_eval
     cr = cq
 
     # This should be QuadraticCost with offset about x because the taylor approx is (x-x0)
@@ -77,7 +77,7 @@ function quadraticize_costs(c::Cost, time_range, x0::AbstractVector{Float64}, u0
     end
 
     # Apply a translation by the state/controls we approximate around.
-    return translate_quadratic_cost(quad_cost, x0, u0s)
+    return quad_cost #translate_quadratic_cost(quad_cost, x0, u0s)
 end
 
 
