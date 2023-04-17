@@ -16,8 +16,9 @@ end
 
 function Gus(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(c.weights)
-    Gs = [Gus(c.costs[ii], time_range, x, us) for ii in 1:num_players]
-    return Dict(jj => sum(c.weights[jj] * G[jj] for G in Gs) for jj in 1:num_players)
+    Gs = [Gus(c_i, time_range, x, us) for c_i in c.costs]
+    # return Dict(jj => sum(c.weights[ii] * G[ii][jj] for G in Gs) for ii in 1:length(c.weights) for jj in 1:num_players)
+    return Dict(jj => sum(c.weights[ii] * Gs[ii][jj] for ii in 1:length(c.weights)) for jj in 1:num_players)
 end
 
 function Gxx(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
@@ -26,17 +27,32 @@ end
 
 function Guus(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(c.weights)
-    Gs = [Guus(c.costs[ii], time_range, x, us) for ii in 1:num_players]
-    return Dict(jj => sum(c.weights[jj] * G[jj] for G in Gs) for jj in 1:num_players)
+    Gs = [Guus(c_i, time_range, x, us) for c_i in c.costs]
+    # return Dict(jj => sum(c.weights[ii] * G[ii][jj] for G in Gs) for ii in 1:length(c.weights) for jj in 1:num_players)
+    return Dict(jj => sum(c.weights[ii] * Gs[ii][jj] for ii in 1:length(c.weights)) for jj in 1:num_players)
 end
 
 # TODO(hamzah) - fix the bug in quadraticization and remove this after that
 function quadraticize_costs(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    num_players = size(us, 1)
     quad_costs = [quadraticize_costs(c.costs[ii], time_range, x, us) for ii in 1:length(c.weights)]
-    return sum(quad_costs)
+
+    sum_Q = sum(get_quadratic_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+    sum_q = sum(get_linear_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+    sum_cq = sum(get_constant_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+
+    q_cost = QuadraticCost(sum_Q, sum_q, sum_cq)
+
+    for jj in 1:num_players
+        sum_R = sum(get_quadratic_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+        sum_r = sum(get_linear_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+        sum_cr = sum(get_constant_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+
+        add_control_cost!(q_cost, jj, sum_R; r=sum_r, cr=sum_cr)
+    end
+
+    return q_cost
 end
-
-
 
 # Export the derivatives.
 export Gx, Gus, Gxx, Guus

@@ -5,26 +5,27 @@
 struct LogBarrierCost <: NonQuadraticCost
     indices
     a::Vector{Float64} # offset with size identical to x
-    b::Float64         # sets the x-intercept
+    b::Vector{Float64} # sets the x-intercept distance
     c::Float64         # scaling constant
 end
-LogBarrierCost(indices, a::Vector{Float64}, b::Float64) = LogBarrierCost(indices, a, b, 1.)
+LogBarrierCost(indices, a::Vector{Float64}, b::Vector{Float64}) = LogBarrierCost(indices, a, b, 1.)
 
-# Use the 1 norm for now.
-P_NORM = 1
+# Use the 2 norm.
+P_NORM = 2
 
 function compute_cost(c::LogBarrierCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     @assert size(x, 1) == size(c.a, 1)
-    abs_dx = norm(x[c.indices] - c.a[c.indices], P_NORM)
-    return -log(abs_dx) + log(c.b)
+    norm_dx = norm(x[c.indices] - c.a[c.indices], P_NORM)
+    return -log(norm_dx) + log(norm(c.b[c.indices] - c.a[c.indices]))
 end
 
 # Derivative term c(x_i - a_i)^-1
 function Gx(c::LogBarrierCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     @assert size(x, 1) == size(c.a, 1)
     out = zeros(1, size(x, 1))
-    dx = x[c.indices] - c.a[c.indices]
-    out[1, c.indices] .= - c.c ./ dx
+    dx = x - c.a
+    dx_norm_sq = norm(dx[c.indices], P_NORM)^2
+    out[1, c.indices] .= - dx[c.indices] / dx_norm_sq
     return out
 end
 
@@ -37,9 +38,13 @@ end
 function Gxx(c::LogBarrierCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     @assert size(x, 1) == size(c.a, 1)
     out = zeros(size(x, 1), size(x, 1))
-    for i in c.indices
-        out[i, i] = c.c / ((x[i] - c.a[i])^2)
-    end
+    dx = x - c.a
+
+    dx_norm_sq = norm(dx[c.indices], P_NORM)^2
+    dx_norm_4 = dx_norm_sq^2
+
+    # Compute the Hessian only for the variables we consider.
+    out[c.indices, c.indices] .= 2 * dx[c.indices] * dx[c.indices]' / dx_norm_4  - (1/dx_norm_sq) * I
     return out
 end
 

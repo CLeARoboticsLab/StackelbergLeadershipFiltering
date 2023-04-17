@@ -31,4 +31,3 @@ quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
 
 println("setting cost to Quadratic Offset Cost")
 selected_cost = quad_w_offset_cost
-

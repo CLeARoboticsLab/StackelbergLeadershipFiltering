@@ -10,7 +10,8 @@ costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 # Create a weighted cost for P1 - incentivizes the quadratic cost behavior, but also adds a log barrier to avoid going
 # over the y-axis.
 indices = [1] # incentivizes x-position to avoid crossing y-axis
-b = 4. # cross 0 outside the bounds of the game
+b = zeros(xdim(dyn)) # cross 0 outside the bounds of the game
+b[indices] .= 1.
 log_cost_p1 = LogBarrierCost(indices, zeros(xdim(dyn)), b)
 
 # Make the weighted cost.
