@@ -33,17 +33,53 @@ function is_pure_quadratic(c::QuadraticCost)
     is_control_cost_pure_quadratic = all([all(iszero.(c.r[ii]) && iszero(c.cr[ii])) for (ii, r) in c.rs])
     return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
 end
+export is_pure_quadratic
+
+# Constructors for shifted input (x-a, u^i - b^i) quadratic costs.
+# Shifts a (Q, q, cq) quadratic cost set to transform to (Q̃, q̃, c̃q). Can be used for control sets too.
+function shift_cost(Q, q, cq, a)
+    @assert size(q) == size(a)
+    Q̃ = Q
+    q̃ = q - Q * a
+    c̃q = (1/2) * (a' * Q * a) - (q' * a) + cq
+
+    return Q̃, q̃, c̃q
+end
+
+# one helpful use case is designing a cost at the origin x=0 and then shifting it elsewhere.
+# a is the state shift x-a
+# bs define the control shifts u^i - b^i
+function translate_quadratic_cost(c::QuadraticCost, a, bs)
+    Q = get_quadratic_state_cost_term(c)
+    q = get_linear_state_cost_term(c)
+    cq = get_constant_state_cost_term(c)
+
+    Q̃, q̃, c̃q = shift_cost(Q, q, cq, a)
+    cost = QuadraticCost(Q̃, q̃, c̃q)
+    for ii in 1:size(bs, 1)
+        Ri = get_quadratic_control_cost_term(c, ii)
+        ri = get_linear_control_cost_term(c, ii)
+        cri = get_constant_control_cost_term(c, ii)
+        R̃, r̃, c̃r = shift_cost(Ri, ri, cri, bs[ii])
+        add_control_cost!(cost, ii, R̃; r=r̃, cr=c̃r)
+    end
+    return cost
+end
+export shift_cost, translate_quadratic_cost
+
+
 
 function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(us)
-    total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
+    total = (1/2.) * (x' * c.Q * x) + (c.q' * x) + c.cq
     if !isempty(c.Rs)
-        total += (1/2.) * sum(us[jj]' * R * us[jj] + 2 * us[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
+        total += (1/2.) * sum(us[jj]' * c.Rs[jj] * us[jj] for (jj, R) in c.Rs)
+        total += sum(us[jj]' * c.rs[jj] for (jj, r) in c.rs)
+        total += sum(c.crs[jj] for (jj, cr) in c.rs)
     end
     return total
 end
 
-export is_pure_quadratic
 
 # Helpers that get the homogenized Q and R matrices for this cost.
 function get_homogenized_state_cost_matrix(c::QuadraticCost)

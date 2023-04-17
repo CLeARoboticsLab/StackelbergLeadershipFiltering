@@ -56,26 +56,28 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     return total
 end
 
-function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    num_players = length(us)
+function quadraticize_costs(c::Cost, time_range, x0::AbstractVector{Float64}, u0s::AbstractVector{<:AbstractVector{Float64}})
+    num_players = length(u0s)
 
-    cost_eval = compute_cost(c, time_range, x, us)
-    ddx2 = Gxx(c, time_range, x, us)
-    dx = Gx(c, time_range, x, us)
-    ddu2s = Guus(c, time_range, x, us)
-    dus = Gus(c, time_range, x, us)
+    cost_eval = compute_cost(c, time_range, x0, u0s)
+    ddx2 = Gxx(c, time_range, x0, u0s)
+    dx = Gx(c, time_range, x0, u0s)
+    ddu2s = Guus(c, time_range, x0, u0s)
+    dus = Gus(c, time_range, x0, u0s)
 
     # Used to compute the way the constant cost terms are divided.
     num_cost_mats = length(ddu2s)
-    const_cost_term = (2/num_cost_mats) * cost_eval
+    cq = (2/num_cost_mats) * cost_eval
+    cr = cq
 
     # This should be QuadraticCost with offset about x because the taylor approx is (x-x0)
-    quad_cost = QuadraticCost(ddx2, dx', const_cost_term)
-    for (ii, du) in dus
-        add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=const_cost_term)
+    quad_cost = QuadraticCost(ddx2, dx', cq)
+    for ii in 1:num_players
+        add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=cr)
     end
 
-    return quad_cost
+    # Apply a translation by the state/controls we approximate around.
+    return quad_cost #translate_quadratic_cost(quad_cost, x0, u0s)
 end
 
 

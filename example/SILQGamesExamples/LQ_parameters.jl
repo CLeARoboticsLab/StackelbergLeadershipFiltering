@@ -32,7 +32,7 @@ end
 # us_1[ii][2, :] .= (xf[4] - x0[4]) / duration # accel
 
 # Test with ideal solution, with noise.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
-_, us_1 = unroll_feedback(dyn, times, Ps_strategies, x₁)
-us_1[1] += 0.1 * rand(rng, udim(dyn, 1), T)
-us_1[2] += 0.1 * rand(rng, udim(dyn, 1), T)
+# Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
+# _, us_1 = unroll_feedback(dyn, times, Ps_strategies, x₁)
+# us_1[1] += 0.1 * rand(rng, udim(dyn, 1), T)
+# us_1[2] += 0.1 * rand(rng, udim(dyn, 1), T)
