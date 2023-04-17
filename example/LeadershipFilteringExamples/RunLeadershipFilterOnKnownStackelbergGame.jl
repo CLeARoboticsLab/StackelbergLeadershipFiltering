@@ -17,14 +17,14 @@ R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
-num_particles = 1000
+num_particles = 100
 
 p = 0.95
 p_init = 0.3
 
 
 threshold = 0.1
-max_iters = 50
+max_iters = 25
 step_size = 0.01
 
 
@@ -92,7 +92,9 @@ true_xs = xs
 # q = @layout [a b; c d; e f]
 p = @layout [a; b]
 
-q1 = plot(legend=:outertopright, ylabel="y (m)", xlabel="x (m)", title="Lead. Filter on Output, Ts=20 time steps")
+q1 = plot(legend=:outertopright, ylabel="y (m)", xlabel="x (m)", title=string("LF on Noisy LQ Stack., leader=", leader_idx,
+                                                                              ", Ts=", Ts,
+                                                                              ", Ns=", num_particles))
 plot!(q1, true_xs[1, :], true_xs[3, :], label="P1 pos", ylimit=(-2.0, 2.0), xlimit=(-2.0, 2.0))
 plot!(q1, true_xs[5, :], true_xs[7, :], label="P2 pos")
 

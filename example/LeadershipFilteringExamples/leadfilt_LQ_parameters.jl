@@ -1,7 +1,7 @@
 using StackelbergControlHypothesesFiltering
 
 dt = 0.05
-T = 51
+T = 101
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -14,7 +14,9 @@ num_players = num_agents(dyn)
 leader_idx = 2
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
-P₁ = Diagonal([1e-4 for _ in 1:xdim(dyn)])
+pos_unc = 1e-2
+vel_unc = 1e-3
+P₁ = Diagonal([pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc])
 
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(8)
