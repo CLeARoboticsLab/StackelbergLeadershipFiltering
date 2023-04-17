@@ -97,6 +97,9 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
 
     # Initialize the state iterations
     xs_km1 = xs_1
+    if norm(xs_km1 - xs_1) != 0
+        println("init diff should be 0: ", xs_km1, " ", xs_1)
+    end
     @assert all(xs_km1[:, 1] .== x₁)
     us_km1 = us_1
 
