@@ -30,7 +30,8 @@ end
 
 export get_underlying_dynamics, get_state, get_current_state
 
-
+# Since this dynamics just stacks history on top of another cost, we define a unique propagate dynamics for it.
+# TODO(hamzah) - Should there be an `ode` function for this? Probably could be.
 function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)

@@ -46,19 +46,6 @@ function get_control_dynamics(dyn::Dynamics, player_idx::Int)
     return dyn.Bs[player_idx]
 end
 
-
-# A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
-function propagate_dynamics(dyn::Dynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
-    # Ensure that there should not be any process noise.
-    @assert vdim(dyn) == 0
-    @assert time_range[1] ≤ time_range[2]
-
-    return propagate_dynamics(dyn, time_range, x, us, nothing)
-end
-
 function propagate_dynamics(dyn::LinearDynamics,
                             time_range,
                             x::AbstractVector{Float64},

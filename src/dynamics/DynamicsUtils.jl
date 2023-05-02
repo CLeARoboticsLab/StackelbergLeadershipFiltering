@@ -2,7 +2,7 @@
 
 # Every Dynamics is assumed to have the following functions defined on it:
 # - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
-# - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
+# - ode(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
 # - Fx(dyn, time_range, x, us) - first-order derivatives wrt state x
 # - Fus(dyn, time_range, x, us) - first-order derivatives wrt state us
 
@@ -45,6 +45,26 @@ export homogenize_state, homogenize_ctrls
 # By default, generate no process noise. Allow 
 function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))
+end
+
+# A function definition that uses RK4 integration to provide the next step.
+# No process noise for now. Some aggregate dynamics (i.e. DynamicsWithHistory) will define their own.
+function step_rk4(dyn::Function
+                  time_range,
+                  x::AbstractVector{Float64},
+                  us::AbstractVector{<:AbstractVector{Float64}})
+    # Ensure that there should not be any process noise.
+    @assert vdim(dyn) == 0
+    @assert time_range[1] ≤ time_range[2]
+
+    δt = time_range[2] - time_range[1]
+
+    k₁ = ode(dyn, time_range, x, us)
+    k₂ = ode(dyn, time_range, x + (k₁/2) * δt, us)
+    k₃ = ode(dyn, time_range, x + (k₂/2) * δt, us)
+    k₄ = ode(dyn, time_range, x + k₃ * δt, us)
+
+    return x + (1/6) * (k₁ + 2*k₂ + 2*k₃ + k₄) * δt
 end
 
 # A function that produces a first-order Taylor linearization of the dynamics.

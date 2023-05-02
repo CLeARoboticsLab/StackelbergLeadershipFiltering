@@ -14,12 +14,12 @@ end
 # Constructor
 UnicycleDynamics(num_players::Int) = UnicycleDynamics(SystemInfo(num_players, 4*num_players, 2*ones(num_players)))
 
-function propagate_dynamics(dyn::UnicycleDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+# produce ode(.) = ẋ = f(x, us)
+function ode(dyn::UnicycleDynamics,
+             time_range,
+             x::AbstractVector{Float64},
+             us::AbstractVector{<:AbstractVector{Float64})
 
-    # In this nonlinear system, no need to homogenize the inputs because we don't matrix multiply anywhere.
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -27,8 +27,7 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         @assert size(us[ii], 1) == 2 * N
     end
 
-    x_tp1 = zeros(xdim(dyn), 1)
-    dt = time_range[2] - time_range[1]
+    dxdt_tp1 = zeros(xdim(dyn), 1)
 
     for ii in 1:N
         start_idx = 4 * (ii-1)
@@ -40,9 +39,34 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         turn_rate = us[ii][1]
         accel = us[ii][2]
 
-        x_tp1[start_idx+1:start_idx+4] = x[start_idx+1:start_idx+4] + dt * [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+        dxdt_tp1[start_idx+1:start_idx+4] = [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+    end
 
-        # Wrap angle before propagation
+    return dxdt_tp1
+
+end
+
+function propagate_dynamics(dyn::UnicycleDynamics,
+                            time_range,
+                            x::AbstractVector{Float64},
+                            us::AbstractVector{<:AbstractVector{Float64}})
+    N = num_agents(dyn)
+    @assert N == length(us)
+    @assert size(x, 1) == 4 * N
+    for ii in 1:N
+        @assert size(us[ii], 1) == 2 * N
+    end
+
+    # x_tp1 = zeros(xdim(dyn), 1)
+    # dt = time_range[2] - time_range[1]
+
+    x_tp1 = step_rk4(dyn, time_range, x, us)
+
+    # Some addition processing is needed to account for angle overflow.
+    for ii in 1:N
+        start_idx = 4 * (ii-1)
+
+        # Wrap angle to [-pi, pi) before propagation.
         x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
     end
 
