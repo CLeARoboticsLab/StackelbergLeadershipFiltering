@@ -138,7 +138,8 @@ function leadership_filter(dyn::Dynamics,
                            P₁, # initial covariance at the beginning of simulation
                            us, # the control inputs that the actor takes
                            zs, # the measurements
-                           R,
+                           R,  # measurement noise
+                           process_noise_distribution,
                            s_init_distrib::Distribution{Univariate, Discrete},
                            discrete_state_transition::Function;
                            threshold,
@@ -212,7 +213,7 @@ function leadership_filter(dyn::Dynamics,
         # TODO(hamzah) - update for multiple historical states
         Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
 
-        f_dynamics(time_range, X, us, rng) = propagate_dynamics(dyn_w_hist, time_range, X, us)
+        f_dynamics(time_range, X, us, rng) = propagate_dynamics(dyn_w_hist, time_range, X, us) + vcat(zeros(xdim(dyn_w_hist) - xdim(dyn)), rand(rng, process_noise_distribution))
 
         ttm1 = (tt == 1) ? 1 : tt-1
         time_range = (times[ttm1], times[tt])

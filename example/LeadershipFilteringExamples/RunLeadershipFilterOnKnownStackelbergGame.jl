@@ -6,6 +6,8 @@ using LinearAlgebra
 using Random
 using Plots
 
+gr()
+
 include("leadfilt_LQ_parameters.jl")
 
 # CONFIG: 
@@ -17,7 +19,7 @@ R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
-num_particles = 100
+num_particles = 50
 
 p = 0.95
 p_init = 0.3
@@ -67,6 +69,8 @@ end
 discrete_state_transition, state_trans_P = generate_discrete_state_transition(p, p)
 s_init_distrib = Bernoulli(p_init)
 
+process_noise_distribution = MvNormal(zeros(xdim(dyn)), Q)
+
 
 x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t0, times,
                            T,         # simulation horizon
@@ -77,6 +81,7 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t0, times,
                            us,        # the control inputs that the actor takes
                            zs,        # the measurements
                            R,
+                           process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;
                            threshold=threshold,
@@ -111,32 +116,32 @@ PLOT_WHOLE_TRAJECTORY = false # if true, plot the whole trajectory at each cycle
 # This plots the line formed by the measurement model outputs (for when we have 1 game played).
 # However, it switches between whatever the leadership state of the particle is.
 # println(size(pf.z_models), " ", pf.z_models)
-for t in 2:T
-    # println(pf.z_models[1,:,t], pf.z_models[3,:,t])
-    num_iters = [0, 0]
-    for n in 1:num_particles
+# for t in 2:T
+#     # println(pf.z_models[1,:,t], pf.z_models[3,:,t])
+#     num_iters = [0, 0]
+#     for n in 1:num_particles
 
-        num_iter_1 = sg_objs[t].num_iterations[n]
-        num_iter_2 = sg_objs[t].num_iterations[n]
+#         num_iter_1 = sg_objs[t].num_iterations[n]
+#         num_iter_2 = sg_objs[t].num_iterations[n]
 
-        # println("particle n thinks leader is: ", n)
-        # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
-        # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
+#         # println("particle n thinks leader is: ", n)
+#         # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
+#         # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
 
-        x1_idx = 1
-        y1_idx = 3
-        x2_idx = 5
-        y2_idx = 7
+#         x1_idx = 1
+#         y1_idx = 3
+#         x2_idx = 5
+#         y2_idx = 7
 
-        # TODO(hamzah) - change color based on which agent is leader
-        scatter!(q1, sg_objs[t].xks[n, num_iter_1, x1_idx, :], sg_objs[t].xks[n, num_iter_1, y1_idx, :], color=:black, markersize=0.15, label="")
-        scatter!(q1, sg_objs[t].xks[n, num_iter_2, x2_idx, :], sg_objs[t].xks[n, num_iter_2, y2_idx, :], color=:black, markersize=0.15, label="")
-    end
+#         # TODO(hamzah) - change color based on which agent is leader
+#         scatter!(q1, sg_objs[t].xks[n, num_iter_1, x1_idx, :], sg_objs[t].xks[n, num_iter_1, y1_idx, :], color=:black, markersize=0.15, label="")
+#         scatter!(q1, sg_objs[t].xks[n, num_iter_2, x2_idx, :], sg_objs[t].xks[n, num_iter_2, y2_idx, :], color=:black, markersize=0.15, label="")
+#     end
 
-    # Plot the h(X) for each of the particles.
-    # scatter!(q1, pf.z_models[1,:,t], pf.z_models[3,:,t], color=:black, markersize=0.15, label="")
-    # scatter!(q1, pf.z_models[5,:,t], pf.z_models[7,:,t], color=:black, markersize=0.15, label="")
-end
+#     # Plot the h(X) for each of the particles.
+#     # scatter!(q1, pf.z_models[1,:,t], pf.z_models[3,:,t], color=:black, markersize=0.15, label="")
+#     # scatter!(q1, pf.z_models[5,:,t], pf.z_models[7,:,t], color=:black, markersize=0.15, label="")
+# end
     # t, particles[2, :, :][:, :]', color=:black, markersize=0.15, label="", yrange=(-plot_mult*5.0,plot_mult*5.0), legend=:outertopright, ylabel="position (m)")
 
 # q2 = plot(times, xs_k[1,:], label="P1 px", legend=:outertopright)
