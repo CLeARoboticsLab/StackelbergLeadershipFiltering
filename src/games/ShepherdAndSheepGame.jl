@@ -35,7 +35,7 @@ Q₁ = zeros(8, 8)
 Q₁[5, 5] = 1.0
 Q₁[7, 7] = 1.0
 c₁ = QuadraticCost(Q₁)
-add_control_cost!(c₁, 1, 1 * diagm([1, 1]))
+add_control_cost!(c₁, 1, .1 * diagm([1, 1]))
 add_control_cost!(c₁, 2, zeros(2, 2))
 
 Q₂ = zeros(8, 8)

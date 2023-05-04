@@ -101,11 +101,9 @@ end
 # Q: How to represent the discrete state in places where the continuous state is needed?
 # Assumption: discrete state takes value 1 or 2.
 MultiStateIntT = Int8
-function initialize_particle_filter(x̄_prior, P_prior, s_init_distribution, t0, Ns, num_data, meas_size, seed)
+function initialize_particle_filter(x̄_prior, P_prior, s_init_distribution, t0, Ns, num_data, meas_size, rng)
 
     num_disc_states = 1
-
-    rng = MersenneTwister(seed)
 
     # Sample particles and weights at initial time.
     prior_state_distrib = MvNormal(x̄_prior, P_prior)
