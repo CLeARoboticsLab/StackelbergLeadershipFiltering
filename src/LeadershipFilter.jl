@@ -229,11 +229,8 @@ function leadership_filter(dyn::Dynamics,
         s_idx = (dyn_w_hist.num_hist-1) * num_states+1
         e_idx = xdim(dyn_w_hist)
         P̂s[:, :, tt] = big_P[s_idx:e_idx, s_idx:e_idx]
-        # println(tt, " x - ", x̂s[:, tt])
-        # println(tt, " P - ", norm(P̂s[:, :, tt]))
 
         lead_probs[tt] = pf.ŝ_probs[tt]
-        # println(tt, " prob - ", lead_probs[tt])
     end
     
     # outputs: (1) state estimates, uncertainty estimates, leadership_probabilities over time, debug data

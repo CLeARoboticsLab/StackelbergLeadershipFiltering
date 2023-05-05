@@ -27,11 +27,12 @@ u_inputs = Dict(i => ones(1) for i in 1:num_data) # inputs should always be 1 or
 #                                 PF(x̄_prior,P_prior,u_inputs,t,t0,z,meas_R,f_dynamics_1,h₁,
 #                                 process_noise_distribution;seed=seed,Ns=Ns)
 
-# x̂✶_PF, P_PF, z̄_PF, P̄_zz_PF, ϵ_bar, ϵ_hat, N̂s_n, s_PF, s_probs, particles =
-#     two_state_PF(x̄_prior,P_prior,u_inputs,s_prior_distrib,t,t0,z,meas_R,discrete_state_transition,f_dynamics,[h₁, h₂],
-#                  ;seed=seed,Ns=Ns)
+x̂✶_PF, P_PF, z̄_PF, P̄_zz_PF, ϵ_bar, ϵ_hat, N̂s_n, s_PF, s_probs, particles = 
+    two_state_PF(x̄_prior,P_prior,u_inputs,s_prior_distrib,t,t0,z,meas_R,discrete_state_transition,f_dynamics,[h₁, h₂],
+                 ;seed=seed,Ns=Ns)
 
 # Run an iterative particle filter that can be used real-time.
+rng = MersenneTwister(seed)
 pf = initialize_particle_filter(x̄_prior, P_prior, s_prior_distrib, t0, Ns, num_data, size(meas_R, 1), rng)
 for tt in 1:num_data
     prev_time = (tt == 1) ? t0 : t[tt-1]

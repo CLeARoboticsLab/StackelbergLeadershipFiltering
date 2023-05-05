@@ -10,6 +10,11 @@ gr()
 
 include("leadfilt_LQ_parameters.jl")
 
+
+
+# TODO(hamzah) - Steal the plots made for the animation file!
+
+
 # CONFIG: 
 # We define an uncertainty for the measurements R arbitrarily - easy for now.
 # 
