@@ -1,3 +1,5 @@
+using ForwardDiff
+
 # TODO(hamzah) Add better tests for the LinearDynamics struct and associated functions.
 # Describes the dynamics x_{t+1} = Ax_t + a + ∑Buᵢ_t + Dv_t; x = state, u = inputs, v = process noise
 struct LinearDynamics <: Dynamics
@@ -50,8 +52,8 @@ end
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
 function propagate_dynamics(dyn::Dynamics,
                             time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+                            x,
+                            us)
     # Ensure that there should not be any process noise.
     @assert vdim(dyn) == 0
     @assert time_range[1] ≤ time_range[2]
@@ -61,12 +63,13 @@ end
 
 function propagate_dynamics(dyn::LinearDynamics,
                             time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
+                            x,
+                            us,
                             v::Union{Nothing, AbstractVector{Float64}})
     N = num_agents(dyn)
 
     # Assertions to confirm sizes.
+    @assert size(us, 1) == N
     @assert size(x, 1) == xdim(dyn)
     for ii in 1:N
         @assert size(us[ii], 1) == udim(dyn, ii)
@@ -88,14 +91,19 @@ function linearize_dynamics(dyn::LinearDynamics, time_range, x::AbstractVector{F
     return dyn
 end
 
-
 # These are the continuous derivative matrices of the f function.
-function Fx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return dyn.A - I
+function Fx(dyn::LinearDynamics, time_range, x0::AbstractVector{Float64}, u0s::AbstractVector{<:AbstractVector{Float64}})
+    diff_x = x -> propagate_dynamics(dyn, time_range, x, u0s)
+    A = ForwardDiff.jacobian(diff_x, x0)
+    return A - I
 end
 
-function Fus(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
-    return dyn.Bs
+function Fus(dyn::LinearDynamics, time_range, x0::AbstractVector{Float64}, u0s::AbstractVector{<:AbstractVector{Float64}})
+    u0s_combined = vcat(u0s...)
+    diff_us = us -> propagate_dynamics(dyn, time_range, x0, split(us, num_us(dyn)))
+    combined_Bs = ForwardDiff.jacobian(diff_us, u0s_combined)
+    Bs = transpose.(split(combined_Bs', num_us(dyn)))
+    return Bs
 end
 
 # TODO(hmzh) - may need dfdv as well

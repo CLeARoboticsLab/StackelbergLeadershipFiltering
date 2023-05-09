@@ -16,9 +16,8 @@ UnicycleDynamics(num_players::Int) = UnicycleDynamics(SystemInfo(num_players, 4*
 
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
-
+                            x::AbstractVector{T},
+                            us::AbstractVector{<:AbstractVector{T}}) where T
     # In this nonlinear system, no need to homogenize the inputs because we don't matrix multiply anywhere.
     N = num_agents(dyn)
     @assert N == length(us)
@@ -27,7 +26,9 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         @assert size(us[ii], 1) == 2 * N
     end
 
-    x_tp1 = zeros(xdim(dyn), 1)
+    # Convert the inputs to the necessary type.
+
+    x_tp1 = x
     dt = time_range[2] - time_range[1]
 
     for ii in 1:N
@@ -40,7 +41,12 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         turn_rate = us[ii][1]
         accel = us[ii][2]
 
-        x_tp1[start_idx+1:start_idx+4] = x[start_idx+1:start_idx+4] + dt * [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+        # x_tp1[start_idx+1:start_idx+4] += dt * [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+        x_tp1[start_idx+1] += dt * vel * cos(theta)
+        x_tp1[start_idx+2] += dt * vel * sin(theta)
+        x_tp1[start_idx+3] += dt * turn_rate
+        x_tp1[start_idx+4] += dt * accel
+        # ; vel * sin(theta); turn_rate; accel
 
         # Wrap angle before propagation
         x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
@@ -52,9 +58,9 @@ end
 # TODO: Unicycle dynamics doesn't currently support process noise.
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::AbstractVector{Float64})
+                            x::AbstractVector{T},
+                            us::AbstractVector{<:AbstractVector{T}},
+                            v::AbstractVector{Float64}) where T
     throw(MethodError("propagate_dynamics not implemented with process noise for UnicycleDynamics"))
 end
 

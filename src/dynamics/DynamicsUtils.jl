@@ -48,14 +48,37 @@ function generate_process_noise(dyn::Dynamics, rng)
 end
 
 # A function that produces a first-order Taylor linearization of the dynamics.
-function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize_dynamics(dyn::Dynamics,
+                            time_range,
+                            x0::AbstractVector{Float64},
+                            u0s::AbstractVector{<:AbstractVector{Float64}})
     t₀, t = time_range
     dt = t - t₀
     @assert t₀ ≤ t
 
-    A = I + dt * Fx(dyn, time_range, x, us)
-    Bs = Fus(dyn, time_range, x, us)
+    A = get_A(dyn, time_range, x0, u0s)
+    Bs = get_Bs(dyn, time_range, x0, u0s)
     return LinearDynamics(A, Bs)
+end
+
+function get_A(dyn::Dynamics,
+               time_range,
+               x0::AbstractVector{Float64},
+               u0s::AbstractVector{<:AbstractVector{Float64}})
+    diff_x = x -> propagate_dynamics(dyn, time_range, x, u0s)
+    A = ForwardDiff.jacobian(diff_x, x0)
+    return A - I
+end
+
+function get_Bs(dyn::Dynamics,
+                time_range,
+                x0::AbstractVector{Float64},
+                u0s::AbstractVector{<:AbstractVector{Float64}})
+    u0s_combined = vcat(u0s...)
+    diff_us = us -> propagate_dynamics(dyn, time_range, x0, split(us, num_us(dyn)))
+    combined_Bs = ForwardDiff.jacobian(diff_us, u0s_combined)
+    Bs = transpose.(split(combined_Bs', num_us(dyn)))
+    return Bs
 end
 
 # Export the types of dynamics.
@@ -73,6 +96,10 @@ end
 
 function udim(dyn::Dynamics)
     return udim(dyn.sys_info)
+end
+
+function num_us(dyn::Dynamics)
+    return num_us(dyn.sys_info)
 end
 
 function udim(dyn::Dynamics, player_idx)
@@ -96,4 +123,4 @@ function uhdim(dyn::Dynamics, player_idx)
     return udim(dyn.sys_info, player_idx) + 1
 end
 
-export num_agents, xdim, udim, vdim, xhdim, uhdim
+export num_agents, xdim, udim, num_us, vdim, xhdim, uhdim

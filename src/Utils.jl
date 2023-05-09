@@ -1,5 +1,19 @@
 # Utilities
 
+# A function that splits 2D arrays into vectors of 2D arrays
+# Use case. combining and splitting control inputs.
+function split(x, n)
+    @assert sum(n) == size(x, 1)
+
+    result = Vector{Matrix{eltype(x)}}()
+    start = firstindex(x)
+    for len in n
+        push!(result, x[start:(start + len - 1), :])
+        start += len
+    end
+    return result
+end
+
 
 # TODO(hmzh) Add a game class of some sort that ties together the system info, cost, and dynamics, factoring in possible
 #            homogenization.
@@ -23,6 +37,10 @@ function udim(sys_info::SystemInfo)
     return sum(sys_info.num_us)
 end
 
+function num_us(sys_info::SystemInfo)
+    return sys_info.num_us
+end
+
 function udim(sys_info::SystemInfo, player_idx)
     return sys_info.num_us[player_idx]
 end
@@ -44,7 +62,7 @@ function uhdim(sys_info::SystemInfo, player_idx)
     return sys_info.num_us[player_idx] + 1
 end
 
-export SystemInfo, num_agents, xdim, udim, vdim, xhdim, uhdim
+export SystemInfo, num_agents, xdim, udim, num_us, vdim, xhdim, uhdim
 
 
 function homogenize_vector(v::AbstractVector{Float64})

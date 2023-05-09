@@ -10,9 +10,9 @@ leader_idx=2
 num_runs=1
 
 # config variables
-threshold=1.
+threshold=0.1
 max_iters=1000
-step_size=1e-2
+step_size=5e-3
 verbose=true
 
 sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs;
