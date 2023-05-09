@@ -24,7 +24,7 @@ function propagate_dynamics(dyn::UnicycleDynamics,
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
-        @assert size(us[ii], 1) == 2 * N
+        @assert size(us[ii], 1) == 2
     end
 
     x_tp1 = zeros(xdim(dyn), 1)
@@ -65,12 +65,12 @@ function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::A
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
-        @assert size(us[ii], 1) == 2 * N
+        @assert size(us[ii], 1) == 2
     end
-    num_states = xdim(dyn)
-    As = [sparse(zeros(num_states, num_states)) for ii in 1:N]
+    num_states_per_player = Int(xdim(dyn) / N)
+    As = [sparse(zeros(num_states_per_player, num_states_per_player)) for ii in 1:N]
     for ii in 1:N
-        start_idx = num_states * (ii-1)
+        start_idx = num_states_per_player * (ii-1)
         theta = x[start_idx + 3]
         v = x[start_idx + 4]
 
@@ -87,14 +87,14 @@ function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
     for ii in 1:N
-        @assert size(us[ii], 1) == 2 * N
+        @assert size(us[ii], 1) == 2
     end
-    num_states = xdim(dyn)
+    num_states_per_player = Int(xdim(dyn) / N)
     Bs = [zeros(xdim(dyn), udim(dyn, ii)) for ii in 1:N]
     prev_time, curr_time = time_range
     dt = curr_time - prev_time
     for ii in 1:N
-        start_idx = num_states * (ii-1)
+        start_idx = num_states_per_player * (ii-1)
         Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
     end
     return Bs

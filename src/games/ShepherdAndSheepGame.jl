@@ -30,6 +30,10 @@ B₂(dt) = vcat(zeros(4, 2),
 
 ShepherdAndSheepDynamics(dt) = LinearDynamics(shepherd_A(dt), [B₁(dt), B₂(dt)])
 
+# Nonlinear version of this game.
+ShepherdAndSheepWithUnicycleDynamics() = UnicycleDynamics(2)
+
+
 # Costs reflecting the preferences above.
 Q₁ = zeros(8, 8)
 Q₁[5, 5] = 1.0
@@ -54,4 +58,4 @@ add_control_cost!(c₂, 1, zeros(2, 2))
 # Gets a vector of costs, one per player.
 ShepherdAndSheepCosts() = [c₁, c₂]
 
-export ShepherdAndSheepDynamics, ShepherdAndSheepCosts
+export ShepherdAndSheepDynamics, ShepherdAndSheepWithUnicycleDynamics, ShepherdAndSheepCosts
