@@ -11,27 +11,27 @@ horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
 dyn = ShepherdAndSheepWithUnicycleDynamics()
-costs = ShepherdAndSheepCosts()
+costs = UnicycleShepherdAndSheepWithQuadraticCosts()
 num_players = num_agents(dyn)
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
-x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
+x₁ = [2.; 1.; 0.; 0.; -1.; 2; 0; 0]
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(rng, 8)
-x₁[[2, 4, 6, 8]] .= 0
+x₁[[3, 4, 7, 8]] .= 0
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
 # for ii in 1:num_players
-# angular velocities
 
-us_1[1][1,:] .= -.1
-us_1[2][1,:] .= -.1
+# angular velocities
+us_1[1][1,:] .= -.03
+us_1[2][1,:] .= -.01
 
 # accelerations
-us_1[1][2,:] .= -1.
-us_1[2][2,:] .= -1.
+us_1[1][2,:] .= -.3
+us_1[2][2,:] .= .3
 
 # end
 # duration = (T-1) * dt
