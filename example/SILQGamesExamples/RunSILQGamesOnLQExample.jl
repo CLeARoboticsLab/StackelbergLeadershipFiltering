@@ -29,46 +29,53 @@ using ElectronDisplay
 using Plots
 
 # Plot positions, other two states, controls, and convergence.
-q = @layout [a b; c d; e f]
+q = @layout [a b c; d e f; g h i]
 
-q1 = plot(legend=:outertopright)
-plot!(q1, xs_k[1, :], xs_k[3, :], label="leader pos")
-plot!(q1, xs_k[5, :], xs_k[7, :], label="follower pos")
+q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
-# q1 = plot(xs_i[1,:], xs_i[2,:], label="", legend=:outertopright, title="Iterative LQR")
-q1 = scatter!([x₁[1]], [x₁[3]], color="blue", label="start P1")
-q1 = scatter!([x₁[5]], [x₁[7]], color="red", label="start P2")
+# q1 = plot(legend=:outertopright)
+# plot!(q1, xs_k[1, :], xs_k[3, :], label="leader pos")
+# plot!(q1, xs_k[5, :], xs_k[7, :], label="follower pos")
 
-q2 = plot(times, xs_k[1,:], label="P1 px", legend=:outertopright)
-plot!(times, xs_k[3,:], label="P1 py")
-plot!(times, xs_k[5,:], label="P2 px", legend=:outertopright)
-plot!(times, xs_k[7,:], label="P2 py")
+# # q1 = plot(xs_i[1,:], xs_i[2,:], label="", legend=:outertopright, title="Iterative LQR")
+# q1 = scatter!([x₁[1]], [x₁[3]], color="blue", label="start P1")
+# q1 = scatter!([x₁[5]], [x₁[7]], color="red", label="start P2")
 
-q3 = plot(times, xs_k[2,:], label="vel1 x", legend=:outertopright)
-plot!(times, xs_k[4,:], label="vel1 y")
-plot!(times, xs_k[6,:], label="vel2 x")
-plot!(times, xs_k[8,:], label="vel2 y")
+# q2 = plot(times, xs_k[1,:], label="P1 px", legend=:outertopright)
+# plot!(times, xs_k[3,:], label="P1 py")
+# plot!(times, xs_k[5,:], label="P2 px", legend=:outertopright)
+# plot!(times, xs_k[7,:], label="P2 py")
 
-q4 = plot(times, us_k[1][1, :], label="P1 accel x", legend=:outertopright)
-plot!(times, us_k[1][2, :], label="P1 accel y")
-plot!(times, us_k[2][1, :], label="P2 accel x", legend=:outertopright)
-plot!(times, us_k[2][2, :], label="P2 accel y")
+# q3 = plot(times, xs_k[2,:], label="vel1 x", legend=:outertopright)
+# plot!(times, xs_k[4,:], label="vel1 y")
+# plot!(times, xs_k[6,:], label="vel2 x")
+# plot!(times, xs_k[8,:], label="vel2 y")
 
-# Plot convergence.
+# q4 = plot(times, us_k[1][1, :], label="P1 accel x", legend=:outertopright)
+# plot!(times, us_k[1][2, :], label="P1 accel y")
+# plot!(times, us_k[2][1, :], label="P2 accel x", legend=:outertopright)
+# plot!(times, us_k[2][2, :], label="P2 accel y")
+
+
+# Plot convergence metrics.
 conv_x = cumsum(ones(num_iters)) .- 1
-q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1", yaxis=:log, legend=:outertopright)
-plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
+title8 = "||k||^2 by player"
+q8 = plot(title=title8, yaxis=:log, legend=:outertopright)
+plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1")
+plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
 
 conv_sum = conv_metrics[1, 1:num_iters] + conv_metrics[2, 1:num_iters]
-plot!(conv_x, conv_sum, label="total", yaxis=:log)
+plot!(conv_x, conv_sum, label="total")
 
-q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log, legend=:outertopright)
-plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
+title9 = "evaluated costs"
+q9 = plot(title=title9, yaxis=:log, legend=:outertopright)
+plot!(conv_x, evaluated_costs[1, 1:num_iters], label="p1")
+plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2")
 
 cost_sum = evaluated_costs[1, 1:num_iters] + evaluated_costs[2, 1:num_iters]
-plot!(conv_x, cost_sum, label="total", yaxis=:log)
+plot!(conv_x, cost_sum, label="total")
 
-plot(q1, q2, q3, q4, q5, q6, layout = q)
+plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
 
 
 
