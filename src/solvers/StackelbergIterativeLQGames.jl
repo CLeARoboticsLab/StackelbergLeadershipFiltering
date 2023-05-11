@@ -178,6 +178,8 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         # Evaluate and store the costs.
         evaluated_costs[:, num_iters+2] = [evaluate(sg.costs[ii], xs_k, us_k) for ii in 1:num_players]
 
+        is_converged = abs(sum(evaluated_costs[:, num_iters+1] - evaluated_costs[:, num_iters+2])) < sg.threshold
+
         if sg.verbose
             old_metric = (num_iters == 0) ? 0. : sum(convergence_metrics[:, num_iters])
             new_metric = sum(convergence_metrics[:, num_iters+1])
