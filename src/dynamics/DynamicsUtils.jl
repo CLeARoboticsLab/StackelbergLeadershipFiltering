@@ -5,7 +5,7 @@
 # - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
 # - Fx(dyn, time_range, x, us) - first-order derivatives wrt state x
 # - Fus(dyn, time_range, x, us) - first-order derivatives wrt state us
-# - produce_state_and_control_plots(dyn, times, xs, us) - produce Plots.jl versions of plots for all states in the dynamics provided
+# - plot_states_and_controls(dyn, times, xs, us) - produce Plots.jl versions of plots for all states in the dynamics provided
 
 # No dynamics should require homogenized inputs. The functions themselves should transform the inputs/outputs as needed.
 

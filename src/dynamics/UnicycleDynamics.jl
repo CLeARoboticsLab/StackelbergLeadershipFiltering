@@ -103,7 +103,7 @@ end
 export UnicycleDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus
 
 
-function produce_state_and_control_plots(dyn::UnicycleDynamics, times, xs, us)
+function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us)
     x₁ = xs[:, 1]
 
     title1 = "pos. traj."
@@ -147,4 +147,4 @@ function produce_state_and_control_plots(dyn::UnicycleDynamics, times, xs, us)
     return q1, q2a, q2b, q3, q4, q5, q6
 end
 
-export produce_state_and_control_plots
+export plot_states_and_controls

@@ -31,7 +31,7 @@ using Plots
 # Plot positions, other two states, controls, and convergence.
 q = @layout [a b c; d e f; g h i]
 
-q1, q2, q3, q4, q5, q6, q7 = produce_state_and_control_plots(dyn, times, xs_k, us_k)
+q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
 # Plot convergence.
 conv_x = cumsum(ones(num_iters)) .- 1

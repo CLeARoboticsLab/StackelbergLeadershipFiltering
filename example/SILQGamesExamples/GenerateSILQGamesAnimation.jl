@@ -13,7 +13,7 @@ anim = @animate for k in iter
     un1s = sg_obj.uks[1][1, k, :, :]
     un2s = sg_obj.uks[2][1, k, :, :]
 
-    p1, p2, p3, p4, p5, p6, p7 = produce_state_and_control_plots(dyn, times, xns, [un1s, un2s])
+    p1, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times, xns, [un1s, un2s])
 
     plot(p1, p2, p3, p4, p5, p6, p7, layout = p)
 end
