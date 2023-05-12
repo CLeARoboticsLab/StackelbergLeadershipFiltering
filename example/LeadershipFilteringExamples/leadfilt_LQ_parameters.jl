@@ -11,7 +11,7 @@ dyn = ShepherdAndSheepDynamics(dt)
 costs = ShepherdAndSheepCosts()
 num_players = num_agents(dyn)
 
-leader_idx = 2
+leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
 pos_unc = 1e-3
