@@ -104,7 +104,12 @@ end
 export LinearDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus
 
 using Plots
+# TODO(hamzah) - refactor this to be tied DoubleIntegrator Dynamics instead of Linear Dynamics.
 function plot_states_and_controls(dyn::LinearDynamics, times, xs, us)
+    @assert num_agents(dyn) == 2
+    @assert xdim(dyn) == 8
+    @assert udim(dyn, 1) == 2
+    @assert udim(dyn, 2) == 2
     x₁ = xs[:, 1]
 
     title1 = "pos. traj."

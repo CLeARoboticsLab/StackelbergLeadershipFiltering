@@ -102,8 +102,10 @@ end
 
 export UnicycleDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus
 
-
+# TODO(hamzah) - refactor this to adjust based on number of players instead of assuming 2.
 function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us)
+    @assert num_agents(dyn) == 2
+
     x₁ = xs[:, 1]
 
     title1 = "pos. traj."
