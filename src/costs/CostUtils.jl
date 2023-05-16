@@ -56,14 +56,17 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     return total
 end
 
-function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+# Return the second order Taylor approximation for dx = x - x0:
+# g(x0 + dx, u0s + dus) ≈ f(x, us) + dx' ∇ₓ g(x0, u0s) + (1/2) dx' ∇ₓₓ g(x0, u0s) dx
+#                                  + ∑ du' ∇ᵤ g(x0, u0s) + (1/2) du' ∇ᵤᵤ g(x0, u0s) du
+function quadraticize_costs(c::Cost, time_range, x0::AbstractVector{Float64}, u0s::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(us)
 
-    cost_eval = compute_cost(c, time_range, x, us)
-    ddx2 = Gxx(c, time_range, x, us)
-    dx = Gx(c, time_range, x, us)
-    ddu2s = Guus(c, time_range, x, us)
-    dus = Gus(c, time_range, x, us)
+    cost_eval = compute_cost(c, time_range, x0, u0s)
+    ddx2 = Gxx(c, time_range, x0, u0s)
+    dx = Gx(c, time_range, x0, u0s)
+    ddu2s = Guus(c, time_range, x0, u0s)
+    dus = Gus(c, time_range, x0, u0s)
 
     # Used to compute the way the constant cost terms are divided.
     num_cost_mats = length(ddu2s)
@@ -74,6 +77,8 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
     for (ii, du) in dus
         add_control_cost!(quad_cost, ii, ddu2s[ii]; r=dus[ii]', cr=const_cost_term)
     end
+
+    # offset_cost = QuadraticCostWithOffset(quad_cost, x0, u0s)
 
     return quad_cost
 end

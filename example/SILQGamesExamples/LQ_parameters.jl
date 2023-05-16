@@ -21,10 +21,10 @@ x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
 # x₁ = rand(rng, 8)
 x₁[[2, 4, 6, 8]] .= 0
 
-# Initial controls
+# Initial controls - pretty bad linearization
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
 for ii in 1:num_players
-    us_1[ii][1,:] .= -1.
+    us_1[ii][1,:] .= -.1
     us_1[ii][2,:] .= -.1
 end
 # duration = (T-1) * dt
