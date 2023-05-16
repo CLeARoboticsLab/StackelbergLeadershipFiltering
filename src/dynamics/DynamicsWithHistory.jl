@@ -16,9 +16,10 @@ function get_underlying_dynamics(dyn::DynamicsWithHistory)
     return dyn.dyn
 end
 
+# hist_idx is the index of the desired state in the history with 1 as the current state.
 function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64}, hist_idx::Int)
     start_idx = (dyn.num_hist - hist_idx) * xdim(dyn.dyn) + 1
-    end_idx = dyn.num_hist * xdim(dyn.dyn)
+    end_idx = (dyn.num_hist - hist_idx + 1) * xdim(dyn.dyn)
     @assert start_idx > 0
     @assert end_idx <= xdim(dyn)
     return X[start_idx:end_idx]
@@ -38,8 +39,10 @@ function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVec
 
     # Shift first num_hist-1 states down into the history and propagate the dynamics to get the new one.
     end_idx = (dyn.num_hist - 1) * num_states
-    X_new = vcat(X[1:end_idx],
+    X_new = vcat(X[num_states+1:num_states+end_idx],
                  propagate_dynamics(dyn.dyn, time_range, x_t, us))
+
+    @assert all(X[num_states+1:num_states+end_idx] .== X_new[1:end_idx])
     @assert size(X_new, 1) == num_states_w_hist
     return X_new
 end

@@ -32,12 +32,13 @@ x̂✶_PF, P_PF, z̄_PF, P̄_zz_PF, ϵ_bar, ϵ_hat, N̂s_n, s_PF, s_probs, parti
                  ;seed=seed,Ns=Ns)
 
 # Run an iterative particle filter that can be used real-time.
-# pf = initialize_particle_filter(x̄_prior, P_prior, s_prior_distrib, t0, Ns, num_data, size(meas_R, 1), seed)
-# for tt in 1:num_data
-#     prev_time = (tt == 1) ? t0 : t[tt-1]
-#     time_range = (prev_time, t[tt])
-#     step_pf(pf, time_range, f_dynamics,[h₁, h₂], discrete_state_transition, u_inputs[tt], z[tt, :], meas_R)
-# end
+rng = MersenneTwister(seed)
+pf = initialize_particle_filter(x̄_prior, P_prior, s_prior_distrib, t0, Ns, num_data, size(meas_R, 1), rng)
+for tt in 1:num_data
+    prev_time = (tt == 1) ? t0 : t[tt-1]
+    time_range = (prev_time, t[tt])
+    step_pf(pf, time_range, f_dynamics,[h₁, h₂], discrete_state_transition, u_inputs[tt], z[tt, :], meas_R)
+end
 x̂✶_PF, P_PF, z̄_PF, P̄_zz_PF, ϵ_bar, ϵ_hat, N̂s_n, s_PF, s_probs, particles = pf.x̂, pf.P, pf.z̄, pf.P̄_zz, pf.ϵ_bar, pf.ϵ_hat, pf.N̂s, pf.s, pf.ŝ_probs, pf.particles
 println("final PF: ", x̂✶_PF[:, num_data])
 
