@@ -100,7 +100,14 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
 
     # Extract the desired times and controls.
     stack_times = times[s_idx:e_idx]
-    us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
+
+    # DEBUGGING: This line provides the future control trajectory to the filter - should not generally be enabled.
+    # us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
+
+    # Set the initial control estimate to be the initial control repeated into the future for Ts time steps.
+    ctrl_len = e_idx - s_idx + 1
+    us_prev = [us[ii][:, s_idx] for ii in 1:num_agents(dyn)]
+    us_1_from_tt = [repeat(us_prev[ii], 1, ctrl_len) for ii in 1:num_agents(dyn)]
 
     # TODO(hamzah) - For now assumes 1 game played; fix this
     @assert num_games_desired == 1
