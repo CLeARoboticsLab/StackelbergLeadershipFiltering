@@ -16,7 +16,7 @@ P_NORM = 2
 function compute_cost(c::LogBarrierCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     @assert size(x, 1) == size(c.a, 1)
     norm_dx = norm(x[c.indices] - c.a[c.indices], P_NORM)
-    return -log(norm_dx) + log(norm(c.b[c.indices] - c.a[c.indices]))
+    return c.c * (-log(norm_dx) + log(norm(c.b[c.indices] - c.a[c.indices])))
 end
 
 # Derivative term c(x_i - a_i)^-1
