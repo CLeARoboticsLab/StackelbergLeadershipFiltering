@@ -3,36 +3,64 @@ using StackelbergControlHypothesesFiltering
 using LinearAlgebra
 
 # includes linear dynamics and quadratic costs
-include("LQ_parameters.jl")
+include("nonquadratic_linear_parameters.jl")
 
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 
-# Create a weighted cost for P1 - incentivizes the quadratic cost behavior, but also adds a log barrier to avoid going
-# over the y-axis.
-indices = [1] # incentivizes x-position to avoid crossing y-axis
-b = zeros(xdim(dyn)) # cross 0 outside the bounds of the game
-b[indices] .= 1.
-log_cost_p1 = LogBarrierCost(indices, zeros(xdim(dyn)), b)
+# # Create a weighted cost for P1 - incentivizes the quadratic cost behavior, but also adds a log barrier to avoid going
+# # over the y-axis.
+# indices1 = [1] # incentivizes P1 x-position to avoid crossing y-axis at x=0
+# x_offset_1 = zeros(xdim(dyn))
+# x_zero_int_1 = zeros(xdim(dyn)) # cross 0 outside the bounds of the game
+# x_zero_int_1[indices1] .= 10.
+# log_cost_p1 = LogBarrierCost(indices1, x_offset_1, x_zero_int_1)
+
+# indices2 = [5] # incentivizes P2 x-position to avoid crossing y-axis
+# x_offset_2 = zeros(xdim(dyn))
+# x_zero_int_2 = zeros(xdim(dyn)) # cross 0 outside the bounds of the game
+# x_zero_int_2[indices2] .= 10.
+# log_cost_p2 = LogBarrierCost(indices2, x_offset_2, x_zero_int_2)
+
+# P1 - avoid crossing the line [x; y] - [-1/2; -1/2] = 0
+indices1 = [1, 3] # x, y
+x_offset_1 = zeros(xdim(dyn))
+x_offset_1[indices1] .= -(1.0/2)
+x_zero_int_1 = zeros(xdim(dyn))
+x_zero_int_1[indices1] .= 10.
+log_cost_p1 = LogBarrierCost(indices1, x_offset_1, x_zero_int_1)
+
+# P2 - avoid crossing the line [x; y] - [-1/2; -1/2] = 0
+indices2 = [5, 7] # x, y
+x_offset_2 = zeros(xdim(dyn))
+x_offset_2[indices2] .= -(1.0/2)
+x_zero_int_2 = zeros(xdim(dyn))
+x_zero_int_2[indices2] .= 10.
+log_cost_p2 = LogBarrierCost(indices2, x_offset_2, x_zero_int_2)
 
 # Make the weighted cost.
-p1_new_cost = WeightedCost([1.0, 0.1], [deepcopy(costs[1]), log_cost_p1])
-new_costs = [p1_new_cost, costs[2]]
+p1_new_cost = WeightedCost([1.0, 0.05], [deepcopy(costs[1]), log_cost_p1])
+# new_costs = [p1_new_cost, costs[2]]
+
+p2_new_cost = WeightedCost([1.0, 0.05], [deepcopy(costs[2]), log_cost_p2])
+# new_costs = [costs[1], p2_new_cost]
+
+new_costs = [p1_new_cost, p2_new_cost]
 
 leader_idx=1
 num_runs=1
 
 # config variables
-threshold=1.
-max_iters=1000
+threshold=0.0001
+max_iters=10000
 step_size=1e-2
 verbose=true
 
-sg_obj = initialize_silq_games_object(num_runs, leader_idx, T, dyn, new_costs;
+sg_obj = initialize_silq_games_object(num_runs, T, dyn, new_costs;
                                       threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
-xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, times[1], times, x₁, us_1)
+xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, x₁, us_1)
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
-final_cost_totals = [evaluate(costs[ii], xs_k, us_k) for ii in 1:num_players]
+final_cost_totals = [evaluate(new_costs[ii], xs_k, us_k) for ii in 1:num_players]
 println("final: ", xs_k[:, T], " with trajectory costs: ", final_cost_totals)
 println(size(xs_k), " ", size(us_k[1]), " ", size(us_k[2]))
 
@@ -68,7 +96,7 @@ plot!(times, us_k[2][2, :], label="P2 accel y")
 
 # Plot convergence.
 conv_x = cumsum(ones(num_iters)) .- 1
-q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1", yaxis=:log)
+q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="||k||^2 metric", label="p1", yaxis=:log)
 plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
 
 q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log)

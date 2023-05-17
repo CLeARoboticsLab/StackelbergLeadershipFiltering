@@ -17,7 +17,6 @@ end
 function Gus(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(c.weights)
     Gs = [Gus(c_i, time_range, x, us) for c_i in c.costs]
-    # return Dict(jj => sum(c.weights[ii] * G[ii][jj] for G in Gs) for ii in 1:length(c.weights) for jj in 1:num_players)
     return Dict(jj => sum(c.weights[ii] * Gs[ii][jj] for ii in 1:length(c.weights)) for jj in 1:num_players)
 end
 
@@ -28,7 +27,6 @@ end
 function Guus(c::WeightedCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     num_players = length(c.weights)
     Gs = [Guus(c_i, time_range, x, us) for c_i in c.costs]
-    # return Dict(jj => sum(c.weights[ii] * G[ii][jj] for G in Gs) for ii in 1:length(c.weights) for jj in 1:num_players)
     return Dict(jj => sum(c.weights[ii] * Gs[ii][jj] for ii in 1:length(c.weights)) for jj in 1:num_players)
 end
 
