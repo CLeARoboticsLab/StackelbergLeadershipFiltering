@@ -22,7 +22,6 @@ function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x::AbstractV
     cr = (1.0 / num_mats) * c.x0' * Q * c.x0
 
     cost = QuadraticCost(Q, q, cq)
-    # println("quad costs with offset: ", Q, q, cq)
 
     for (ii, R) in c.q_cost.Rs
         add_control_cost!(cost, ii, c.q_cost.Rs[ii]; r=c.q_cost.Rs[ii] * (us[ii] - c.u0s[ii]) + c.q_cost.rs[ii], cr=cr)
