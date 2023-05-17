@@ -37,16 +37,16 @@ function quadraticize_costs(c::WeightedCost, time_range, x::AbstractVector{Float
     num_players = size(us, 1)
     quad_costs = [quadraticize_costs(c.costs[ii], time_range, x, us) for ii in 1:length(c.weights)]
 
-    sum_Q = sum(get_quadratic_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
-    sum_q = sum(get_linear_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
-    sum_cq = sum(get_constant_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+    sum_Q = sum(c.weights[ii] * get_quadratic_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+    sum_q = sum(c.weights[ii] * get_linear_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
+    sum_cq = sum(c.weights[ii] * get_constant_state_cost_term(quad_costs[ii]) for ii in 1:length(c.weights))
 
     q_cost = QuadraticCost(sum_Q, sum_q, sum_cq)
 
     for jj in 1:num_players
-        sum_R = sum(get_quadratic_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
-        sum_r = sum(get_linear_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
-        sum_cr = sum(get_constant_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+        sum_R = sum(c.weights[ii] * get_quadratic_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+        sum_r = sum(c.weights[ii] * get_linear_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
+        sum_cr = sum(c.weights[ii] * get_constant_control_cost_term(quad_costs[ii], jj) for ii in 1:length(c.weights))
 
         add_control_cost!(q_cost, jj, sum_R; r=sum_r, cr=sum_cr)
     end
