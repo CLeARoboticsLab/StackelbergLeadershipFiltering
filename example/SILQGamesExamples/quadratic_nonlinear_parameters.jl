@@ -23,7 +23,6 @@ x₁[[3, 4, 7, 8]] .= 0
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
-# for ii in 1:num_players
 
 # angular velocities
 us_1[1][1,:] .= -.03
