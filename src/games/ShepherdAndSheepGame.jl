@@ -90,4 +90,34 @@ add_control_cost!(c₄, 1, zeros(2, 2))
 # Gets a vector of costs, one per player.
 UnicycleShepherdAndSheepWithQuadraticCosts() = [c₃, c₄]
 
-export ShepherdAndSheepDynamics, ShepherdAndSheepWithUnicycleDynamics, ShepherdAndSheepCosts, UnicycleShepherdAndSheepWithQuadraticCosts
+
+# Nonquadratic, but still linear, version of this game.
+costs = ShepherdAndSheepCosts()
+costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+
+# P1 - avoid crossing the line [x; y] - [-1/2; -1/2] = 0
+indices1 = [1, 3] # x, y
+x_offset_1 = zeros(num_states)
+x_offset_1[indices1] .= -(1.0/2)
+x_zero_int_1 = zeros(num_states)
+x_zero_int_1[indices1] .= 10.
+log_cost_p1 = LogBarrierCost(indices1, x_offset_1, x_zero_int_1)
+
+# P2 - avoid crossing the line [x; y] - [-1/2; -1/2] = 0
+indices2 = [5, 7] # x, y
+x_offset_2 = zeros(num_states)
+x_offset_2[indices2] .= -(1.0/2)
+x_zero_int_2 = zeros(num_states)
+x_zero_int_2[indices2] .= 10.
+log_cost_p2 = LogBarrierCost(indices2, x_offset_2, x_zero_int_2)
+
+# Make the weighted cost.
+p1_new_cost = WeightedCost([1.0, 0.5], [deepcopy(costs[1]), log_cost_p1])
+# new_costs = [p1_new_cost, costs[2]]
+
+p2_new_cost = WeightedCost([1.0, 0.5], [deepcopy(costs[2]), log_cost_p2])
+# new_costs = [costs[1], p2_new_cost]
+
+ShepherdAndSheepWithLogBarrierQuadraticCosts() = [p1_new_cost, p2_new_cost]
+
+export ShepherdAndSheepDynamics, ShepherdAndSheepWithUnicycleDynamics, ShepherdAndSheepCosts, UnicycleShepherdAndSheepWithQuadraticCosts, ShepherdAndSheepWithLogBarrierQuadraticCosts
