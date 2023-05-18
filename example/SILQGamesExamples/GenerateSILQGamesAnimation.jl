@@ -1,6 +1,6 @@
 # include("RunSILQGamesOnLQExample.jl")
 # include("RunSILQGamesOnQuadraticNonlinearGame.jl")
-include("RunSILQGamesWithNonLQExample.jl")
+include("RunSILQGamesOnNonquadraticLinearGame.jl")
 
 using Plots
 using ProgressBars
@@ -24,11 +24,11 @@ anim = @animate for k in iter
     conv_x = cumsum(ones(num_iters)) .- 1
     r1 = plot(conv_x, conv_metrics[1, 1:num_iters], title="||k||^2", label="p1", yaxis=:log)
     plot!(r1, conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
-    # plot!(r1, [k, k], [0, max(conv_metrics[1, 1], conv_metrics[2, 1])], label="", color=:black)
+    plot!(r1, [k, k], [minimum(conv_metrics[:, 1:num_iters]), maximum(conv_metrics[:, 1:num_iters])], label="", color=:black, yaxis=:log)
 
     r2 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log)
     plot!(r2, conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
-    # plot!(r2, [k, k], [0, max(evaluated_costs[1, 1], evaluated_costs[2, 1])], label="", color=:black)
+    plot!(r2, [k, k], [minimum(evaluated_costs[:, 1:num_iters]), maximum(evaluated_costs[:, 1:num_iters])], label="", color=:black, yaxis=:log)
 
     plot(p1, p2, p3, p4, p5, p6, p7, r1, r2, layout = p)
 end

@@ -23,13 +23,13 @@ x₁[[2, 4, 6, 8]] .= 0
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
-for ii in 1:num_players
-    us_1[ii][1,:] .= -1.
-    us_1[ii][2,:] .= -.1
-end
+# for ii in 1:num_players
+#     us_1[ii][1,:] .= -1.
+#     us_1[ii][2,:] .= -.1
+# end
 
 # Test with ideal solution, with noise.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
-_, us_1 = unroll_feedback(dyn, times, Ps_strategies, x₁)
-us_1[1] += 0.1 * rand(rng, udim(dyn, 1), T)
-us_1[2] += 0.1 * rand(rng, udim(dyn, 1), T)
+# Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
+# _, us_1 = unroll_feedback(dyn, times, Ps_strategies, x₁)
+# us_1[1] += 0.1 * rand(rng, udim(dyn, 1), T)
+# us_1[2] += 0.1 * rand(rng, udim(dyn, 1), T)
