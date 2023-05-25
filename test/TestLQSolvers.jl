@@ -52,7 +52,7 @@ seed!(0)
 
         # Perturb each strategy a little bit and confirm that cost only
         # increases for that player.
-        ϵ = 1e-1
+        ϵ = 1e-2
         for ii in 1:2
             for tt in 1:horizon
                 ctrl_strat_P̃s = deepcopy(ctrl_strat_Ps)
@@ -105,12 +105,16 @@ seed!(0)
         optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
         # Define some useful constants.
-        ϵ = 1e-1
+        ϵ = 1e-2
         leader_idx = stackelberg_leader_idx
         follower_idx = 3 - stackelberg_leader_idx
         num_players = num_agents(dyn)
 
+
+        println("\n\n\n=================\n\n\n")
+
         for tt in horizon-1:-1:1
+            println(tt)
             time_range = (tt, tt+1)
 
             # Copy the things we will alter.
@@ -122,6 +126,8 @@ seed!(0)
             # Perturb the leader input u1 at the current time.
             ũs[leader_idx][:, tt] += ϵ * randn(udim(dyn, leader_idx))
             ũhs = homogenize_ctrls(dyn, ũs)
+
+            println(get_homogenized_state_cost_matrix(future_costs[follower_idx][tt+1])[5, 5])
 
             # Re-solve for the optimal follower input given the perturbed leader trajectory.
             A = get_homogenized_state_dynamics_matrix(dyn)
@@ -159,7 +165,6 @@ seed!(0)
 
             x̃s = unroll_raw_controls(dyn, times, ũs, x₁)
             new_stack_costs = [evaluate(c, x̃s, ũs) for c in costs]
-            optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
             # This test evaluates the cost for the entire perturbed trajectory against the optimal cost.
             @test new_stack_costs[leader_idx] ≥ optimal_stackelberg_costs[leader_idx]
@@ -175,7 +180,7 @@ seed!(0)
         optimal_stackelberg_costs = [evaluate(c, xs, us) for c in costs]
 
         # Define some useful constants.
-        ϵ = 1e-1
+        ϵ = 1e-2
         leader_idx = stackelberg_leader_idx
         follower_idx = 3 - stackelberg_leader_idx
         num_players = follower_idx
