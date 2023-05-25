@@ -51,7 +51,7 @@ function get_homogenized_state_cost_matrix(c::QuadraticCost)
 end
 
 function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
-    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
+    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx], 1e-32)
 end
 
 export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix

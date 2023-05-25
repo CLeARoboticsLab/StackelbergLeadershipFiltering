@@ -15,15 +15,20 @@ abstract type NonQuadraticCost <: Cost end
 # If we need to perform a spectral shift to enforce PD-ness, we can set ρ accordingly.
 function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
     # If we're gonna have problems with singularity, then spectral shift the matrix.
-    if all(iszero.(m)) && cm == 0.0 && ρ == nothing
-        ρ = 1e-32
-    elseif (ρ == nothing)
-        ρ = 0.0
+    # if all(iszero.(m)) && cm == 0.0 && ρ == nothing
+    #     ρ = vcat(hcat(zeros(size(M)), zeros(size(m))),
+    #              hcat(zeros(size(m')),   [1e-32]))
+    # else
+    if (ρ == nothing)
+        ρ = zeros(size(M, 1)+1, size(M, 2)+1)
+    else
+        ρ = ρ * Matrix(I, size(M, 1)+1, size(M, 2)+1)
     end
 
     M_dim = size(M, 1)
-    return vcat(hcat(M ,  m),
-                hcat(m', cm)) + ρ * I
+    out = vcat(hcat(M ,  m),
+               hcat(m', cm)) + ρ
+    return out
 end
 
 # Homogenize state - by default, this adds a 1 to the bottom. If a custom one is needed, define it elsewhere.
