@@ -8,7 +8,6 @@ mutable struct QuadraticCost <: Cost
     rs::Dict{Int, Vector{Float64}}
     crs::Dict{Int, Float64}
 end
-# Quadratic costs always homogeneous
 QuadraticCost(Q::AbstractMatrix{Float64}) = QuadraticCost(Q, zeros(size(Q, 1)), 0,
                                                           Dict{Int, Matrix{eltype(Q)}}(),
                                                           Dict{Int, Vector{eltype(Q)}}(),
@@ -44,17 +43,6 @@ function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, 
 end
 
 export is_pure_quadratic
-
-# Helpers that get the homogenized Q and R matrices for this cost.
-function get_homogenized_state_cost_matrix(c::QuadraticCost)
-    return homogenize_cost_matrix(c.Q, c.q, c.cq)
-end
-
-function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
-    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
-end
-
-export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
 
 
 # Derivative terms

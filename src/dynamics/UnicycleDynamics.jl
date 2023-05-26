@@ -18,8 +18,6 @@ function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
                             x::AbstractVector{Float64},
                             us::AbstractVector{<:AbstractVector{Float64}})
-
-    # In this nonlinear system, no need to homogenize the inputs because we don't matrix multiply anywhere.
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N

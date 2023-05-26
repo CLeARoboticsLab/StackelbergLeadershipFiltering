@@ -18,6 +18,7 @@ include("control_strategies/FeedbackGainControlStrategy.jl")
 
 include("games/ShepherdAndSheepGame.jl")
 
+include("solvers/HomogenizationUtils.jl")
 include("solvers/IterativeLQR.jl")
 include("solvers/LQNashFeedbackSolver.jl")
 include("solvers/LQStackelbergFeedbackSolver.jl")

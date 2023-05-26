@@ -6,7 +6,6 @@ struct QuadraticCostWithOffset <: Cost
     x0::AbstractVector{Float64}
     u0s::AbstractVector{<:AbstractVector{Float64}}
 end
-# Quadratic costs always homogeneous
 QuadraticCostWithOffset(quad_cost::QuadraticCost, x0=zeros(size(quad_cost.Q, 1)), u0s=[zeros(size(quad_cost.Rs[ii], 1)) for ii in 1:length(quad_cost.Rs)]) = QuadraticCostWithOffset(quad_cost, x0, u0s)
 
 # TODO(hmzh): Adjust quadraticization for the multi-player case.

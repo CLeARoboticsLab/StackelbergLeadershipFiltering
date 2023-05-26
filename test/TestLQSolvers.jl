@@ -121,7 +121,7 @@ seed!(0)
 
             # Perturb the leader input u1 at the current time.
             ũs[leader_idx][:, tt] += ϵ * randn(udim(dyn, leader_idx))
-            ũhs = homogenize_ctrls(dyn, ũs)
+            ũhs = homogenize_vector.(ũs)
 
             # Re-solve for the optimal follower input given the perturbed leader trajectory.
             A = get_homogenized_state_dynamics_matrix(dyn)
@@ -212,10 +212,7 @@ seed!(0)
                 time_range = (tt, tt+1)
 
                 u_tt = [us[ii][:, tt] for ii in 1:num_players]
-                # uh_tt = homogenize_ctrls(dyn, u_tt)
-
                 u_ttp1 = [us[ii][:, tt+1] for ii in 1:num_players]
-                # uh_ttp1 = homogenize_ctrls(dyn, u_ttp1)
 
                 # TODO(hamzah) Fix discrepancy in extra cost in quad cost.
                 state_and_control_costs = compute_cost(costs[ii], time_range, xs[:, tt], u_tt)

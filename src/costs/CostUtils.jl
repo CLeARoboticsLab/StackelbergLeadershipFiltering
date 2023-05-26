@@ -6,39 +6,8 @@ abstract type Cost end
 # - compute_cost(cost, xs, us) - this function evaluates the cost of a trajectory given the states and controls
 # - Gx, Gus, Gxx, Guus(cost, time_range, x, us) - derivatives must be defined.
 
-# No costs should require homogenized inputs. The evaluate function will homogenize the inputs as needed.
-
 # We use this type by making a substruct of it which can then have certain functions defined for it.
 abstract type NonQuadraticCost <: Cost end
-
-# Produces a symmetric matrix.
-# If we need to perform a spectral shift to enforce PD-ness, we can set ρ accordingly.
-function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
-    # If we're gonna have problems with singularity, then spectral shift the matrix.
-    if all(iszero.(m)) && cm == 0.0 && ρ == nothing
-        ρ = 1e-32
-    elseif (ρ == nothing)
-        ρ = 0.0
-    end
-
-    M_dim = size(M, 1)
-    return vcat(hcat(M ,  m),
-                hcat(m', cm)) + ρ * I
-end
-
-# Homogenize state - by default, this adds a 1 to the bottom. If a custom one is needed, define it elsewhere.
-function homogenize_state(c::Cost, xs::AbstractArray{Float64})
-    xhs = homogenize_vector(xs)
-    return xhs
-end
-
-function homogenize_ctrls(c::Cost, us::AbstractVector{<:AbstractArray{Float64}})
-    num_players = length(us)
-    uhs = [homogenize_vector(us[ii]) for ii in 1:num_players]
-    return uhs
-end
-export homogenize_state, homogenize_ctrls
-
 
 # Evaluates the cost across a time horizon.
 # - xs[:, time]
