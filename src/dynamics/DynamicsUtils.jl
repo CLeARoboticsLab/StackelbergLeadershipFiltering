@@ -56,4 +56,12 @@ function vdim(dyn::Dynamics)
     return vdim(dyn.sys_info)
 end
 
-export num_agents, xdim, udim, vdim
+function sampling_time(dyn::Dynamics)
+    return sampling_time(dyn.sys_info)
+end
+
+function is_continuous(dyn::Dynamics)
+    return iszero(sampling_time(dyn))
+end
+
+export num_agents, xdim, udim, vdim, sampling_time, is_continuous
