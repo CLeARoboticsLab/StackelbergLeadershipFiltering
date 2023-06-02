@@ -9,7 +9,7 @@ struct SystemInfo
     num_v::Int
     dt::Float64 # If this is set to 0, the system is continuous.
 end
-SystemInfo(num_agents, num_x, num_us, dt=0) = SystemInfo(num_agents, num_x, num_us, 0, dt)
+SystemInfo(num_agents, num_x, num_us, dt=0.) = SystemInfo(num_agents, num_x, num_us, 0, dt)
 SystemInfo(si::SystemInfo, dt) = SystemInfo(si.num_agents, si.num_x, si.num_us, si.num_v, dt)
 
 function num_agents(sys_info::SystemInfo)

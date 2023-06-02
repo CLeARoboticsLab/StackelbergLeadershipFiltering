@@ -1,11 +1,15 @@
 # Utilities for managing linear and nonlinear dynamics.
 
 # Every Dynamics is assumed to have the following functions defined on it:
-# - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
+# Unique to each struct:
+# - dx(dyn, time_range, x, us, v) - computes differntial dynamics, with process noise.
 # - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
 # - Fx(dyn, time_range, x, us) - first-order derivatives wrt state x
 # - Fus(dyn, time_range, x, us) - first-order derivatives wrt state us
-# - plot_states_and_controls(dyn, times, xs, us) - produce Plots.jl versions of plots for all states in the dynamics provided
+
+# Defined on Dynamics
+# - dx(dyn, time_range, x, us)
+# - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
 
 # Every Dynamics struct must have
 # - a sys_info field of type SystemInfo.
@@ -20,15 +24,43 @@ function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))
 end
 
-# A function that produces a first-order Taylor linearization of the dynamics.
-function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function dx(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    # Ensure that there should not be any process noise.
+    @assert vdim(dyn) == 0
+    @assert time_range[1] ≤ time_range[2]
+
+    return dx(dyn, time_range, x, us, nothing)
+end
+
+# A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
+function propagate_dynamics(dyn::Dynamics,
+                            time_range,
+                            x::AbstractVector{Float64},
+                            us::AbstractVector{<:AbstractVector{Float64}})
+    # Ensure that there should not be any process noise.
+    @assert vdim(dyn) == 0
+    @assert time_range[1] ≤ time_range[2]
+
+    return propagate_dynamics(dyn, time_range, x, us, nothing)
+end
+
+# A function that produces a continuous-time first-order Taylor linearization of the dynamics.
+function linearize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     t₀, t = time_range
-    dt = t - t₀
     @assert t₀ ≤ t
 
-    A = I + dt * Fx(dyn, time_range, x, us)
+    # TODO(hamzah) Add in forward diff usage here, and a way to linearize discretized.
+    @assert is_continuous(dyn) "Can only linearize continuous dynamics objects, for now."
+    A = Fx(dyn, time_range, x, us)
     Bs = Fus(dyn, time_range, x, us)
-    return LinearDynamics(A, Bs)
+    return ContinuousLinearDynamics(A, Bs)
+end
+
+# A function which linearizes any continuous-time dynamics and then discretizes it.
+function linearize_discretize(dyn::Dynamics, time_range, x, us, new_sampling_time)
+    @assert is_continuous(dyn) "Can only linearize continuous dynamics objects, for now."
+    lin_dyn = linearize(dyn, time_range, x, us)
+    return discretize(lin_dyn, new_sampling_time)
 end
 
 # Export the types of dynamics.
