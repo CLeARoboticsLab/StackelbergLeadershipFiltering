@@ -66,16 +66,21 @@ function linearize(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, 
 end
 
 function discretize(dyn::LinearDynamics, dt::Float64)
-    @assert is_continuous(dyn) "Input dynamics must be continuous to be discretized."
-    new_sys_info = SystemInfo(dyn.sys_info, dt)
+    new_sys_info = get_discretized_system_info(dyn, dt)
     new_D = isnothing(dyn.D) ? nothing : dt * dyn.D
     return LinearDynamics(I + dt * dyn.A, dt * dyn.a, dt * dyn.Bs, new_D, new_sys_info)
+end
+
+# A function which jointly linearizes and discretizes any dynamics.
+function linearize_discretize(dyn::LinearDynamics, time_range, x, us)
+    lin_dyn = linearize(dyn, time_range, x, us)
+    return discretize(lin_dyn, new_sampling_time)
 end
 
 # TODO(hmzh) - may need dfdv as well
 
 
-export propagate_dynamics, linearize, discretize
+export propagate_dynamics, linearize, linearize_discretize
 
 using Plots
 # TODO(hamzah) - refactor this to be tied DoubleIntegrator Dynamics instead of Linear Dynamics.

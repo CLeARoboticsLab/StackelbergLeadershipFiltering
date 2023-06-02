@@ -6,9 +6,10 @@
 # - propagate_dynamics(dyn, time_range, x, us, v) - this function propagates the dynamics to the next timestep with state, controls, realized process noise.
 # - Fx(dyn, time_range, x, us) - first-order derivatives wrt state x
 # - Fus(dyn, time_range, x, us) - first-order derivatives wrt state us
+# - linearize_discretize(dyn, time_range, x, us) - linearizes and discretizes a continuous-time system.
 
 # Defined on Dynamics
-# - dx(dyn, time_range, x, us)
+# - dx(dyn, time_range, x, us) - same as the one above, but without process noise.
 # - propagate_dynamics(dyn, time_range, x, us) - this function propagates the dynamics to the next timestep with state and controls.
 
 # Every Dynamics struct must have
@@ -54,13 +55,6 @@ function linearize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::Ab
     A = Fx(dyn, time_range, x, us)
     Bs = Fus(dyn, time_range, x, us)
     return ContinuousLinearDynamics(A, Bs)
-end
-
-# A function which linearizes any continuous-time dynamics and then discretizes it.
-function linearize_discretize(dyn::Dynamics, time_range, x, us, new_sampling_time)
-    @assert is_continuous(dyn) "Can only linearize continuous dynamics objects, for now."
-    lin_dyn = linearize(dyn, time_range, x, us)
-    return discretize(lin_dyn, new_sampling_time)
 end
 
 # Export the types of dynamics.
