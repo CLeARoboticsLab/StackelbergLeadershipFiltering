@@ -1,9 +1,9 @@
 using Plots
 
 include("params_time.jl")
-# include("params_doubleintegrator_quadoffset.jl")
+include("params_doubleintegrator_quadoffset.jl")
 # include("params_unicycle_quadoffset.jl")
-include("params_unicycle_nonlinearexample.jl")
+# include("params_unicycle_nonlinearexample.jl")
 
 #####################################
 #    Define the initial controls.   #

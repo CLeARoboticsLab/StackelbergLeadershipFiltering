@@ -14,6 +14,7 @@ function ilqr(T::Int,
               verbose=false)
 
     @assert num_agents(dyn) == 1
+    @assert !is_continuous(dyn) "iLQR requires discrete-time dynamics to be provided."
 
     # Extract initial reference trajectory based on provided controls.
     xs_1 = unroll_raw_controls(dyn, times, [us_1], x₁)
@@ -46,7 +47,7 @@ function ilqr(T::Int,
             prev_time = (tt == 1) ? t0 : times[tt-1]
             curr_time = times[tt]
             time_range = (prev_time, curr_time)
-            lin_dyns[tt] = linearize_dynamics(dyn, time_range, xs_im1[:, tt], [us_im1[:, tt]])
+            lin_dyns[tt] = linearize(dyn, time_range, xs_im1[:, tt], [us_im1[:, tt]])
             quad_costs[tt] = quadraticize_costs(cost, time_range, xs_im1[:, tt], [us_im1[:, tt]])
         end
 
