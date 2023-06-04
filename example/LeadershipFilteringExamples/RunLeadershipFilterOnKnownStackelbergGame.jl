@@ -141,7 +141,7 @@ PLOT_WHOLE_TRAJECTORY = false # if true, plot the whole trajectory at each cycle
 
 # # Plot convergence.
 # conv_x = cumsum(ones(num_iters)) .- 1
-# q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (||k||^2) by player", label="p1", yaxis=:log)
+# q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (|⋅|∞) by player", label="p1", yaxis=:log)
 # plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
 
 # q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log)
