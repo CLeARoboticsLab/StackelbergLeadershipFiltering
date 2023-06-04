@@ -82,13 +82,15 @@ function ilqr(T::Int,
         cost_diff = evaluated_costs[num_iters+2] - evaluated_costs[num_iters+1]
 
         # Use norm of ks as the convergence metric.
-        new_conv_metric = norm(ks)
-        conv_metric_im1 = evaluated_costs[num_iters + 1]
-        convergence_metrics[num_iters+2] = new_conv_metric
+        k_norm_conv_metric = norm(ks)
+
+        # New convergence metric: maximum infinite norm difference between current and previous trajectory iteration.
+        max_inf_norm_conv_metric = maximum(abs.(xs_i - xs_im1))
         
         # Another possible convergence metric is cost difference.
-        # is_converged = abs(cost_diff) < threshold
-        is_converged = norm(ks) < threshold
+        conv_metric = max_inf_norm_conv_metric
+        is_converged = conv_metric < threshold
+        convergence_metrics[num_iters+2] = conv_metric
 
         # TODO(hmzh) - Implement line search here once derivatives are ready.
 

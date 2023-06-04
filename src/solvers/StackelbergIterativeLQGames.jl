@@ -172,13 +172,16 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         for ii in 1:num_players
             convergence_metrics[ii, num_iters+1] = norm(ks[ii])^2
         end
+        # New convergence metric: maximum infinite norm difference between current and previous trajectory iteration.
+        convergence_metrics[:, num_iters+1] .= 1e-8
+        max_inf_norm_conv_metric = maximum(abs.(xs_k - xs_km1))
+        convergence_metrics[1, num_iters+1] = max_inf_norm_conv_metric
 
         is_converged = sum(convergence_metrics[:, num_iters+1]) < sg.threshold
 
         # Evaluate and store the costs.
         evaluated_costs[:, num_iters+2] = [evaluate(sg.costs[ii], xs_k, us_k) for ii in 1:num_players]
-
-        is_converged = abs(sum(evaluated_costs[:, num_iters+1] - evaluated_costs[:, num_iters+2])) < sg.threshold
+        # is_converged = abs(sum(evaluated_costs[:, num_iters+1] - evaluated_costs[:, num_iters+2])) < sg.threshold
 
         if sg.verbose
             old_metric = (num_iters == 0) ? 0. : sum(convergence_metrics[:, num_iters])
