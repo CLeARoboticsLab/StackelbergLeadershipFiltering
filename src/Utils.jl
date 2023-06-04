@@ -40,9 +40,8 @@ function is_continuous(sys_info::SystemInfo)
     return iszero(sampling_time(sys_info))
 end
 
-function get_discretized_system_info(dyn::Dynamics, new_dt)
-    @assert is_continuous(dyn) "Input dynamics must be continuous to be discretized."
-    return SystemInfo(dyn.sys_info, new_dt)
+function get_discretized_system_info(sys_info::SystemInfo, new_dt)
+    return SystemInfo(sys_info, new_dt)
 end
 
 export SystemInfo, num_agents, xdim, udim, vdim, sampling_time, is_continuous, get_discretized_system_info

@@ -127,6 +127,7 @@ seed!(0)
             ũhs = homogenize_vector.(ũs)
 
             # Re-solve for the optimal follower input given the perturbed leader trajectory.
+            # TODO(hamzah): fix this by trying a pure quadratic.
             A = get_homogenized_state_dynamics_matrix(dyn)
             B₂ = get_homogenized_control_dynamics_matrix(dyn, follower_idx)
             L₂_ttp1 = get_homogenized_state_cost_matrix(future_costs[follower_idx][tt+1])

@@ -47,7 +47,10 @@ function ilqr(T::Int,
             prev_time = (tt == 1) ? t0 : times[tt-1]
             curr_time = times[tt]
             time_range = (prev_time, curr_time)
-            lin_dyns[tt] = linearize(dyn, time_range, xs_im1[:, tt], [us_im1[:, tt]])
+            # Produce a continuous-time linear system from any dynamical system,
+            # then discretize it at the sampling time of the original system.
+            cont_lin_dyn = linearize(dyn, time_range, xs_im1[:, tt], [us_im1[:, tt]])
+            lin_dyns[tt] = discretize(cont_lin_dyn, sampling_time(dyn))
             quad_costs[tt] = quadraticize_costs(cost, time_range, xs_im1[:, tt], [us_im1[:, tt]])
         end
 

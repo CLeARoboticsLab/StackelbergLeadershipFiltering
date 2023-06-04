@@ -51,10 +51,21 @@ function linearize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::Ab
     @assert t₀ ≤ t
 
     # TODO(hamzah) Add in forward diff usage here, and a way to linearize discretized.
-    @assert is_continuous(dyn) "Can only linearize continuous dynamics objects, for now."
     A = Fx(dyn, time_range, x, us)
     Bs = Fus(dyn, time_range, x, us)
     return ContinuousLinearDynamics(A, Bs)
+end
+
+function linearize_discretize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+    t₀, t = time_range
+    @assert t₀ ≤ t
+
+    @assert !is_continuous(dyn) "Input dynamics must have dt > 0 for discretization."
+    # TODO(hamzah) Add in forward diff usage here, and a way to linearize discretized.
+    A = Fx(dyn, time_range, x, us)
+    Bs = Fus(dyn, time_range, x, us)
+    cont_dyn = ContinuousLinearDynamics(A, Bs)
+    return discretize(cont_dyn, sampling_time(dyn))
 end
 
 # Export the types of dynamics.
