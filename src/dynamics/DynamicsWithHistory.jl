@@ -32,7 +32,7 @@ end
 export get_underlying_dynamics, get_state, get_current_state
 
 
-function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -48,7 +48,7 @@ function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVec
 end
 
 # These are the continuous derivative matrices of the f function. It does not include the derivatives of previous states.
-function Fx(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -63,7 +63,7 @@ function Fx(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us
     return out
 end
 
-function Fus(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -74,7 +74,7 @@ end
 
 # We define a custom linearize_dynamics function for this object because this is a pseudo-dynamics object and would not
 # work properly with the generally defined one.
-function linearize_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize_dynamics(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)

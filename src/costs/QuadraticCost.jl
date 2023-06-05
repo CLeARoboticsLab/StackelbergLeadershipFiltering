@@ -33,7 +33,7 @@ function is_pure_quadratic(c::QuadraticCost)
     return is_state_cost_pure_quadratic && is_control_cost_pure_quadratic
 end
 
-function compute_cost(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function compute_cost(c::QuadraticCost, time_range, x, us)
     num_players = length(us)
     total = (1/2.) * (x' * c.Q * x + 2 * c.q' * x + c.cq)
     if !isempty(c.Rs)
@@ -46,19 +46,19 @@ export is_pure_quadratic
 
 
 # Derivative terms
-function Gx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gx(c::QuadraticCost, time_range, x, us)
     return x' * c.Q + c.q'
 end
 
-function Gus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gus(c::QuadraticCost, time_range, x, us)
     return Dict(ii => us[ii]' * R + c.rs[ii]' for (ii, R) in c.Rs)
 end
 
-function Gxx(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gxx(c::QuadraticCost, time_range, x, us)
     return deepcopy(c.Q)
 end
 
-function Guus(c::QuadraticCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Guus(c::QuadraticCost, time_range, x, us)
     return deepcopy(c.Rs)
 end
 

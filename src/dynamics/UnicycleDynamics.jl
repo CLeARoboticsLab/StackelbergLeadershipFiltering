@@ -14,10 +14,7 @@ end
 # Constructor
 UnicycleDynamics(num_players::Int) = UnicycleDynamics(SystemInfo(num_players, 4*num_players, 2*ones(num_players)))
 
-function propagate_dynamics(dyn::UnicycleDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+function propagate_dynamics(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -48,17 +45,13 @@ function propagate_dynamics(dyn::UnicycleDynamics,
 end
 
 # TODO: Unicycle dynamics doesn't currently support process noise.
-function propagate_dynamics(dyn::UnicycleDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::AbstractVector{Float64})
+function propagate_dynamics(dyn::UnicycleDynamics, time_range, x, us, v)
     throw(MethodError("propagate_dynamics not implemented with process noise for UnicycleDynamics"))
 end
 
 # These are the continuous derivatives of the unicycle dynamics with respect to x and u.
 
-function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -80,7 +73,7 @@ function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::A
     return Matrix(blockdiag(As...))
 end
 
-function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N

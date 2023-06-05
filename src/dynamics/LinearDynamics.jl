@@ -36,10 +36,7 @@ end
 
 
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
-function propagate_dynamics(dyn::Dynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+function propagate_dynamics(dyn::Dynamics, time_range, x, us)
     # Ensure that there should not be any process noise.
     @assert vdim(dyn) == 0
     @assert time_range[1] ≤ time_range[2]
@@ -47,11 +44,7 @@ function propagate_dynamics(dyn::Dynamics,
     return propagate_dynamics(dyn, time_range, x, us, nothing)
 end
 
-function propagate_dynamics(dyn::LinearDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::Union{Nothing, AbstractVector{Float64}})
+function propagate_dynamics(dyn::LinearDynamics, time_range, x, us, v)
     N = num_agents(dyn)
 
     # Assertions to confirm sizes.
@@ -72,17 +65,17 @@ function propagate_dynamics(dyn::LinearDynamics,
     return x_next
 end
 
-function linearize_dynamics(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize_dynamics(dyn::LinearDynamics, time_range, x, us)
     return dyn
 end
 
 
 # These are the continuous derivative matrices of the f function.
-function Fx(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::LinearDynamics, time_range, x, us)
     return dyn.A - I
 end
 
-function Fus(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::LinearDynamics, time_range, x, us)
     return dyn.Bs
 end
 

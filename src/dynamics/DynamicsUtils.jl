@@ -21,7 +21,7 @@ function generate_process_noise(dyn::Dynamics, rng)
 end
 
 # A function that produces a first-order Taylor linearization of the dynamics.
-function linearize_dynamics(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize_dynamics(dyn::Dynamics, time_range, x, us)
     t₀, t = time_range
     dt = t - t₀
     @assert t₀ ≤ t
