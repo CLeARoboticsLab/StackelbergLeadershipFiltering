@@ -85,8 +85,8 @@ function linearize_discretize(dyn::Dynamics, time_range, x, us)
 
     @assert !is_continuous(dyn) "Input dynamics must have dt > 0 for discretization."
     # TODO(hamzah) Add in forward diff usage here, and a way to linearize discretized.
-    A = Fx(dyn, time_range, x, us)
-    Bs = Fus(dyn, time_range, x, us)
+    A = get_A(dyn, time_range, x, us)
+    Bs = get_Bs(dyn, time_range, x, us)
     cont_dyn = ContinuousLinearDynamics(A, Bs)
     return discretize(cont_dyn, sampling_time(dyn))
 end
