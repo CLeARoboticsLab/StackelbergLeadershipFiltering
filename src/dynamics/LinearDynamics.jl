@@ -23,11 +23,7 @@ ContinuousLinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(A, a, B
 
 export ContinuousLinearDynamics, LinearDynamics
 
-function dx(dyn::LinearDynamics,
-            time_range,
-            x::AbstractVector{Float64},
-            us::AbstractVector{<:AbstractVector{Float64}},
-            v::Union{Nothing, AbstractVector{Float64}})
+function dx(dyn::LinearDynamics, time_range, x, us, v)
     @assert is_continuous(dyn) "dx is defined on continuous-time dynamics objects."
     dfdx = dyn.A * x + dyn.a + sum(get_control_dynamics(dyn, ii) * us[ii] for ii in 1:N)
     if dyn.D != nothing && v != nothing
@@ -36,11 +32,7 @@ function dx(dyn::LinearDynamics,
     return dfdx
 end
 
-function propagate_dynamics(dyn::LinearDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::Union{Nothing, AbstractVector{Float64}})
+function propagate_dynamics(dyn::LinearDynamics, time_range, x, us, v)
     @assert !is_continuous(dyn) "Only discrete-time dynamics objects can be propagated."
     N = num_agents(dyn)
 
@@ -62,7 +54,7 @@ function propagate_dynamics(dyn::LinearDynamics,
 end
 
 # Produces a continuous-time Jacobian linearized system from any linear system.
-function linearize(dyn::LinearDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize(dyn::LinearDynamics, time_range, x, us)
     return dyn
 end
 

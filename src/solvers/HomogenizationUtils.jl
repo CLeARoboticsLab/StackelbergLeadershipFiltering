@@ -4,11 +4,11 @@
 # Vector homogenization #
 #########################
 
-function homogenize_vector(v::AbstractVector{Float64})
+function homogenize_vector(v::AbstractVector{T}) where {T}
     return vcat(v, 1)
 end
 
-function homogenize_vector(vs::AbstractMatrix{Float64})
+function homogenize_vector(vs::AbstractMatrix{T}) where {T}
     return vcat(vs, ones(1, size(vs, 2)))
 end
 export homogenize_vector
@@ -19,7 +19,7 @@ export homogenize_vector
 ###############################################
 
 # This function assumes right multiplication; if left multiplication is done, then matrix should be transposed.
-function homogenize_dynamics_matrix(M::AbstractMatrix{Float64}; m=zeros(size(M, 1))::AbstractVector{Float64}, ρ=0.0)
+function homogenize_dynamics_matrix(M::AbstractMatrix{T}; m=zeros(size(M, 1))::AbstractVector{T}, ρ=0.0::T) where {T}
     M_dim2 = size(M, 2)
     # TODO(hamzah): This is buggy code and should really be dependent on whether we are homogenizing A or B.
     cm = (size(M, 1) == size(M, 2)) ? 1. : 0.
@@ -35,7 +35,7 @@ export homogenize_dynamics_matrix
 
 # Produces a symmetric matrix.
 # If we need to perform a spectral shift to enforce PD-ness, we can set ρ accordingly.
-function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
+function homogenize_cost_matrix(M::AbstractMatrix{T}, m=zeros(size(M, 1))::AbstractVector{T}, cm=0.0::T, ρ=nothing) where {T}
     # If we're gonna have problems with singularity, then spectral shift the matrix.
     if all(iszero.(m)) && cm == 0.0 && ρ == nothing
         ρ = 1e-32

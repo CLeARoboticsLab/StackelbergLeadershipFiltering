@@ -1,3 +1,5 @@
+using ForwardDiff
+
 # Utilities for managing linear and nonlinear dynamics.
 
 # Every Dynamics is assumed to have the following functions defined on it:
@@ -25,19 +27,26 @@ function generate_process_noise(dyn::Dynamics, rng)
     return zeros(vdim(dyn))
 end
 
-function dx(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+# TODO(hamzah)  - combine these functions into one.
+function dx(dyn::Dynamics, time_range, x::AbstractVector{TX}, us::AbstractVector{<:AbstractVector{Float64}}) where {TX}
     # Ensure that there should not be any process noise.
     @assert vdim(dyn) == 0
     @assert time_range[1] ≤ time_range[2]
 
-    return dx(dyn, time_range, x, us, nothing)
+    adjusted_us = [TX.(u) for u in us]
+    return dx(dyn, time_range, x, adjusted_us, nothing)
+end
+
+function dx(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{TU}}) where {TU}
+    # Ensure that there should not be any process noise.
+    @assert vdim(dyn) == 0
+    @assert time_range[1] ≤ time_range[2]
+
+    return dx(dyn, time_range, TU.(x), us, nothing)
 end
 
 # A function definition that does not accept process noise input and reroutes to the type-specific propagate_dynamics that does.
-function propagate_dynamics(dyn::Dynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+function propagate_dynamics(dyn::Dynamics, time_range, x, us)
     # Ensure that there should not be any process noise.
     @assert vdim(dyn) == 0
     @assert time_range[1] ≤ time_range[2]
@@ -46,17 +55,31 @@ function propagate_dynamics(dyn::Dynamics,
 end
 
 # A function that produces a continuous-time first-order Taylor linearization of the dynamics.
-function linearize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize(dyn::Dynamics, time_range, x, us)
     t₀, t = time_range
     @assert t₀ ≤ t
 
-    # TODO(hamzah) Add in forward diff usage here, and a way to linearize discretized.
-    A = Fx(dyn, time_range, x, us)
-    Bs = Fus(dyn, time_range, x, us)
+    # TODO(hamzah) Add in forward diff usage here.
+    A = get_A(dyn, time_range, x, us)
+    Bs = get_Bs(dyn, time_range, x, us)
     return ContinuousLinearDynamics(A, Bs)
 end
 
-function linearize_discretize(dyn::Dynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function get_A(dyn::Dynamics, time_range, x0, u0s)
+    diff_x = x -> dx(dyn, time_range, x, u0s)
+    A = ForwardDiff.jacobian(diff_x, x0)
+    return A
+end
+
+function get_Bs(dyn::Dynamics, time_range, x0, u0s)
+    u0s_combined = vcat(u0s...)
+    diff_us = us -> dx(dyn, time_range, x0, split(us, udims(dyn)))
+    combined_Bs = ForwardDiff.jacobian(diff_us, u0s_combined)
+    Bs = transpose.(split(combined_Bs', udims(dyn)))
+    return Bs
+end
+
+function linearize_discretize(dyn::Dynamics, time_range, x, us)
     t₀, t = time_range
     @assert t₀ ≤ t
 
@@ -87,6 +110,10 @@ end
 
 function udim(dyn::Dynamics, player_idx)
     return udim(dyn.sys_info, player_idx)
+end
+
+function udims(dyn::Dynamics)
+    return udims(dyn.sys_info)
 end
 
 function vdim(dyn::Dynamics)

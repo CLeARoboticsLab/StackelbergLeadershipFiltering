@@ -36,7 +36,7 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
     # Ensure that the number of controls matches number of players at each horizon.
     for tt in 1:horizon
         @assert !is_continuous(dyns[tt]) string("Dynamics object at time ", tt, " should be discretized.")
-        @assert(size(all_costs[tt], 1) == num_agents(dyns[tt]))
+        @assert size(all_costs[tt], 1) == num_agents(dyns[tt])
     end
 
     # TODO(hamzah) If we ever go beyond a 2-player game, figure out multiple followers.

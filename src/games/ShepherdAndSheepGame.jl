@@ -10,25 +10,25 @@ num_players = 2
 num_states = 8
 num_ctrls = [2, 2]
 
-shepherd_Ã(dt) = [1 dt  0  0;
-                  0  1  0  0;
-                  0  0  1 dt;
-                  0  0  0  1]
-shepherd_A(dt) = vcat(hcat(shepherd_Ã(dt), zeros(4, 4)),
-                      hcat(zeros(4, 4), shepherd_Ã(dt)))
+shepherd_Ã() = [0 1.  0  0;
+                0  0  0  0;
+                0  0  0 1.;
+                0  0  0  0]
+shepherd_A() = vcat(hcat(shepherd_Ã(), zeros(4, 4)),
+                      hcat(zeros(4, 4), shepherd_Ã()))
 
-B₁(dt) = vcat([0   0;
-               dt  0;
-               0   0;
-               0   dt],
-               zeros(4, 2))
-B₂(dt) = vcat(zeros(4, 2),
-              [0   0;
-               dt  0;
-               0   0;
-               0   dt])
+B₁() = vcat([0   0;
+             1  0;
+             0   0;
+             0   1],
+             zeros(4, 2))
+B₂() = vcat(zeros(4, 2),
+            [0   0;
+             1  0;
+             0   0;
+             0   1])
 
-ShepherdAndSheepDynamics(dt) = LinearDynamics(shepherd_A(dt), [B₁(dt), B₂(dt)])
+ShepherdAndSheepDynamics() = ContinuousLinearDynamics(shepherd_A(), [B₁(), B₂()])
 
 
 # Costs reflecting the preferences above.
@@ -58,7 +58,7 @@ ShepherdAndSheepCosts() = [c₁, c₂]
 
 # Nonlinear, but still quadratic, version of this game.
 
-ShepherdAndSheepWithUnicycleDynamics() = UnicycleDynamics(2)
+ShepherdAndSheepWithUnicycleDynamics(dt) = UnicycleDynamics(2, dt)
 
 # P1 wants P2 to go to origin in position
 Q₃ = zeros(8, 8)

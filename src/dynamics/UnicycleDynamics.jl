@@ -19,9 +19,9 @@ export UnicycleDynamics
 
 function dx(dyn::UnicycleDynamics,
             time_range,
-            x::AbstractVector{Float64},
-            us::AbstractVector{<:AbstractVector{Float64}},
-            v::Union{Nothing, AbstractVector{Float64}})
+            x::AbstractVector{TX},
+            us::AbstractVector{<:AbstractVector{TU}},
+            v) where {TX, TU}
     # TODO(hamzah) - propagate_dynamics not implemented with process noise for UnicycleDynamics".
     # TODO: Unicycle dynamics doesn't currently support process noise.
     @assert isnothing(v)
@@ -33,7 +33,7 @@ function dx(dyn::UnicycleDynamics,
         @assert size(us[ii], 1) == 2
     end
 
-    dx_t = zeros(xdim(dyn))
+    dx_t = zeros(TX, xdim(dyn))
     for ii in 1:N
         start_idx = 4 * (ii-1)
         px = x[start_idx + 1]
@@ -52,9 +52,9 @@ end
 # TODO(hamzah) - unify propagate dynamics into the DynamicsUtils, with separate validators and pre/post-process.
 function propagate_dynamics(dyn::UnicycleDynamics,
                             time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::Union{Nothing, AbstractVector{Float64}})
+                            x,
+                            us,
+                            v)
     # TODO(hamzah) - propagate_dynamics not implemented with process noise for UnicycleDynamics".
     # TODO: Unicycle dynamics doesn't currently support process noise.
     @assert isnothing(v)
@@ -83,7 +83,7 @@ end
 
 # These are the continuous derivatives of the unicycle dynamics with respect to x and u.
 
-function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -105,7 +105,7 @@ function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::A
     return Matrix(blockdiag(As...))
 end
 
-function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N

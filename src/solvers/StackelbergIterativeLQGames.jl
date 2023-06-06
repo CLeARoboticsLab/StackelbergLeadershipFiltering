@@ -132,13 +132,17 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
             time_range = (prev_time, curr_time)
 
             us_km1_tt = [us_km1[ii][:, tt] for ii in 1:num_players]
-            lin_dyns[tt] = linearize_dynamics(sg.dyn, time_range, xs_km1[:, tt], us_km1_tt)
+
+            # Produce a continuous-time linear system from the dynamical system,
+            # then discretize it at the sampling time of the original system.
+            cont_lin_dyn = linearize(sg.dyn, time_range, xs_km1[:, tt], us_km1_tt)
+            lin_dyns[tt] = discretize(cont_lin_dyn, sampling_time(sg.dyn))
             for ii in 1:num_players
                 quad_costs[tt][ii] = quadraticize_costs(sg.costs[ii], time_range, xs_km1[:, tt], us_km1_tt)
             end
         end
 
-         # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
+        # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
         ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
