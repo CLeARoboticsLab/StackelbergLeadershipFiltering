@@ -7,7 +7,7 @@ horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
-dyn = ShepherdAndSheepWithUnicycleDynamics()
+dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
 costs = UnicycleShepherdAndSheepWithQuadraticCosts()
 num_players = num_agents(dyn)
 
