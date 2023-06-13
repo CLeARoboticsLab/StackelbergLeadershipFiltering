@@ -35,8 +35,9 @@ function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_cos
 
     # Make state cost.
     Q = make_symmetric_pos_def_matrix(num_states)
-    Q = (make_affine) ? vcat(hcat(Q, zeros(num_states)), hcat(zeros(1, num_states), 1.)) : Q
-    costs = [QuadraticCost(Q) for _ in 1:N]
+    q = (make_affine) ? rand(num_states) : zeros(num_states)
+    cq = (make_affine) ? rand() : 0.
+    costs = [QuadraticCost(Q, q, cq) for _ in 1:N]
 
 
     # Make control costs.
@@ -44,14 +45,16 @@ function generate_random_quadratic_costs(sys_info::SystemInfo; include_cross_cos
         for jj in 1:N
             # Generate the control costs, factoring in the flag for cross control.
             num_uj = udim(sys_info, jj)
+            r = (make_affine) ? rand(num_uj) : zeros(num_uj)
+            cr = (make_affine) ? rand() : 0.
             if ii != jj && !include_cross_costs
                 R_ij = zeros(num_uj, num_uj)
-                add_control_cost!(costs[ii], jj, R_ij)
+                add_control_cost!(costs[ii], jj, R_ij; r, cr)
                 continue
             end
             R_ij = make_symmetric_pos_def_matrix(num_uj)
-            R_ij = (make_affine) ? vcat(hcat(R_ij, zeros(num_uj)), hcat(zeros(1, num_uj), 1.)) : R_ij
-            add_control_cost!(costs[ii], jj, R_ij)
+            # R_ij = (make_affine) ? vcat(hcat(R_ij, zeros(num_uj)), hcat(zeros(1, num_uj), 1.)) : R_ij
+            add_control_cost!(costs[ii], jj, R_ij; r, cr)
         end
     end
 
