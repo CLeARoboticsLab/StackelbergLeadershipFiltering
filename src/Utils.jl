@@ -65,6 +65,10 @@ function udims(sys_info::SystemInfo)
     return sys_info.num_us
 end
 
+function get_zero_ctrls(sys_info::SystemInfo)
+    return [zeros(udim(sys_info, ii)) for ii in 1:num_agents(sys_info)]
+end
+
 function vdim(sys_info::SystemInfo)
     return sys_info.num_v
 end
@@ -81,7 +85,7 @@ function get_discretized_system_info(sys_info::SystemInfo, new_dt)
     return SystemInfo(sys_info, new_dt)
 end
 
-export SystemInfo, num_agents, xdim, udim, udims, vdim, sampling_time, is_continuous, get_discretized_system_info
+export SystemInfo, num_agents, xdim, udim, udims, get_zero_ctrls, vdim, sampling_time, is_continuous, get_discretized_system_info
 
 
 # Wraps angles to the range [-pi, pi).

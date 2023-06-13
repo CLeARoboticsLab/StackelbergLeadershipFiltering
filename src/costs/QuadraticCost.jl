@@ -63,7 +63,7 @@ function compute_cost(c::QuadraticCost, t, x, us)
     dus = us - c.u₀s
     total = ((1/2.) * dx' * c.Q * dx) + c.q' * dx + c.cq
     if !isempty(c.Rs)
-        total += sum((1/2.) * dus[jj]' * R * dus[jj] + dus[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
+        total += sum(((1/2.) * dus[jj]' * R * dus[jj]) + dus[jj]' * c.rs[jj] + c.crs[jj] for (jj, R) in c.Rs)
     end
     return total
 end
@@ -73,7 +73,7 @@ end
 # Shifts a (Q, q, cq) quadratic cost set to transform to (Q̃, q̃, c̃q). Can be used for control sets too.
 function _shift_cost(Q, q, cq, a)
     @assert size(q) == size(a)
-    Q̃ = Q
+    Q̃ = deepcopy(Q)
     q̃ = q - Q * a
     c̃q = (1/2) * (a' * Q * a) - (q' * a) + cq
 
@@ -152,29 +152,44 @@ end
 export Gx, Gus, Gxx, Guus
 
 
-# Helpers specific to quadratic costs.
+# Helpers specific to quadratic costs - these return the cost terms in the form
+# x' Q x + q' x + cq.
+# Offsets are factored into the terms.
+# TODO(hamzah) - Find a way to define offsets more automatically.
 function get_quadratic_state_cost_term(c::QuadraticCost)
-    return deepcopy(c.Q)
+    @assert !isnothing(c.x₀) "Offsets must be defined manually."
+    Q_shifted = _shift_cost(c.Q, c.q, c.cq, c.x₀)[1]
+    return Q_shifted
 end
 
 function get_linear_state_cost_term(c::QuadraticCost)
-    return deepcopy(c.q)
+    @assert !isnothing(c.x₀) "Offsets must be defined manually."
+    q_shifted = _shift_cost(c.Q, c.q, c.cq, c.x₀)[2]
+    return q_shifted
 end
 
 function get_constant_state_cost_term(c::QuadraticCost)
-    return deepcopy(c.cq)
+    @assert !isnothing(c.x₀) "Offsets must be defined manually."
+    cq_shifted = _shift_cost(c.Q, c.q, c.cq, c.x₀)[3]
+    return cq_shifted
 end
 
 function get_quadratic_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return deepcopy(c.Rs[player_idx])
+    @assert !isnothing(c.u₀s) "Offsets must be defined manually."
+    R_shifted = _shift_cost(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx], c.u₀s[player_idx])[1]
+    return R_shifted
 end
 
 function get_linear_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return deepcopy(c.rs[player_idx])
+    @assert !isnothing(c.u₀s) "Offsets must be defined manually."
+    r_shifted = _shift_cost(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx], c.u₀s[player_idx])[2]
+    return r_shifted
 end
 
 function get_constant_control_cost_term(c::QuadraticCost, player_idx::Int)
-    return deepcopy(c.crs[player_idx])
+    @assert !isnothing(c.u₀s) "Offsets must be defined manually."
+    cr_shifted = _shift_cost(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx], c.u₀s[player_idx])[3]
+    return cr_shifted
 end
 
 # Export the cost type.

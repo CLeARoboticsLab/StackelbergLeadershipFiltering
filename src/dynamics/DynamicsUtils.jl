@@ -116,6 +116,10 @@ function udims(dyn::Dynamics)
     return udims(dyn.sys_info)
 end
 
+function get_zero_ctrls(dyn::Dynamics)
+    return get_zero_ctrls(dyn.sys_info)
+end
+
 function vdim(dyn::Dynamics)
     return vdim(dyn.sys_info)
 end
