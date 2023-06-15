@@ -3,7 +3,7 @@ using StackelbergControlHypothesesFiltering
 
 using LinearAlgebra
 using Random: seed!
-using Test: @test, @testset
+using Test: @test, @testset, @test_throws
 
 include("TestUtils.jl")
 
@@ -133,5 +133,85 @@ end
                 all_quad_costs[ii] = approx_quad_cost
             end
         end
+    end
+
+    # For a convex quadratic cost, ensure that the QuadraticTrackingCost is equivalent with shifted input.
+    @testset "ComputeCostIdenticalWithShiftedInput" begin
+        NUM_TESTS = 1
+
+        # Generate arbitrary quadratic costs centered around zero.
+        # TODO (hamzah): For now, we require zero-offsets for quadratic costs used in QuadraticTrackingCosts.
+        # For this test, we work around that and make the tracking cost directly and it seems to work.
+        x_offset, us_offset = generate_random_state_ctrl_point(si)
+
+        all_quad_costs = generate_random_quadratic_costs(si; include_cross_costs=true, make_affine=true)
+        all_quad_track_costs = [QuadraticTrackingCost(deepcopy(cost), x_offset, us_offset) for cost in all_quad_costs]
+
+        for _ in NUM_TESTS
+            x_eval, us_eval = generate_random_state_ctrl_point(si)
+
+            c1 = all_quad_costs[1]
+            c2 = all_quad_track_costs[1]
+            @test compute_cost(c1, time_range, x_eval - x_offset, us_eval - us_offset) == compute_cost(c2, time_range, x_eval, us_eval)
+            @test compute_cost(c1, time_range, x_eval, us_eval) == compute_cost(c2, time_range, x_eval + x_offset, us_eval + us_offset)
+        end
+    end
+
+    # For a convex quadratic cost, ensure that the QuadraticTrackingCost is equivalent to itself when quadraticized.
+    @testset "ComputeCostIdenticalWithSameInputAfterQuadraticizationOfTrackingCost" begin
+        NUM_TESTS = 1
+
+        # Generate offset state and controls for quadratic cost to be inserted in the tracking cost.
+        x_offset, us_offset = generate_random_state_ctrl_point(si)
+
+        # For now, set the offsets to zero.
+        # TODO(hamzah): Get this working with general pre-existing offsets and remove the test below.
+        x_offset = zeros(xdim(si))
+        us_offset = get_zero_ctrls(si)
+
+        all_quad_costs = generate_random_quadratic_costs(si; include_cross_costs=true, make_affine=true)
+        add_offsets!(all_quad_costs[1], x_offset, us_offset)
+        add_offsets!(all_quad_costs[2], x_offset, us_offset)
+
+        # Generate reference state and trajectories for the quadratic tracking cost.
+        x_ref, us_ref = generate_random_state_ctrl_point(si)
+        all_quad_track_costs = [make_quadratic_tracking_cost(deepcopy(cost), x_ref, us_ref) for cost in all_quad_costs]
+
+        for _ in NUM_TESTS
+            # These are the state-controls at which the costs are evaluated.
+            x_curr, us_curr = generate_random_state_ctrl_point(si)
+
+            # We are comparing the quadratic tracking cost to itself approximated to the second order.
+            c1 = all_quad_track_costs[1]
+            c2 = quadraticize_costs(all_quad_track_costs[1], time_range, x_curr, us_curr)
+
+            # Quadraticization allows the quadratic tracking cost to be represented as x' Q x + ... instead of (x - xr)' Q (x - xr).
+            # This the computed cost should be exactly the same as the original quadratic tracking cost.
+            @test compute_cost(c1, time_range, x_curr, us_curr) ≈ compute_cost(c2, time_range, x_curr, us_curr)
+
+            # Quadraticization should also have a translated relationship compared to the original quadratic cost. 
+            c3 = all_quad_costs[1]
+            @test compute_cost(c3, time_range, x_curr - x_ref, us_curr - us_ref) ≈ compute_cost(c2, time_range, x_curr, us_curr)
+        end
+    end
+
+    # Ensures, for now, that QuadraticTrackingCost can only be made with 
+    @testset "ShouldNotBeAbleToConstructQuadraticTrackingCostWithNonZeroQuadraticOffset" begin
+
+        # Generate offset state and controls for quadratic cost to be inserted in the tracking cost.
+        x_offset, us_offset = generate_random_state_ctrl_point(si)
+
+        # For now, get some offsets.
+        # TODO(hamzah): Get this working with general pre-existing offsets and remove this test.
+        x_offset = ones(xdim(si))
+        us_offset = [ones(udim(si, ii)) for ii in 1:num_agents(si)]
+
+        all_quad_costs = generate_random_quadratic_costs(si; include_cross_costs=true, make_affine=true)
+        add_offsets!(all_quad_costs[1], x_offset, us_offset)
+        quad_cost = all_quad_costs[1]
+
+        # Generate reference state and trajectories for the quadratic tracking cost.
+        x_ref, us_ref = generate_random_state_ctrl_point(si)
+        @test_throws AssertionError make_quadratic_tracking_cost(deepcopy(quad_cost), x_ref, us_ref)
     end
 end

@@ -2,7 +2,7 @@
 # cost = (x-xf)' Q (x-xf) + u' R u + exp(omega^2 - omega^2_max) + exp(accel^2 - accel^2_max)
 
 struct ExampleILQRCost <: NonQuadraticCost
-    quad_cost::QuadraticCostWithOffset
+    quad_cost::QuadraticTrackingCost
     c::Float64 # constant
     max_accel::Float64
     max_omega::Float64

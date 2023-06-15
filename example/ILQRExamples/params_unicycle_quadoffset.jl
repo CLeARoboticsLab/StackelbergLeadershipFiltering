@@ -26,8 +26,9 @@ Q = Matrix(Diagonal(1*[1., 1., 1., 1.]))
 R = Matrix(Diagonal(1*[1., 1.]))
 quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
-quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
+add_offsets!(quad_cost, xf, get_zero_ctrls(dyn))
+# quad_w_offset_cost = QuadraticTrackingCost(quad_cost, xf)
 
 println("setting cost to Quadratic Offset Cost")
-selected_cost = quad_w_offset_cost
+selected_cost = quad_cost
 

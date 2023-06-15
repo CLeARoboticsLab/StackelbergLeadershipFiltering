@@ -29,7 +29,6 @@ function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R
     c.Rs[other_player_idx] = R
     c.rs[other_player_idx] = r
     c.crs[other_player_idx] = cr
-
 end
 
 function add_offsets!(c::QuadraticCost, x₀, u₀s)
@@ -131,6 +130,11 @@ function quadraticize_costs(c::QuadraticCost, time_range, x, us)
     return quad_cost
 end
 
+# # Also passes the tests, but not general enough to use elsewhere.
+# function quadraticize_costs(c::QuadraticCost, time_range, x, us)
+#     _set_zero_offsets_if_unset(c, size(x), [size(us[ii]) for ii in 1:length(us)])
+#     return c
+# end
 
 # Derivative terms
 function Gx(c::QuadraticCost, t, x, us)

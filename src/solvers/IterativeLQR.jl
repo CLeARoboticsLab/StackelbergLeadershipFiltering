@@ -36,7 +36,6 @@ function ilqr(T::Int,
     num_iters = 0
     is_converged = false
     while !is_converged && num_iters < max_iters
-
         # I. Backwards pass
 
         # 1. Extract linear dynamics and quadratic costs wrt to the current iteration of state and controls.
@@ -53,6 +52,16 @@ function ilqr(T::Int,
             lin_dyns[tt] = discretize(cont_lin_dyn, sampling_time(dyn))
             quad_costs[tt] = quadraticize_costs(cost, time_range, xs_im1[:, tt], [us_im1[:, tt]])
         end
+
+        # println(tt, " - ", get_quadratic_state_cost_term(quad_costs[tt]))
+        t = 1
+        # println(t, " - ", get_linear_state_cost_term(quad_costs[t]), " ", quad_costs[t].q)
+        # println(t, " - ", get_constant_state_cost_term(quad_costs[t]))
+        # println(t, " - ", get_quadratic_control_cost_term(quad_costs[t], 1), " ", quad_costs[t].Rs[1])
+        # println(t, " - ", get_linear_control_cost_term(quad_costs[t], 1), " ", quad_costs[t].rs[1])
+        # println(t, " - ", get_constant_control_cost_term(quad_costs[t], 1))
+        # println(tt, " - ", quad_costs[tt].x₀, " ", quad_costs[tt].u₀s)
+        # println("---")
 
         # 2. Solve the optimal control problem wrt the linearizations to produce the homogeneous feedback and cost matrices.
         ctrl_strats, _ = solve_lqr_feedback(lin_dyns, quad_costs, T)
@@ -72,6 +81,7 @@ function ilqr(T::Int,
 
             # Run the update step for the controls.
             us_i[:, tt] = us_im1[:, tt] - Ks[:, :, tt] * (xs_i[:, tt] - xs_im1[:, tt]) - step_size * ks[:, tt]
+            println("t=", tt, " - ", norm(ks[:, tt]))
 
             # Propagate the state at the next time step based on the new controls.
             time_range = (prev_time, curr_time)

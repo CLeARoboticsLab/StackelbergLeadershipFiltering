@@ -2,7 +2,7 @@ using Plots
 
 include("params_time.jl")
 include("params_doubleintegrator_quadoffset.jl")
-include("params_unicycle_quadoffset.jl")
+# include("params_unicycle_quadoffset.jl")
 # include("params_unicycle_nonlinearexample.jl")
 
 #####################################
@@ -13,8 +13,8 @@ include("params_unicycle_quadoffset.jl")
 us_1 = zeros(udim(dyn), T)
 
 # constant inputs - same as Jake
-us_1[1,:] .= 0.1
-us_1[2,:] .= 0.01
+# us_1[1,:] .= 0.1
+# us_1[2,:] .= 0.01
 
 # Linearly interpolate.
 # duration = (T-1) * dt
@@ -27,7 +27,11 @@ us_1[2,:] .= 0.01
 # _, us_1 = unroll_feedback(dyn, times, ctrl_strats, x0)
 # us_1 = us_1[1] + randn(size(us_1[1])) * 0.1
 
-xs_i, us_i, is_converged, num_iters, conv_metrics, evaluated_costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1; max_iters=1000, step_size=0.01, threshold=1e-4, verbose=true)
+max_iters=2
+step_size=1.
+threshold=1e-3
+verbose=true
+xs_i, us_i, is_converged, num_iters, conv_metrics, evaluated_costs = ilqr(T, t0, times, dyn, selected_cost, x0, us_1; max_iters, step_size, threshold, verbose)
 final_cost_total = evaluate(selected_cost, xs_i, [us_i])
 
 println("final: ", xs_i[:, T], " with trajectory cost: ", final_cost_total)

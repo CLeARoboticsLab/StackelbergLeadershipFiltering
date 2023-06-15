@@ -69,7 +69,7 @@ max_iters = 50
 step_size = 0.01
 
 # Generate the ground truth.
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+costs = [QuadraticTrackingCost(costs[1]), QuadraticTrackingCost(costs[2])]
 
 # leader_idx=2
 gt_silq_num_runs=1

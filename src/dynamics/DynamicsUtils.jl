@@ -132,4 +132,4 @@ function is_continuous(dyn::Dynamics)
     return iszero(sampling_time(dyn))
 end
 
-export num_agents, xdim, udim, vdim, sampling_time, is_continuous
+export num_agents, xdim, udim, udims, get_zero_ctrls, vdim, sampling_time, is_continuous

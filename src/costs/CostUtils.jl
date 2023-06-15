@@ -36,7 +36,7 @@ function quadraticize_costs(c::Cost, time_range, x, us)
 
     # Used to compute the way the constant cost terms are divided.
     num_cost_mats = length(ddu2s)
-    const_cost_term = (2/num_cost_mats) * cost_eval
+    const_cost_term = (1/(num_cost_mats+1)) * cost_eval
 
     # This should be QuadraticCost with offset about x because the taylor approx is (x-x0)
     quad_cost = QuadraticCost(ddx2, dx', const_cost_term)
