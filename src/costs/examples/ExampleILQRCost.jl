@@ -2,7 +2,7 @@
 # cost = (x-xf)' Q (x-xf) + u' R u + exp(omega^2 - omega^2_max) + exp(accel^2 - accel^2_max)
 
 struct ExampleILQRCost <: NonQuadraticCost
-    quad_cost::QuadraticCostWithOffset
+    quad_cost::QuadraticTrackingCost
     c::Float64 # constant
     max_accel::Float64
     max_omega::Float64
@@ -11,7 +11,7 @@ struct ExampleILQRCost <: NonQuadraticCost
 end
 
 # See slide 35 on Jake Levy's CLeAR Lab talk on 09/26/2022.
-function compute_cost(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function compute_cost(c::ExampleILQRCost, time_range, x, us)
     # Start with the quadratic portions of the c.
     total = compute_cost(c.quad_cost, time_range, x, us)
 
@@ -25,11 +25,11 @@ function compute_cost(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}
     return total
 end
 
-function Gx(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gx(c::ExampleILQRCost, time_range, x, us)
     return Gx(c.quad_cost, time_range, x, us)
 end
 
-function Gus(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gus(c::ExampleILQRCost, time_range, x, us)
     accel = us[1][2]
     omega = us[1][1]
     exp_term_alpha = exp(c.c * (accel^2 - c.max_accel^2))
@@ -42,11 +42,11 @@ function Gus(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::Abs
     return out
 end
 
-function Gxx(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Gxx(c::ExampleILQRCost, time_range, x, us)
     return Gxx(c.quad_cost, time_range, x, us)
 end
 
-function Guus(c::ExampleILQRCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Guus(c::ExampleILQRCost, time_range, x, us)
     accel = us[1][2]
     omega = us[1][1]
     exp_term_alpha = exp(c.c * (accel^2 - c.max_accel^2))

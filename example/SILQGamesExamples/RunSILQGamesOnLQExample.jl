@@ -4,7 +4,7 @@ using LinearAlgebra
 
 include("LQ_parameters.jl")
 
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+costs = [QuadraticTrackingCost(costs[1]), QuadraticTrackingCost(costs[2])]
 
 num_runs=1
 

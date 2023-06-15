@@ -12,7 +12,7 @@ abstract type NonQuadraticCost <: Cost end
 # Evaluates the cost across a time horizon.
 # - xs[:, time]
 # - us[player][:, time]
-function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:AbstractMatrix{Float64}})
+function evaluate(c::Cost, xs, us)
     horizon = last(size(xs))
     num_players = size(us, 1)
 
@@ -25,7 +25,7 @@ function evaluate(c::Cost, xs::AbstractMatrix{Float64}, us::AbstractVector{<:Abs
     return total
 end
 
-function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function quadraticize_costs(c::Cost, time_range, x, us)
     num_players = length(us)
 
     cost_eval = compute_cost(c, time_range, x, us)
@@ -36,7 +36,7 @@ function quadraticize_costs(c::Cost, time_range, x::AbstractVector{Float64}, us:
 
     # Used to compute the way the constant cost terms are divided.
     num_cost_mats = length(ddu2s)
-    const_cost_term = (2/num_cost_mats) * cost_eval
+    const_cost_term = (1/(num_cost_mats+1)) * cost_eval
 
     # This should be QuadraticCost with offset about x because the taylor approx is (x-x0)
     quad_cost = QuadraticCost(ddx2, dx', const_cost_term)

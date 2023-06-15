@@ -4,11 +4,11 @@
 # Vector homogenization #
 #########################
 
-function homogenize_vector(v::AbstractVector{Float64})
+function homogenize_vector(v::AbstractVector{T}) where {T}
     return vcat(v, 1)
 end
 
-function homogenize_vector(vs::AbstractMatrix{Float64})
+function homogenize_vector(vs::AbstractMatrix{T}) where {T}
     return vcat(vs, ones(1, size(vs, 2)))
 end
 export homogenize_vector
@@ -19,7 +19,7 @@ export homogenize_vector
 ###############################################
 
 # This function assumes right multiplication; if left multiplication is done, then matrix should be transposed.
-function homogenize_dynamics_matrix(M::AbstractMatrix{Float64}; m=zeros(size(M, 1))::AbstractVector{Float64}, ρ=0.0)
+function homogenize_dynamics_matrix(M::AbstractMatrix{T}; m=zeros(size(M, 1))::AbstractVector{T}, ρ=0.0::T) where {T}
     M_dim2 = size(M, 2)
     # TODO(hamzah): This is buggy code and should really be dependent on whether we are homogenizing A or B.
     cm = (size(M, 1) == size(M, 2)) ? 1. : 0.
@@ -35,7 +35,7 @@ export homogenize_dynamics_matrix
 
 # Produces a symmetric matrix.
 # If we need to perform a spectral shift to enforce PD-ness, we can set ρ accordingly.
-function homogenize_cost_matrix(M::AbstractMatrix{Float64}, m=zeros(size(M, 1))::AbstractVector{Float64}, cm=0.0::Float64, ρ=nothing)
+function homogenize_cost_matrix(M::AbstractMatrix{T}, m=zeros(size(M, 1))::AbstractVector{T}, cm=0.0::T, ρ=nothing) where {T}
     # If we're gonna have problems with singularity, then spectral shift the matrix.
     if all(iszero.(m)) && cm == 0.0 && ρ == nothing
         ρ = 1e-32
@@ -55,11 +55,17 @@ end
 
 # Helpers that get the homogenized Q and R matrices for a quadratic cost matrix.
 function get_homogenized_state_cost_matrix(c::QuadraticCost)
-    return homogenize_cost_matrix(c.Q, c.q, c.cq)
+    Q = get_quadratic_state_cost_term(c)
+    q = get_linear_state_cost_term(c)
+    cq = get_constant_state_cost_term(c)
+    return homogenize_cost_matrix(Q, q, cq)
 end
 
 function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
-    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
+    R = get_quadratic_control_cost_term(c, player_idx)
+    r = get_linear_control_cost_term(c, player_idx)
+    cr = get_constant_control_cost_term(c, player_idx)
+    return homogenize_cost_matrix(R, r, cr)
 end
 
 export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
@@ -67,10 +73,12 @@ export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
 
 # Helpers that get the homogenized A and B for a linear dynamical system.
 function get_homogenized_state_dynamics_matrix(dyn::LinearDynamics)
+    # TODO(hamzah): Do not use the fields directly. Use some sort of getter function.
     return homogenize_dynamics_matrix(dyn.A; m=dyn.a)
 end
 
 function get_homogenized_control_dynamics_matrix(dyn::LinearDynamics, player_idx::Int)
+    # TODO(hamzah): Do not use the fields directly. Use some sort of getter function.
     return homogenize_dynamics_matrix(dyn.Bs[player_idx])
 end
 

@@ -7,7 +7,7 @@ horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
-dyn = ShepherdAndSheepWithUnicycleDynamics()
+dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
 costs = UnicycleShepherdAndSheepWithQuadraticCosts()
 num_players = num_agents(dyn)
 
@@ -69,7 +69,7 @@ max_iters = 50
 step_size = 0.01
 
 # Generate the ground truth.
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+costs = [QuadraticTrackingCost(costs[1]), QuadraticTrackingCost(costs[2])]
 
 # leader_idx=2
 gt_silq_num_runs=1

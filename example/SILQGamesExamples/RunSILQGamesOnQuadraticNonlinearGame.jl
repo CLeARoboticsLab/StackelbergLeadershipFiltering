@@ -4,14 +4,14 @@ using LinearAlgebra
 
 include("quadratic_nonlinear_parameters.jl")
 
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+costs = [QuadraticTrackingCost(costs[1]), QuadraticTrackingCost(costs[2])]
 
 num_runs=1
 
 # config variables
-threshold=0.001
-max_iters=1000
-step_size=1e-2
+threshold=1e-4
+max_iters=10000
+step_size=1e-3
 verbose=true
 
 sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs;

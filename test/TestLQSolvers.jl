@@ -11,13 +11,20 @@ seed!(0)
     stackelberg_leader_idx = 1
 
     # Common dynamics, costs, and initial condition.
-    A = [1 0.1 0 0;
-         0 1   0 0;
-         0 0   1 1.1;
-         0 0   0 1]
+    x₁ = [1., 0, 1, 0]
+    horizon = 10
+
+    dt = 1.
+    times = dt * (cumsum(ones(horizon)) .- 1.)
+    
+    A = [0 0.1 0 0;
+         0 0   0 0;
+         0 0   0 1.1;
+         0 0   0 0]
     B₁ = [0 0.1 0 0]'
     B₂ = [0 0   0 0.1]'
-    dyn = LinearDynamics(A, [B₁, B₂])
+    cont_dyn = ContinuousLinearDynamics(A, [B₁, B₂])
+    dyn = discretize(cont_dyn, dt)
 
     Q₁ = [0 0 0  0;
           0 0 0  0;
@@ -34,10 +41,6 @@ seed!(0)
     c₂ = QuadraticCost(Q₂)
     add_control_cost!(c₂, 2, ones(1, 1))
     add_control_cost!(c₂, 1, zeros(1, 1))
-
-    x₁ = [1., 0, 1, 0]
-    horizon = 10
-    times = cumsum(ones(horizon)) .- 1.
 
     costs = [c₁, c₂]
 
@@ -124,6 +127,7 @@ seed!(0)
             ũhs = homogenize_vector.(ũs)
 
             # Re-solve for the optimal follower input given the perturbed leader trajectory.
+            # TODO(hamzah): fix this by trying a pure quadratic.
             A = get_homogenized_state_dynamics_matrix(dyn)
             B₂ = get_homogenized_control_dynamics_matrix(dyn, follower_idx)
             L₂_ttp1 = get_homogenized_state_cost_matrix(future_costs[follower_idx][tt+1])

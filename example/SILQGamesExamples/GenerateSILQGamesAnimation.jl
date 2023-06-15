@@ -1,5 +1,5 @@
-include("RunSILQGamesOnLQExample.jl")
-# include("RunSILQGamesOnQuadraticNonlinearGame.jl")
+# include("RunSILQGamesOnLQExample.jl")
+include("RunSILQGamesOnQuadraticNonlinearGame.jl")
 
 using Plots
 using ProgressBars
@@ -27,7 +27,7 @@ previous_GKSwstype = get(ENV, "GKSwstype", "")
 ENV["GKSwstype"] = "100"
 
 println("giffying...")
-gif(anim, "silqgames_animation.gif", fps = 20)
+gif(anim, "silqgames_animation.gif", fps = 50)
 println("done")
 
 # Speeds up call to gif (p.2/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4

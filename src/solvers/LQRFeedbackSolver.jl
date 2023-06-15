@@ -26,6 +26,11 @@ function solve_lqr_feedback(dyns::AbstractVector{LinearDynamics}, costs::Abstrac
     @assert !isempty(dyns) && size(dyns, 1) == horizon
     @assert !isempty(costs) && size(costs, 1) == horizon
 
+    # Ensure that all dynamics objects are discretized.
+    for tt in 1:horizon
+        @assert !is_continuous(dyns[tt]) string("Dynamics object at time ", tt, " should be discretized.")
+    end
+
     # Note: There should only be one "player" for an LQR problem.
     num_states = xhdim(dyns[1])
     num_ctrls = uhdim(dyns[1], 1)

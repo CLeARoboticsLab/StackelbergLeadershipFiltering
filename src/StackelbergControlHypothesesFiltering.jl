@@ -4,7 +4,7 @@ include("Utils.jl")
 
 include("costs/CostUtils.jl")
 include("costs/QuadraticCost.jl")
-include("costs/QuadraticCostWithOffset.jl")
+include("costs/QuadraticTrackingCost.jl")
 
 include("costs/examples/ExampleILQRCost.jl")
 

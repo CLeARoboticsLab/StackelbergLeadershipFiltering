@@ -17,7 +17,7 @@ function get_underlying_dynamics(dyn::DynamicsWithHistory)
 end
 
 # hist_idx is the index of the desired state in the history with 1 as the current state.
-function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64}, hist_idx::Int)
+function get_state(dyn::DynamicsWithHistory, X, hist_idx::Int)
     start_idx = (dyn.num_hist - hist_idx) * xdim(dyn.dyn) + 1
     end_idx = (dyn.num_hist - hist_idx + 1) * xdim(dyn.dyn)
     @assert start_idx > 0
@@ -25,14 +25,14 @@ function get_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64}, hist_id
     return X[start_idx:end_idx]
 end
 
-function get_current_state(dyn::DynamicsWithHistory, X::AbstractVector{Float64})
+function get_current_state(dyn::DynamicsWithHistory, X)
     return get_state(dyn, X, 1)
 end
 
 export get_underlying_dynamics, get_state, get_current_state
 
 
-function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -48,7 +48,7 @@ function propagate_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVec
 end
 
 # These are the continuous derivative matrices of the f function. It does not include the derivatives of previous states.
-function Fx(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -63,7 +63,7 @@ function Fx(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us
     return out
 end
 
-function Fus(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)
@@ -74,7 +74,7 @@ end
 
 # We define a custom linearize_dynamics function for this object because this is a pseudo-dynamics object and would not
 # work properly with the generally defined one.
-function linearize_dynamics(dyn::DynamicsWithHistory, time_range, X::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function linearize(dyn::DynamicsWithHistory, time_range, X, us)
     x_t = get_current_state(dyn, X)
     num_states = xdim(dyn.dyn)
     num_states_w_hist = xdim(dyn)

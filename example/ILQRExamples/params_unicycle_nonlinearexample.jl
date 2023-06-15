@@ -18,7 +18,7 @@ println()
 #####################################
 #        Define the dynamics.       #
 #####################################
-dyn = UnicycleDynamics(num_players)
+dyn = UnicycleDynamics(num_players, dt)
 
 
 #####################################
@@ -28,7 +28,7 @@ Q = Matrix(Diagonal(1*[1., 1., 1., 1.]))
 R = Matrix(Diagonal(1*[1., 1.]))
 quad_cost = QuadraticCost(Q)
 add_control_cost!(quad_cost, 1, R)
-quad_w_offset_cost = QuadraticCostWithOffset(quad_cost, xf)
+quad_w_offset_cost = QuadraticTrackingCost(quad_cost, xf)
 
 # TODO(hmzh) - Implement this particular non-quadratic cost and test.
 const_multiplier = 1.0
