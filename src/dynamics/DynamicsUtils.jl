@@ -95,6 +95,25 @@ end
 export Dynamics, NonlinearDynamics, generate_process_noise, linearize_dynamics
 
 
+# A function definition that uses RK4 integration to provide the next step.
+# No process noise for now. Some aggregate dynamics (i.e. DynamicsWithHistory) will define their own.
+function step_rk4(dyn::Dynamics, time_range, x, us, v=nothing)
+    # Ensure that there should not be any process noise.
+    @assert vdim(dyn) == 0
+    @assert time_range[1] ≤ time_range[2]
+    δt = time_range[2] - time_range[1]
+
+    k₁ = dx(dyn, time_range, x, us, v)
+    k₂ = dx(dyn, time_range, x + (k₁/2) * δt, us, v)
+    k₃ = dx(dyn, time_range, x + (k₂/2) * δt, us, v)
+    k₄ = dx(dyn, time_range, x + k₃ * δt, us, v)
+
+    return x + (1/6) * (k₁ + 2*k₂ + 2*k₃ + k₄) * δt
+end
+
+export step_rk4
+
+
 # Dimensionality helpers.
 function num_agents(dyn::Dynamics)
     return num_agents(dyn.sys_info)

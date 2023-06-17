@@ -71,9 +71,9 @@ function propagate_dynamics(dyn::UnicycleDynamics,
     dt = sampling_time(dyn)
     x_tp1 = x + dt * dx(dyn, time_range, x, us, v)
 
+    # TODO(hamzah): Wrapping the angle is generally preferred, but causes issues with autodiff for some reason. Explore this.
     for ii in 1:N
         start_idx = 4 * (ii-1)
-
         # Wrap angle after propagation to bound in [-pi, pi).
         x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
     end
