@@ -118,7 +118,7 @@ function Fus(dyn::UnicycleDynamics, time_range, x, us)
     dt = curr_time - prev_time
     for ii in 1:N
         start_idx = num_states_per_player * (ii-1)
-        Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
+        Bs[ii][start_idx+3:start_idx+4, 1:2] = [1 0; 0 1]
     end
     return Bs
 end

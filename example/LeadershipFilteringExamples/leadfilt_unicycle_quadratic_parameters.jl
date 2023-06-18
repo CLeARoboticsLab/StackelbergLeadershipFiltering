@@ -1,4 +1,8 @@
 using StackelbergControlHypothesesFiltering
+using Random: seed!
+
+seed!(0)
+
 
 dt = 0.05
 T = 301
@@ -64,9 +68,9 @@ p_transition = 0.98
 p_init = 0.3
 
 
-threshold = 0.1
-max_iters = 50
-step_size = 0.01
+threshold = 1e-2
+max_iters = 100
+step_size = 1e-2
 
 # Generate the ground truth.
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
