@@ -1,4 +1,4 @@
-# Stackelberg Control Hypotheses Filtering, intended submission to IROS 2022
+# Stackelberg Control Hypotheses Filtering
 
 ## Setup
 

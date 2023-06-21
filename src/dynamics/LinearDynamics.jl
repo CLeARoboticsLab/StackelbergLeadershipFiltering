@@ -21,18 +21,6 @@ LinearDynamics(A, Bs, sys_info::SystemInfo; a=zeros(size(A, 1))) = LinearDynamic
 LinearDynamics(A, Bs, D; a=zeros(size(A, 1))) = LinearDynamics(A, a, Bs, D,
                                                                SystemInfo(length(Bs), last(size(A)), [last(size(Bs[i])) for i in 1:length(Bs)], size(D, 2)))
 
-# Helpers that get the homogenized A and B matrices.
-function get_homogenized_state_dynamics_matrix(dyn::LinearDynamics)
-    return homogenize_dynamics_matrix(dyn.A; m=dyn.a)
-end
-
-function get_homogenized_control_dynamics_matrix(dyn::LinearDynamics, player_idx::Int)
-    return homogenize_dynamics_matrix(dyn.Bs[player_idx])
-end
-
-export get_homogenized_state_dynamics_matrix, get_homogenized_control_dynamics_matrix
-
-
 # Get the linear term.
 function get_linear_state_dynamics(dyn::LinearDynamics)
     return dyn.A

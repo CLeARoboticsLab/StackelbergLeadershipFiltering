@@ -15,7 +15,6 @@ println()
 #####################################
 #        Define the dynamics.       #
 #####################################
-# Ensure the dynamics and costs are both homogenized similarly.
 dyn = LinearDynamics([1. 0. dt 0.;
                       0. 1. 0. dt;
                       0. 0. 1. 0.;
