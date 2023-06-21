@@ -11,12 +11,17 @@ horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
 dyn = ShepherdAndSheepDynamics(dt)
-costs = ShepherdAndSheepCosts()
+bound_val = 3.
+costs = ShepherdAndSheepWithLogBarrierOverallCosts((-bound_val, bound_val), (0.0, bound_val))
 num_players = num_agents(dyn)
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
-x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
+# top half of plane
+x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
+
+# opposite diagonals
+# x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(rng, 8)
 x₁[[2, 4, 6, 8]] .= 0

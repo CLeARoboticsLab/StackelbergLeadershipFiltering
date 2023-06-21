@@ -7,6 +7,7 @@ include("costs/QuadraticCost.jl")
 include("costs/QuadraticCostWithOffset.jl")
 include("costs/WeightedCost.jl")
 include("costs/LogBarrierCost.jl")
+include("costs/AbsoluteLogBarrierCost.jl")
 
 include("costs/examples/ExampleILQRCost.jl")
 

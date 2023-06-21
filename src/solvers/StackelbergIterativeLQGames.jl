@@ -151,13 +151,16 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         xs_k = zeros(size(xs_km1))
         xs_k[:, 1] = x₁
         us_k = [zeros(size(us_km1[ii])) for ii in 1:num_players]
+
+        # On the first iteration, choose a step size of 1.
+        step_size = iszero(num_iters) ? 1. : sg.step_size
         for tt in 1:T-1
             ttp1 = tt + 1
             prev_time = (tt == 1) ? t0 : times[tt]
             curr_time = times[ttp1]
 
             for ii in 1:num_players
-                us_k[ii][:, tt] = us_km1[ii][:, tt] - Ks[ii][:, :, tt] * (xs_k[:, tt] - xs_km1[:, tt]) - sg.step_size * ks[ii][:, tt]
+                us_k[ii][:, tt] = us_km1[ii][:, tt] - Ks[ii][:, :, tt] * (xs_k[:, tt] - xs_km1[:, tt]) - step_size * ks[ii][:, tt]
             end
             us_k_tt = [us_k[ii][:, tt] for ii in 1:num_players]
             time_range = (prev_time, curr_time)
@@ -200,7 +203,7 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         xs_km1 = xs_k
         us_km1 = us_k
 
-        num_iters +=1
+        num_iters += 1
     end
 
     # Update debug data.
