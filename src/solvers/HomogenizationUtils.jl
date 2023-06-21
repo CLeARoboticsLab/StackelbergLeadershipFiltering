@@ -21,6 +21,7 @@ export homogenize_vector
 # This function assumes right multiplication; if left multiplication is done, then matrix should be transposed.
 function homogenize_dynamics_matrix(M::AbstractMatrix{Float64}; m=zeros(size(M, 1))::AbstractVector{Float64}, ρ=0.0)
     M_dim2 = size(M, 2)
+    # TODO(hamzah): This is buggy code and should really be dependent on whether we are homogenizing A or B.
     cm = (size(M, 1) == size(M, 2)) ? 1. : 0.
     return vcat(hcat(       M        ,  m),
                 hcat(zeros(1, M_dim2), cm))
