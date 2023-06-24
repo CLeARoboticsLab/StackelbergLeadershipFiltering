@@ -17,7 +17,7 @@ function coupling_example()
     dt = 0.1
     cont_lin_dyn = ShepherdAndSheepDynamics()
     dyn = discretize(cont_lin_dyn, dt)
-    costs = ShepherdAndSheepCosts()
+    costs = ShepherdAndSheepCosts(dyn)
 
     # Initial condition chosen randomly. Ensure both have relatively low speed.
     x₁ = randn(8)

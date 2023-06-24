@@ -12,7 +12,7 @@ times = dt * (cumsum(ones(T)) .- 1)
 
 cont_dyn = ShepherdAndSheepDynamics()
 dyn = discretize(cont_dyn, dt)
-costs = ShepherdAndSheepCosts()
+costs = ShepherdAndSheepCosts(dyn)
 num_players = num_agents(dyn)
 
 leader_idx = 1

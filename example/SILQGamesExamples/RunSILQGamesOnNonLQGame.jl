@@ -3,13 +3,13 @@ using StackelbergControlHypothesesFiltering
 using LinearAlgebra
 
 # includes linear dynamics and quadratic costs
-include("nonquadratic_linear_parameters.jl")
+include("nonLQ_parameters.jl")
 
 leader_idx=1
 num_runs=1
 
 # config variables
-threshold=3e-3
+threshold=1e-3
 max_iters=200
 step_size=1e-2
 verbose=true
@@ -49,15 +49,15 @@ plot!(times, xs_k[p1y_idx,:], label="P1 py")
 plot!(times, xs_k[p2x_idx,:], label="P2 px", legend=:outertopright)
 plot!(times, xs_k[p2y_idx,:], label="P2 py")
 
-q3 = plot(times, xs_k[2,:], label="vel1 x", legend=:outertopright)
-plot!(times, xs_k[4,:], label="vel1 y")
-plot!(times, xs_k[6,:], label="vel2 x")
-plot!(times, xs_k[8,:], label="vel2 y")
+q3 = plot(times, xs_k[3,:], label="P1 θ", legend=:outertopright)
+plot!(times, xs_k[4,:], label="P1 v")
+plot!(times, xs_k[7,:], label="P2 θ")
+plot!(times, xs_k[8,:], label="P2 v")
 
-q4 = plot(times, us_k[1][1, :], label="P1 accel x", legend=:outertopright)
-plot!(times, us_k[1][2, :], label="P1 accel y")
-plot!(times, us_k[2][1, :], label="P2 accel x", legend=:outertopright)
-plot!(times, us_k[2][2, :], label="P2 accel y")
+q4 = plot(times, us_k[1][1, :], label="P1 ω", legend=:outertopright)
+plot!(times, us_k[1][2, :], label="P1 accel")
+plot!(times, us_k[2][1, :], label="P2 ω", legend=:outertopright)
+plot!(times, us_k[2][2, :], label="P2 accel")
 
 # Plot convergence.
 conv_x = cumsum(ones(num_iters)) .- 1
