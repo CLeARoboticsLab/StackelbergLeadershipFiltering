@@ -44,6 +44,12 @@ using Printf
 using ProgressBars
 gr()
 
+# Indices for shepherd and sheep game.
+p1x_idx = xidx(dyn, 1)
+p1y_idx = yidx(dyn, 1)
+p2x_idx = xidx(dyn, 2)
+p2y_idx = yidx(dyn, 2)
+
 # N = Int(sg_obj.num_iterations[1]+1)
 iter = ProgressBar(2:T)
 anim = @animate for t in iter
@@ -53,36 +59,36 @@ anim = @animate for t in iter
     println(plot_title)
     title1="x-y plot of agent positions over time"
     p1 = plot(title=title1, legend=:outertopright, ylabel="y (m)", xlabel="x (m)", ylimit=(-2.0, 2.0), xlimit=(-2.0, 2.0))
-    plot!(p1, true_xs[1, 1:T], true_xs[2, 1:T], label="P1 true pos")
-    plot!(p1, true_xs[5, 1:T], true_xs[6, 1:T], label="P2 true pos")
+    plot!(p1, true_xs[p1x_idx, 1:T], true_xs[p1y_idx, 1:T], label="P1 true pos")
+    plot!(p1, true_xs[p2x_idx, 1:T], true_xs[p2y_idx, 1:T], label="P2 true pos")
 
-    plot!(p1, zs[1, 1:T], zs[2, 1:T], label="P1 meas pos", color=:blue, linewidth=0.15)
-    plot!(p1, zs[5, 1:T], zs[6, 1:T], label="P2 meas pos", color=:red, linewidth=0.15)
+    plot!(p1, zs[p1x_idx, 1:T], zs[p1y_idx, 1:T], label="P1 meas pos", color=:blue, linewidth=0.15)
+    plot!(p1, zs[p2x_idx, 1:T], zs[p2y_idx, 1:T], label="P2 meas pos", color=:red, linewidth=0.15)
 
-    p1 = scatter!([x₁[1]], [x₁[2]], color="blue", label="start P1")
-    p1 = scatter!([x₁[5]], [x₁[6]], color="red", label="start P2")
+    p1 = scatter!([x₁[p1x_idx]], [x₁[p1y_idx]], color="blue", label="start P1")
+    p1 = scatter!([x₁[p2x_idx]], [x₁[p2y_idx]], color="red", label="start P2")
 
     # plot 2
     title2 = "LF estimated states (x̂) over time"
     p2 = plot(legend=:outertopright, xlabel="t (s)", ylabel="pos (m)", title=title2)
-    plot!(p2, times[1:T], x̂s[1,1:T], label="P1 px")
-    plot!(p2, times[1:T], x̂s[2,1:T], label="P1 py")
-    plot!(p2, times[1:T], x̂s[5,1:T], label="P2 px")
-    plot!(p2, times[1:T], x̂s[6,1:T], label="P2 py")
+    plot!(p2, times[1:T], x̂s[p1x_idx,1:T], label="P1 px")
+    plot!(p2, times[1:T], x̂s[p1y_idx,1:T], label="P1 py")
+    plot!(p2, times[1:T], x̂s[p2x_idx,1:T], label="P2 px")
+    plot!(p2, times[1:T], x̂s[p2y_idx,1:T], label="P2 py")
     plot!(p2, [times[t], times[t]], [-1, 2], label="", color=:black)
 
     # plot 3
-    title3 = "LF estimated heading (x̂) over time"
+    title3 = "LF estimated x velocity (x̂) over time"
     p3 = plot(legend=:outertopright, xlabel="t (s)", ylabel="θ (rad)", title=title3)
-    plot!(p3, times[1:T], x̂s[3,1:T], label="P1 θ")
-    plot!(p3, times[1:T], x̂s[7,1:T], label="P2 θ")
+    plot!(p3, times[1:T], x̂s[2,1:T], label="P1 vx")
+    plot!(p3, times[1:T], x̂s[6,1:T], label="P2 vx")
     plot!(p3, [times[t], times[t]], [-pi, pi], label="", color=:black)
 
     # plot 3
-    title3 = "LF estimated velocity (x̂) over time"
+    title3 = "LF estimated y velocity (x̂) over time"
     p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="vel (m/2)", title=title3)
-    plot!(p4, times[1:T], x̂s[4,1:T], label="P1 v")
-    plot!(p4, times[1:T], x̂s[8,1:T], label="P2 v")
+    plot!(p4, times[1:T], x̂s[4,1:T], label="P1 vy")
+    plot!(p4, times[1:T], x̂s[8,1:T], label="P2 vy")
     plot!(p4, [times[t], times[t]], [-1, 1], label="", color=:black)
 
 
@@ -96,30 +102,25 @@ anim = @animate for t in iter
         # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
         # println("num iters 1, 2: ", sg_objs[t].num_iterations, " ", sg_objs[t].num_iterations[n])
 
-        x1_idx = 1
-        y1_idx = 2
-        x2_idx = 5
-        y2_idx = 6
-
         xks = sg_objs[t].xks[n, num_iter, :, :]
 
         # TODO(hamzah) - change color based on which agent is leader
-        scatter!(p1, xks[x1_idx, :], xks[y1_idx, :], color=:black, markersize=0.5, label="")
+        scatter!(p1, xks[p1x_idx, :], xks[p1y_idx, :], color=:black, markersize=0.5, label="")
 
         color = (sg_objs[t].leader_idxs[n] == 1) ? :blue : :red
-        scatter!(p1, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=3., label="")
+        scatter!(p1, [xks[p1x_idx, 2]], [xks[p1y_idx, 2]], color=color, markersize=3., label="")
 
-        scatter!(p1, xks[x2_idx, :], xks[y2_idx, :], color=:black, markersize=0.5, label="")
-        scatter!(p1, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., label="")
+        scatter!(p1, xks[p2x_idx, :], xks[p2y_idx, :], color=:black, markersize=0.5, label="")
+        scatter!(p1, [xks[p2x_idx, 2]], [xks[p2y_idx, 2]], color=color, markersize=3., label="")
     end
 
     # plot 4
     title5 = "Input acceleration controls (u) over time"
     p5 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
-    plot!(p5, times[1:T], us[1][1, 1:T], label="P1 ω")
-    plot!(p5, times[1:T], us[2][1, 1:T], label="P2 ω")
-    plot!(p5, times[1:T], us[1][2, 1:T], label="P1 a")
-    plot!(p5, times[1:T], us[2][2, 1:T], label="P2 a")
+    plot!(p5, times[1:T], us[1][1, 1:T], label="P1 ax")
+    plot!(p5, times[1:T], us[2][1, 1:T], label="P2 ax")
+    plot!(p5, times[1:T], us[1][2, 1:T], label="P1 ay")
+    plot!(p5, times[1:T], us[2][2, 1:T], label="P2 ay")
     plot!(p5, [times[t], times[t]], [-1, 1], label="", color=:black)
 
     # probability plot - plot 5
@@ -137,7 +138,7 @@ previous_GKSwstype = get(ENV, "GKSwstype", "")
 ENV["GKSwstype"] = "100"
 
 println("giffying...")
-filename = string("unicycle_quadratic_leadfilt_",string(Dates.now()),".gif")
+filename = string("linear_nonquadratic_leadfilt_",string(Dates.now()),".gif")
 gif(anim, filename, fps=10)
 println("done")
 

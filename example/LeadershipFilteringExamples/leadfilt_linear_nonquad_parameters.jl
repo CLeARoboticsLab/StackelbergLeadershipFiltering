@@ -1,21 +1,23 @@
 using StackelbergControlHypothesesFiltering
 
-dt = 0.05
-T = 301
+dt = 0.01
+T = 401
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
-dyn = ShepherdAndSheepDynamics(dt)
-bound_val = 10.
-costs = ShepherdAndSheepWithLogBarrierOverallCosts(bound_val)
+dyn = ShepherdAndSheepDynamics()
+dyn = discretize(dyn, dt)
+bound_val = 5.
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val)
+# costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0., bound_val))
 num_players = num_agents(dyn)
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 # top half of plane
-x₁ = [-2.; 0.; 1.; 0.; -1.; 0; 2; 0]
+x₁ = [-2.; 0.; 1.; 0.; 1.; 0; 2; 0]
 
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
@@ -65,14 +67,14 @@ R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
-num_particles = 50
+num_particles = 100
 
 p_transition = 0.98
 p_init = 0.7
 
-threshold = 0.1
+threshold = 1e-3
 max_iters = 50
-step_size = 0.01
+step_size = 2e-2
 
 gt_silq_num_runs=1
 
