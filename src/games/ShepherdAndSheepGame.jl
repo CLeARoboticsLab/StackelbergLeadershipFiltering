@@ -17,25 +17,25 @@ xidx(dyn::UnicycleDynamics, p_idx::Int) = 4 * (p_idx - 1) + 1
 yidx(dyn::UnicycleDynamics, p_idx::Int) = 4 * (p_idx - 1) + 2
 export xidx, yidx
 
-shepherd_Ã(dt) = [1 dt  0  0;
-                  0  1  0  0;
-                  0  0  1 dt;
-                  0  0  0  1]
-shepherd_A(dt) = vcat(hcat(shepherd_Ã(dt), zeros(4, 4)),
-                      hcat(zeros(4, 4), shepherd_Ã(dt)))
+shepherd_Ã() = [0 1.  0  0;
+                0  0  0  0;
+                0  0  0 1.;
+                0  0  0  0]
+shepherd_A() = vcat(hcat(shepherd_Ã(), zeros(4, 4)),
+                      hcat(zeros(4, 4), shepherd_Ã()))
 
-B₁(dt) = vcat([0   0;
-               dt  0;
-               0   0;
-               0   dt],
-               zeros(4, 2))
-B₂(dt) = vcat(zeros(4, 2),
-              [0   0;
-               dt  0;
-               0   0;
-               0   dt])
+B₁() = vcat([0   0;
+             1  0;
+             0   0;
+             0   1],
+             zeros(4, 2))
+B₂() = vcat(zeros(4, 2),
+            [0   0;
+             1  0;
+             0   0;
+             0   1])
 
-ShepherdAndSheepDynamics(dt) = LinearDynamics(shepherd_A(dt), [B₁(dt), B₂(dt)])
+ShepherdAndSheepDynamics() = ContinuousLinearDynamics(shepherd_A(), [B₁(), B₂()])
 
 # Gets a vector of costs, one per player.
 ShepherdAndSheepCosts(dyn::Dynamics) = begin
@@ -49,8 +49,8 @@ ShepherdAndSheepCosts(dyn::Dynamics) = begin
     Q₁ = zeros(8, 8)
     Q₁[p2x_idx, p2x_idx] = 1.0
     Q₁[p2y_idx, p2y_idx] = 1.0
-    c₁ = QuadraticCost(10*Q₁)
-    add_control_cost!(c₁, 1, 1 * diagm([1, 1]))
+    c₁ = QuadraticCost(1*Q₁)
+    add_control_cost!(c₁, 1, .1 * diagm([1, 1]))
     add_control_cost!(c₁, 2, zeros(2, 2))
 
     Q₂ = zeros(8, 8)
@@ -62,8 +62,8 @@ ShepherdAndSheepCosts(dyn::Dynamics) = begin
     Q₂[p2y_idx, p2y_idx] = 1.0
     Q₂[p1y_idx, p2y_idx] = -1.0
     Q₂[p2y_idx, p1y_idx] = -1.0
-    c₂ = QuadraticCost(10*Q₂)
-    add_control_cost!(c₂, 2, 1 * diagm([1, 1]))
+    c₂ = QuadraticCost(1*Q₂)
+    add_control_cost!(c₂, 2, .1 * diagm([1, 1]))
     add_control_cost!(c₂, 1, zeros(2, 2))
 
     return [c₁, c₂]
@@ -72,7 +72,7 @@ end
 
 # Nonlinear, but still quadratic, version of this game.
 
-ShepherdAndSheepWithUnicycleDynamics() = UnicycleDynamics(2)
+ShepherdAndSheepWithUnicycleDynamics(dt) = UnicycleDynamics(2, dt)
 
 # # P1 wants P2 to go to origin in position
 # Q₃ = zeros(8, 8)

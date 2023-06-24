@@ -56,8 +56,10 @@ function solve_lq_nash_feedback(
     @assert !isempty(dyns) && size(dyns, 1) == horizon
     @assert !isempty(all_costs) && size(all_costs, 1) == horizon
 
+    # Ensure that all dynamics objects are discretized.
     # Ensure that the number of controls matches number of players at each horizon.
     for tt in 1:horizon
+        @assert !is_continuous(dyns[tt]) string("Dynamics object at time ", tt, " should be discretized.")
         @assert(size(all_costs[tt], 1) == num_agents(dyns[tt]))
     end
 

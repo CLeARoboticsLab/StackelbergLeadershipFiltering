@@ -15,7 +15,8 @@ stackelberg_leader_idx = 2
 function coupling_example()
 
     dt = 0.1
-    dyn = ShepherdAndSheepDynamics(dt)
+    cont_lin_dyn = ShepherdAndSheepDynamics()
+    dyn = discretize(cont_lin_dyn, dt)
     costs = ShepherdAndSheepCosts()
 
     # Initial condition chosen randomly. Ensure both have relatively low speed.

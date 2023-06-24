@@ -18,7 +18,7 @@ println()
 #####################################
 #        Define the dynamics.       #
 #####################################
-dyn = UnicycleDynamics(num_players)
+dyn = UnicycleDynamics(num_players, dt)
 
 
 #####################################

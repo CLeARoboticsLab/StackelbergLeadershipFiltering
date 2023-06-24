@@ -1,4 +1,8 @@
 using StackelbergControlHypothesesFiltering
+using Random: seed!
+
+seed!(0)
+
 
 dt = 0.05
 T = 301
@@ -7,7 +11,7 @@ horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
-dyn = ShepherdAndSheepWithUnicycleDynamics()
+dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
 costs = UnicycleShepherdAndSheepWithQuadraticCosts()
 num_players = num_agents(dyn)
 
@@ -64,9 +68,9 @@ p_transition = 0.98
 p_init = 0.3
 
 
-threshold = 0.1
-max_iters = 50
-step_size = 0.01
+threshold = 1e-2
+max_iters = 100
+step_size = 1e-2
 
 # Generate the ground truth.
 costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]

@@ -21,13 +21,13 @@ Ts = 20
 num_games = 1
 num_particles = 50
 
-p_transition = 0.95
+p_transition = 0.98
 p_init = 0.3
 
 
-threshold = 0.1
-max_iters = 25
-step_size = 0.01
+threshold = 1e-3
+max_iters = 50
+step_size = 1e-2
 
 
 # Solve an LQ Stackelberg game based on the shepherd and sheep example.

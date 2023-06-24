@@ -13,11 +13,19 @@ end
 
 # Constructor
 UnicycleDynamics(num_players::Int) = UnicycleDynamics(SystemInfo(num_players, 4*num_players, 2*ones(num_players)))
+UnicycleDynamics(num_players::Int, dt::Float64) = UnicycleDynamics(SystemInfo(num_players, 4*num_players, 2*ones(num_players), 0, dt))
 
-function propagate_dynamics(dyn::UnicycleDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}})
+export UnicycleDynamics
+
+function dx(dyn::UnicycleDynamics,
+            time_range,
+            x::AbstractVector{TX},
+            us::AbstractVector{<:AbstractVector{TU}},
+            v) where {TX, TU}
+    # TODO(hamzah) - propagate_dynamics not implemented with process noise for UnicycleDynamics".
+    # TODO: Unicycle dynamics doesn't currently support process noise.
+    @assert isnothing(v)
+
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -25,9 +33,7 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         @assert size(us[ii], 1) == 2
     end
 
-    x_tp1 = zeros(xdim(dyn), 1)
-    dt = time_range[2] - time_range[1]
-
+    dx_t = zeros(TX, xdim(dyn))
     for ii in 1:N
         start_idx = 4 * (ii-1)
         px = x[start_idx + 1]
@@ -38,27 +44,46 @@ function propagate_dynamics(dyn::UnicycleDynamics,
         turn_rate = us[ii][1]
         accel = us[ii][2]
 
-        x_tp1[start_idx+1:start_idx+4] = x[start_idx+1:start_idx+4] + dt * [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+        dx_t[start_idx+1:start_idx+4] = [vel * cos(theta); vel * sin(theta); turn_rate; accel]
+    end
+    return dx_t
+end
 
-        # Wrap angle before propagation
+# TODO(hamzah) - unify propagate dynamics into the DynamicsUtils, with separate validators and pre/post-process.
+function propagate_dynamics(dyn::UnicycleDynamics,
+                            time_range,
+                            x,
+                            us,
+                            v)
+    # TODO(hamzah) - propagate_dynamics not implemented with process noise for UnicycleDynamics".
+    # TODO: Unicycle dynamics doesn't currently support process noise.
+    @assert isnothing(v)
+
+    N = num_agents(dyn)
+    @assert N == length(us)
+    @assert size(x, 1) == 4 * N
+    for ii in 1:N
+        @assert size(us[ii], 1) == 2
+    end
+
+    @assert !is_continuous(dyn) "Can only propagate discrete-time dynamics objects."
+
+    dt = sampling_time(dyn)
+    x_tp1 = x + dt * dx(dyn, time_range, x, us, v)
+
+    # TODO(hamzah): Wrapping the angle is generally preferred, but causes issues with autodiff for some reason. Explore this.
+    for ii in 1:N
+        start_idx = 4 * (ii-1)
+        # Wrap angle after propagation to bound in [-pi, pi).
         x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
     end
 
     return x_tp1
 end
 
-# TODO: Unicycle dynamics doesn't currently support process noise.
-function propagate_dynamics(dyn::UnicycleDynamics,
-                            time_range,
-                            x::AbstractVector{Float64},
-                            us::AbstractVector{<:AbstractVector{Float64}},
-                            v::AbstractVector{Float64})
-    throw(MethodError("propagate_dynamics not implemented with process noise for UnicycleDynamics"))
-end
-
 # These are the continuous derivatives of the unicycle dynamics with respect to x and u.
 
-function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fx(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -80,7 +105,7 @@ function Fx(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::A
     return Matrix(blockdiag(As...))
 end
 
-function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
+function Fus(dyn::UnicycleDynamics, time_range, x, us)
     N = num_agents(dyn)
     @assert N == length(us)
     @assert size(x, 1) == 4 * N
@@ -93,12 +118,12 @@ function Fus(dyn::UnicycleDynamics, time_range, x::AbstractVector{Float64}, us::
     dt = curr_time - prev_time
     for ii in 1:N
         start_idx = num_states_per_player * (ii-1)
-        Bs[ii][start_idx+3:start_idx+4, 1:2] = dt * [1 0; 0 1]
+        Bs[ii][start_idx+3:start_idx+4, 1:2] = [1 0; 0 1]
     end
     return Bs
 end
 
-export UnicycleDynamics, propagate_dynamics, linearize_dynamics, Fx, Fus
+export dx, propagate_dynamics, Fx, Fus
 
 # TODO(hamzah) - refactor this to adjust based on number of players instead of assuming 2.
 function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us)

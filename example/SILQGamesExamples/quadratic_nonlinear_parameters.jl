@@ -10,7 +10,7 @@ T = 301
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
-dyn = ShepherdAndSheepWithUnicycleDynamics()
+dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
 costs = UnicycleShepherdAndSheepWithQuadraticCosts()
 num_players = num_agents(dyn)
 

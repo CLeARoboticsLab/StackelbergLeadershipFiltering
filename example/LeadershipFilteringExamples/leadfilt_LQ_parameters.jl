@@ -1,13 +1,14 @@
 using StackelbergControlHypothesesFiltering
 
 dt = 0.05
-T = 151
+T = 301
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
-dyn = ShepherdAndSheepDynamics(dt)
+cont_lin_dyn = ShepherdAndSheepDynamics()
+dyn = discretize(cont_lin_dyn, dt)
 costs = ShepherdAndSheepCosts()
 num_players = num_agents(dyn)
 

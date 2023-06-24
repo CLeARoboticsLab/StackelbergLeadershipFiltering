@@ -73,16 +73,20 @@ function generate_dynamics(a)
 
     i = 1
 
-    A(t) = [1 0; t 1]
-    B(t) = [t; 0][:,:] # The multiplier here is the difference between states.
-    D(t) = [1 0; 0 1]
+    A = [0 0; 1. 0]
+    B = [1.; 0][:,:] # The multiplier here is the difference between states.
+    D = [1. 0; 0 1.]
+    cont_dyn = ContinuousLinearDynamics(A, [B], D)
     function f_dynamics(t_range, x, u, v)
         t0 = t_range[1]
         t = t_range[2]
         @assert t ≥ t0
 
+        # no change if the times are the same.
+        if t == t0 return x end
+
         dt = t - t0
-        dyn = LinearDynamics(A(dt), [B(dt)], D(dt))
+        dyn = discretize(cont_dyn, dt)
 
         return propagate_dynamics(dyn, t_range, x, [a * u], v[:])
     end

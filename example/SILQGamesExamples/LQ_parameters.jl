@@ -10,7 +10,8 @@ T = 201
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
-dyn = ShepherdAndSheepDynamics(dt)
+cont_dyn = ShepherdAndSheepDynamics()
+dyn = discretize(cont_dyn, dt)
 costs = ShepherdAndSheepCosts()
 num_players = num_agents(dyn)
 

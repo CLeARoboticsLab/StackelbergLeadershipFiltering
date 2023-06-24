@@ -15,13 +15,13 @@ println()
 #####################################
 #        Define the dynamics.       #
 #####################################
-dyn = LinearDynamics([1. 0. dt 0.;
-                      0. 1. 0. dt;
-                      0. 0. 1. 0.;
-                      0. 0. 0. 1.],
-                     [vcat(zeros(2,2),
-                      [dt 0; 0 dt])]) # 2d double integrator [x y xdot ydot]
-
+cont_dyn = ContinuousLinearDynamics([0. 0. 1. 0.;
+                                     0. 0. 0. 1.;
+                                     0. 0. 0. 0.;
+                                     0. 0. 0. 0.],
+                                    [vcat(zeros(2,2),
+                                     [1. 0; 0 1.])]) # 2d double integrator [x y xdot ydot]
+dyn = discretize(cont_dyn, dt)
 
 #####################################
 #         Define the costs.         #
