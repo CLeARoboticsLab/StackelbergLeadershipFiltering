@@ -10,21 +10,26 @@ T = 301
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
-dyn = ShepherdAndSheepDynamics(dt)
-bound_val = 3.
-costs = ShepherdAndSheepWithLogBarrierOverallCosts((-bound_val, bound_val), (0.0, bound_val))
+# dyn = ShepherdAndSheepDynamics(dt)
+dyn = ShepherdAndSheepWithUnicycleDynamics()
+bound_val = 2.1
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0.0, bound_val))
 num_players = num_agents(dyn)
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 # top half of plane
-x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
+
+# x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0] # double integrator dynamics
+# x₁[[2, 4, 6, 8]] .= 0
+
+x₁ = [2.; 1.; 3*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
 # x₁ = rand(rng, 8)
-x₁[[2, 4, 6, 8]] .= 0
+
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]

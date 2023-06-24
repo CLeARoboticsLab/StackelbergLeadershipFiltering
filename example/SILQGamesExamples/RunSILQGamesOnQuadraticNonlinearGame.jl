@@ -9,7 +9,7 @@ costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 num_runs=1
 
 # config variables
-threshold=0.001
+threshold=1e-3
 max_iters=1000
 step_size=1e-2
 verbose=true

@@ -10,7 +10,7 @@ num_runs=1
 
 # config variables
 threshold=1e-3
-max_iters=200
+max_iters=100
 step_size=1e-2
 verbose=true
 
@@ -31,17 +31,23 @@ using Plots
 q = @layout [a b; c d; e f]
 # q = @layout [a b; c d]#; e f]
 
+# Indices for shepherd and sheep game.
+p1x_idx = xidx(dyn, 1)
+p1y_idx = yidx(dyn, 1)
+p2x_idx = xidx(dyn, 2)
+p2y_idx = yidx(dyn, 2)
+
 q1 = plot(legend=:outertopright)
-plot!(q1, xs_k[1, :], xs_k[3, :], label="leader pos")
-plot!(q1, xs_k[5, :], xs_k[7, :], label="follower pos")
+plot!(q1, xs_k[p1x_idx, :], xs_k[p1y_idx, :], label="leader pos")
+plot!(q1, xs_k[p2x_idx, :], xs_k[p2y_idx, :], label="follower pos")
 
-q1 = scatter!([x₁[1]], [x₁[3]], color="blue", label="start P1")
-q1 = scatter!([x₁[5]], [x₁[7]], color="red", label="start P2")
+q1 = scatter!([x₁[p1x_idx]], [x₁[p1y_idx]], color="blue", label="start P1")
+q1 = scatter!([x₁[p2x_idx]], [x₁[p2y_idx]], color="red", label="start P2")
 
-q2 = plot(times, xs_k[1,:], label="P1 px", legend=:outertopright)
-plot!(times, xs_k[3,:], label="P1 py")
-plot!(times, xs_k[5,:], label="P2 px", legend=:outertopright)
-plot!(times, xs_k[7,:], label="P2 py")
+q2 = plot(times, xs_k[p1x_idx,:], label="P1 px", legend=:outertopright)
+plot!(times, xs_k[p1y_idx,:], label="P1 py")
+plot!(times, xs_k[p2x_idx,:], label="P2 px", legend=:outertopright)
+plot!(times, xs_k[p2y_idx,:], label="P2 py")
 
 q3 = plot(times, xs_k[2,:], label="vel1 x", legend=:outertopright)
 plot!(times, xs_k[4,:], label="vel1 y")
@@ -58,7 +64,7 @@ conv_x = cumsum(ones(num_iters)) .- 1
 # q5 = plot(title="convergence")
 # plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1", yaxis=:log)
 # plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
-q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv. metric", label="p1", yaxis=:log)
+q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv. metric", label="p1", yaxis=:log, legend=:outertopright)
 plot!(q5, conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
 plot!(q5, conv_x, threshold * ones(length(conv_x)), label="threshold")
 
@@ -70,7 +76,7 @@ plot!(q5, conv_x, threshold * ones(length(conv_x)), label="threshold")
 costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-8)
 costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-8)
 
-q6 = plot(conv_x, costs_1, title="evaluated costs", label="p1", yaxis=:log)
+q6 = plot(conv_x, costs_1, title="evaluated costs", label="p1", yaxis=:log, legend=:outertopright)
 plot!(q6, conv_x, costs_2, label="p2", yaxis=:log)
 
 # plot(q1, q2, q3, q4, layout = q)
