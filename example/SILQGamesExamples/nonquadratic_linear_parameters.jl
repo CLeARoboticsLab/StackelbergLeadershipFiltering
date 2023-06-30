@@ -5,14 +5,14 @@ using Random
 seed = 1
 rng = MersenneTwister(seed)
 
-dt = 0.05
-T = 301
+dt = 0.01
+T = 501
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
 dyn = ShepherdAndSheepDynamics(); dyn = discretize(dyn, dt)
 # top half of plane
-x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0] # double integrator dynamics
+x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0] # double integrator dynamics
 x₁[[2, 4, 6, 8]] .= 0
 
 # opposite diagonals
@@ -26,10 +26,10 @@ x₁[[2, 4, 6, 8]] .= 0
 # x₁ = [2.; 1.; -3*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 
 bound_val = 2.1
-costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0.0, bound_val))
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val))
 num_players = num_agents(dyn)
 
-leader_idx = 1
+leader_idx = 2
 
 
 # Initial controls

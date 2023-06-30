@@ -5,7 +5,7 @@ seed!(0)
 
 
 dt = 0.01
-T = 301
+T = 501
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -24,7 +24,7 @@ vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
 # TODO(hamzah) - vectorize this better
@@ -60,7 +60,7 @@ rng = MersenneTwister(0)
 
 R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
 zs = zeros(xdim(dyn), T)
-Ts = 20
+Ts = 80
 num_games = 1
 num_particles = 50
 
@@ -69,7 +69,7 @@ p_init = 0.3
 
 
 threshold = 1e-2
-max_iters = 100
+max_iters = 25
 step_size = 1e-2
 
 # Generate the ground truth.
@@ -90,12 +90,12 @@ us_init = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
 # for ii in 1:num_players
 
 # angular velocities
-us_init[1][1,:] .= -.03
-us_init[2][1,:] .= -.01
+# us_init[1][1,:] .= -.03
+# us_init[2][1,:] .= -.01
 
-# accelerations
-us_init[1][2,:] .= -.3
-us_init[2][2,:] .= .3
+# # accelerations
+# us_init[1][2,:] .= -.3
+# us_init[2][2,:] .= .3
 
 
 # Generate the ground truth.

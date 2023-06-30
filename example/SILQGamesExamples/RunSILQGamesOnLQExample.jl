@@ -9,7 +9,7 @@ costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 num_runs=1
 
 # config variables
-threshold=5e-4
+threshold=1e-3
 max_iters=1000
 step_size=1e-2
 verbose=true
@@ -35,7 +35,7 @@ q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
 # Plot convergence metrics.
 conv_x = cumsum(ones(num_iters)) .- 1
-title8 = "convergence (|⋅|∞) by player"
+title8 = "conv. (|⋅|∞)"
 q8 = plot(title=title8, yaxis=:log, legend=:outertopright)
 plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1")
 plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")

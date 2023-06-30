@@ -87,10 +87,19 @@ export SystemInfo, num_agents, xdim, udim, udims, vdim, sampling_time, is_contin
 # Wraps angles to the range [-pi, pi).
 # Note: implementations using the mod operator cause havoc with autodiff.
 function wrap_angle(angle_rad)
-    ang = angle_rad
-    while abs(angle_rad) >= pi
-        ang -= sign(angle_rad) * 2 * pi
+    ang = angle_rad + pi
+    while angle_rad >= 2*pi
+        angle_rad -= 2*pi
     end
+    while angle_rad < 0
+        angle_rad += 2*pi
+    end
+    return angle_rad - pi
+
+    # ang = angle_rad
+    # while abs(angle_rad) >= pi
+    #     ang -= sign(angle_rad) * 2 * pi
+    # end
     return ang
 end
 

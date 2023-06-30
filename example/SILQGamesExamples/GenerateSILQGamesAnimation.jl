@@ -1,6 +1,7 @@
 # include("RunSILQGamesOnLQExample.jl")
 # include("RunSILQGamesOnQuadraticNonlinearGame.jl")
-include("RunSILQGamesOnNonquadraticLinearGame.jl")
+# include("RunSILQGamesOnNonquadraticLinearGame.jl")
+include("RunSILQGamesOnNonLQGame.jl")
 
 using Plots
 using ProgressBars

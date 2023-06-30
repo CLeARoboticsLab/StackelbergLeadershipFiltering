@@ -9,7 +9,7 @@ times = dt * (cumsum(ones(2*T)) .- 1)
 
 dyn = ShepherdAndSheepDynamics()
 dyn = discretize(dyn, dt)
-bound_val = 5.
+bound_val = 2.5
 costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val)
 # costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0., bound_val))
 num_players = num_agents(dyn)
@@ -25,12 +25,12 @@ x₁ = [-2.; 0.; 1.; 0.; 1.; 0; 2; 0]
 # x₁ = rand(rng, 8)
 x₁[[2, 4, 6, 8]] .= 0
 
-pos_unc = 1e-3
-vel_unc = 1e-4
+pos_unc = 1e-2
+vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+Q = 1e-3 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 
 
 # TODO(hamzah) - vectorize this better
@@ -63,18 +63,18 @@ end
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
+R = zeros(xdim(dyn), xdim(dyn)) + 1e-3 * I
 zs = zeros(xdim(dyn), T)
-Ts = 20
+Ts = 40
 num_games = 1
 num_particles = 100
 
 p_transition = 0.98
-p_init = 0.7
+p_init = 0.5
 
 threshold = 1e-3
-max_iters = 50
-step_size = 2e-2
+max_iters = 25
+step_size = 1e-2
 
 gt_silq_num_runs=1
 

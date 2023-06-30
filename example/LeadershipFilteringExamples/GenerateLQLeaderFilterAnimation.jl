@@ -10,39 +10,6 @@ gr()
 
 include("leadfilt_LQ_parameters.jl")
 
-# CONFIG: 
-# We define an uncertainty for the measurements R arbitrarily - easy for now.
-# 
-rng = MersenneTwister(0)
-
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
-zs = zeros(xdim(dyn), T)
-Ts = 20
-num_games = 1
-num_particles = 50
-
-p_transition = 0.98
-p_init = 0.3
-
-
-threshold = 1e-3
-max_iters = 50
-step_size = 1e-2
-
-
-# Solve an LQ Stackelberg game based on the shepherd and sheep example.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
-xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
-
-# Augment the remaining states so we have T+Ts-1 of them.
-xs = hcat(xs, zeros(xdim(dyn), Ts-1))
-us = [hcat(us[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
-
-# Fill in z as noisy state measurements.
-for tt in 1:T
-    zs[:, tt] = rand(rng, MvNormal(xs[:, tt], R))
-end
-
 
 discrete_state_transition, state_trans_P = generate_discrete_state_transition(p_transition, p_transition)
 s_init_distrib = Bernoulli(p_init)

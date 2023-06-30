@@ -5,12 +5,11 @@ using LinearAlgebra
 # includes linear dynamics and quadratic costs
 include("nonLQ_parameters.jl")
 
-leader_idx=1
 num_runs=1
 
 # config variables
 threshold=1e-3
-max_iters=200
+max_iters=1000
 step_size=1e-2
 verbose=true
 
@@ -38,8 +37,8 @@ p2x_idx = xidx(dyn, 2)
 p2y_idx = yidx(dyn, 2)
 
 q1 = plot(legend=:outertopright)
-plot!(q1, xs_k[p1x_idx, :], xs_k[p1y_idx, :], label="leader pos")
-plot!(q1, xs_k[p2x_idx, :], xs_k[p2y_idx, :], label="follower pos")
+plot!(q1, xs_k[p1x_idx, :], xs_k[p1y_idx, :], label="P1 pos")
+plot!(q1, xs_k[p2x_idx, :], xs_k[p2y_idx, :], label="P2 pos")
 
 q1 = scatter!([x₁[p1x_idx]], [x₁[p1y_idx]], color="blue", label="start P1")
 q1 = scatter!([x₁[p2x_idx]], [x₁[p2y_idx]], color="red", label="start P2")
@@ -68,16 +67,22 @@ q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv. metric", label="p1"
 plot!(q5, conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
 plot!(q5, conv_x, threshold * ones(length(conv_x)), label="threshold")
 
+conv_sum = conv_metrics[1, 1:num_iters] + conv_metrics[2, 1:num_iters]
+plot!(conv_x, conv_sum, label="total")
+
 # q6 = plot(title="costs")
 # plot!(conv_x, evaluated_costs[1, 1:num_iters], label="p1", yaxis=:log)
 # plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2")
 
 # Shift the cost to ensure they are positive.
-costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-8)
-costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-8)
+costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-2)
+costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-2)
 
 q6 = plot(conv_x, costs_1, title="evaluated costs", label="p1", yaxis=:log, legend=:outertopright)
 plot!(q6, conv_x, costs_2, label="p2", yaxis=:log)
+
+cost_sum = costs_1 + costs_2
+plot!(conv_x, cost_sum, label="total", yaxis=:log)
 
 # plot(q1, q2, q3, q4, layout = q)
 plot(q1, q2, q3, q4, q5, q6, layout = q)
