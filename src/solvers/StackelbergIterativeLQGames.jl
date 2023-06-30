@@ -157,7 +157,6 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         us_k = [zeros(size(us_km1[ii])) for ii in 1:num_players]
 
         # On the first iteration, choose a step size of 1.
-        step_size = (iszero(num_iters) && sg.horizon > 50) ? 1. : sg.step_size
         step_size = iszero(num_iters) ? 1. : sg.step_size
         for tt in 1:T-1
             ttp1 = tt + 1

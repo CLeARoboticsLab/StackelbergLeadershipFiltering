@@ -75,7 +75,7 @@ function propagate_dynamics(dyn::UnicycleDynamics,
     for ii in 1:N
         start_idx = 4 * (ii-1)
         # Wrap angle after propagation to bound in [-pi, pi).
-        x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
+        # x_tp1[start_idx+3] = wrap_angle(x_tp1[start_idx+3])
     end
 
     return x_tp1
@@ -151,8 +151,8 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us)
 
     title3 = "θ"
     q3 = plot(legend=:outertopright, title=title3, xlabel="t (s)", ylabel="θ (rad)")
-    plot!(times, xs[3,:], label="P1 θ")
-    plot!(times, xs[7,:], label="P2 θ")
+    plot!(times, wrap_angle.(xs[3,:]), label="P1 θ")
+    plot!(times, wrap_angle.(xs[7,:]), label="P2 θ")
 
     title4 = "vel"
     q4 = plot(legend=:outertopright, title=title4, xlabel="t (s)", ylabel="vel. (mps)")
