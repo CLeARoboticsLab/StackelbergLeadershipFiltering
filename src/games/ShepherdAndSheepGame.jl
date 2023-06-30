@@ -141,23 +141,21 @@ ShepherdAndSheepWithUnicycleDynamics(dt) = UnicycleDynamics(2, dt)
 # - P2 has quadratic cost and seeks it's position to be close to P1.
 #   TODO(hamzah) - introduce a relative logarithmic cost which accounts for maximum allowed difference.
 
-ShepherdAndSheepWithLogBarrierP1Cost(dyn::Dynamics, x_bounds, y_bounds) = begin
+ShepherdAndSheepWithLogBarrierCost(dyn::Dynamics, agent_idx, bounded_agent_idx, x_bounds, y_bounds) = begin
     zero_us = [zeros(2) for ii in 1:2]
     time_range = (0., 0.05)
 
-    p1x_idx = xidx(dyn, 1)
-    p1y_idx = yidx(dyn, 1)
-    p2x_idx = xidx(dyn, 2)
-    p2y_idx = yidx(dyn, 2)
+    x_idx = xidx(dyn, bounded_agent_idx)
+    y_idx = yidx(dyn, bounded_agent_idx)
 
     # 1. bound P2 x position below.
-    c1 = AbsoluteLogBarrierCost(p2x_idx, x_bounds[1], true)
+    c1 = AbsoluteLogBarrierCost(x_idx, x_bounds[1], true)
     # 2. bound P2 x position above.
-    c2 = AbsoluteLogBarrierCost(p2x_idx, x_bounds[2], false)
+    c2 = AbsoluteLogBarrierCost(x_idx, x_bounds[2], false)
     # 3. bound P2 y position below.
-    c3 = AbsoluteLogBarrierCost(p2y_idx, y_bounds[1], true)
+    c3 = AbsoluteLogBarrierCost(y_idx, y_bounds[1], true)
     # 4. bound P2 y position above.
-    c4 = AbsoluteLogBarrierCost(p2y_idx, y_bounds[2], false)
+    c4 = AbsoluteLogBarrierCost(y_idx, y_bounds[2], false)
     # 5. quadratic control cost on P1 by P1
     # c5 = QuadraticCost(zeros(num_states, num_states))
     # add_control_cost!(c5, 1, 10 * diagm([1, 1]))
@@ -170,7 +168,7 @@ ShepherdAndSheepWithLogBarrierP1Cost(dyn::Dynamics, x_bounds, y_bounds) = begin
     # add_control_cost!(qc, 1, 1 * diagm([1, 1]))
     # add_control_cost!(qc, 2, zeros(2, 2))
 
-    costs = [c1, c2, c3, c4, QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn)[1])]
+    costs = [c1, c2, c3, c4, QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn)[agent_idx])]
     weights = ones(5)
     weights[5] = 1.
     return WeightedCost(weights, costs)
@@ -178,7 +176,8 @@ end
 
 ShepherdAndSheepWithLogBarrierOverallCosts(dyn::Dynamics, bound_val::Real) = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val))
 ShepherdAndSheepWithLogBarrierOverallCosts(dyn::Dynamics, x_bounds, y_bounds) = begin
-    return [ShepherdAndSheepWithLogBarrierP1Cost(dyn, x_bounds, y_bounds),
+    return [ShepherdAndSheepWithLogBarrierCost(dyn, 1, 2, x_bounds, y_bounds),
+            # ShepherdAndSheepWithLogBarrierCost(dyn, 2, 1, x_bounds, y_bounds)]
             QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn)[2])]
 end
 
