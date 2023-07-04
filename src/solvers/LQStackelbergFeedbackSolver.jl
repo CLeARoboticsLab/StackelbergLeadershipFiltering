@@ -71,6 +71,25 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         R₁₂ = get_homogenized_control_cost_matrix(costs[leader_idx], follower_idx)
         R₂₁ = get_homogenized_control_cost_matrix(costs[follower_idx], leader_idx)
 
+        # small_num = 1e-2
+        # Ql_min = minimum(eigvals(Q_leader))
+        # Q_leader = Q_leader + (abs(min(0, Ql_min)) + small_num) * I
+
+        # Qf_min = minimum(eigvals(Q_follower))
+        # Q_follower = Q_follower + (abs(min(0, Qf_min)) + small_num) * I
+
+        # R1_min = minimum(eigvals(R₁₁))
+        # R₁₁ = R₁₁ + (abs(min(0, R1_min)) + small_num) * I
+
+        # R2_min = minimum(eigvals(R₂₂))
+        # R₂₂ = R₂₂ + (abs(min(0, R2_min)) + small_num) * I
+
+        # println(eigvals(Q_follower))
+        # @assert isposdef(Q_leader)
+        # @assert isposdef(Q_follower)
+        # @assert isposdef(R₁₁)
+        # @assert isposdef(R₂₂)
+
         Lₖ₊₁ = [all_Ls[leader_idx][:, :, tt+1], all_Ls[follower_idx][:, :, tt+1]]
 
         # Run recursive computation for one step.
