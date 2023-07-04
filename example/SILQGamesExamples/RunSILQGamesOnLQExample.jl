@@ -4,7 +4,10 @@ using LinearAlgebra
 
 include("LQ_parameters.jl")
 
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+# costs = [QuadraticCostWithOffset(ss_costs[1]), QuadraticCostWithOffset(ss_costs[2])]
+
+# For player cost
+costs = [pc_cost_1, pc_cost_2]
 
 num_runs=1
 
