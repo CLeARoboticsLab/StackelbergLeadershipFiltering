@@ -31,6 +31,8 @@ include("solvers/StackelbergIterativeLQGames.jl")
 
 include("TwoStateParticleFilter.jl")
 
+include("LeadershipFilterUtils.jl")
+
 include("LeadershipFilter.jl")
 
 end # module
