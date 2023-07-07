@@ -9,8 +9,18 @@ times = dt * (cumsum(ones(2*T)) .- 1)
 
 cont_lin_dyn = ShepherdAndSheepDynamics()
 dyn = discretize(cont_lin_dyn, dt)
-costs = ShepherdAndSheepCosts(dyn)
+ss_costs = ShepherdAndSheepCosts(dyn)
 num_players = num_agents(dyn)
+
+
+function make_quadratic_player_cost(si, ss_costs, player_idx)
+    f = get_as_function(ss_costs[player_idx])
+    return PlayerCost(f, si)
+end
+pc_cost_1 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 1)
+pc_cost_2 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 2)
+costs = [pc_cost_1, pc_cost_2]
+
 
 leader_idx = 2
 # Initial condition chosen randomly. Ensure both have relatively low speed.
@@ -44,7 +54,7 @@ step_size = 1e-2
 
 
 # Solve an LQ Stackelberg game based on the shepherd and sheep example.
-Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, costs, T, leader_idx)
+Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, ss_costs, T, leader_idx)
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
 # Augment the remaining states so we have T+Ts-1 of them.

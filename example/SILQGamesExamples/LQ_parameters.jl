@@ -15,14 +15,8 @@ dyn = discretize(cont_dyn, dt)
 ss_costs = ShepherdAndSheepCosts(dyn)
 num_players = num_agents(dyn)
 
-
 function make_quadratic_player_cost(si, ss_costs, player_idx)
-    f(si, x, us, t) = begin
-        cost = (1//2) * x' * (ss_costs[player_idx].Q * x + ss_costs[player_idx].q) + ss_costs[player_idx].cq
-        cost = cost + (1//2) * us[1]' * (ss_costs[player_idx].Rs[1] * us[1] + ss_costs[player_idx].rs[1]) + ss_costs[1].crs[1]
-        cost = cost + (1//2) * us[2]' * (ss_costs[player_idx].Rs[2] * us[2] + ss_costs[player_idx].rs[2]) + ss_costs[1].crs[2]
-        return cost
-    end
+    f = get_as_function(ss_costs[player_idx])
     return PlayerCost(f, si)
 end
 pc_cost_1 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 1)

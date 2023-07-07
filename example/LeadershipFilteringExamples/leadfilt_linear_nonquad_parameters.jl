@@ -10,7 +10,8 @@ times = dt * (cumsum(ones(2*T)) .- 1)
 dyn = ShepherdAndSheepDynamics()
 dyn = discretize(dyn, dt)
 bound_val = 2.5
-costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val)
+use_autodiff = true
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val, use_autodiff)
 # costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0., bound_val))
 num_players = num_agents(dyn)
 
@@ -55,7 +56,7 @@ gt_silq_num_runs=1
 
 # config variables
 gt_silq_threshold=1e-3
-gt_silq_max_iters=200
+gt_silq_max_iters=1000
 gt_silq_step_size=1e-2
 gt_silq_verbose=true
 

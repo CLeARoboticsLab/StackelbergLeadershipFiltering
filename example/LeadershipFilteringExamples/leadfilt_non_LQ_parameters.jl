@@ -9,7 +9,8 @@ times = dt * (cumsum(ones(2*T)) .- 1)
 
 dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
 bound_val = 2.1
-costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val)
+use_autodiff = true
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val, use_autodiff)
 # costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0., bound_val))
 num_players = num_agents(dyn)
 

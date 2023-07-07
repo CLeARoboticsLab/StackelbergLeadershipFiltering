@@ -26,7 +26,8 @@ x₁[[2, 4, 6, 8]] .= 0
 # x₁ = [2.; 1.; -3*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 
 bound_val = 2.1
-costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val))
+use_autodiff = true
+costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val), use_autodiff)
 num_players = num_agents(dyn)
 
 leader_idx = 2
