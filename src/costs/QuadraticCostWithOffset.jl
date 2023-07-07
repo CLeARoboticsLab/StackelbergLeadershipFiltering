@@ -8,6 +8,22 @@ struct QuadraticCostWithOffset <: Cost
 end
 QuadraticCostWithOffset(quad_cost::QuadraticCost, x0=zeros(size(quad_cost.Q, 1)), u0s=[zeros(size(quad_cost.Rs[ii], 1)) for ii in 1:length(quad_cost.Rs)]) = QuadraticCostWithOffset(quad_cost, x0, u0s)
 
+
+function get_as_function(c::QuadraticCostWithOffset)
+    f(si, x, us, t) = begin
+        dx = x - c.x0
+        dus = us - c.u0s
+
+        cost = (1//2) * (dx' * c.Q * dx) + (dx' * c.q) + c.cq
+        cost = cost + (1//2) * dus[1]' * c.Rs[1] * dus[1] + (dus[1]' * c.rs[1]) + c.crs[1]
+        cost = cost + (1//2) * dus[2]' * c.Rs[2] * dus[2] + (dus[2]' * c.rs[2]) + c.crs[2]
+        return cost
+    end
+    return f
+end
+export get_as_function
+
+
 # TODO(hmzh): Adjust quadraticization for the multi-player case.
 function quadraticize_costs(c::QuadraticCostWithOffset, time_range, x, us)
     Q = get_quadratic_state_cost_term(c.q_cost)

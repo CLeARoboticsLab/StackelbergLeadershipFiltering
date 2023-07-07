@@ -18,6 +18,18 @@ QuadraticCost(Q::AbstractMatrix{Float64}, q::AbstractVector{Float64}, cq::Float6
                                                                                                    Dict{Int, Vector{eltype(q)}}(),
                                                                                                    Dict{Int, eltype(cq)}())
 
+function get_as_function(c::QuadraticCost)
+    f(si, x, us, t) = begin
+        cost = (1//2) * (x' * c.Q * x) + (x' * c.q) + c.cq
+        cost = cost + (1//2) * us[1]' * c.Rs[1] * us[1] + (us[1]' * c.rs[1]) + c.crs[1]
+        cost = cost + (1//2) * us[2]' * c.Rs[2] * us[2] + (us[2]' * c.rs[2]) + c.crs[2]
+        return cost
+    end
+    return f
+end
+export get_as_function
+
+
 function add_control_cost!(c::QuadraticCost, other_player_idx, R; r=zeros(size(R, 1))::AbstractVector{Float64}, cr=0.::Float64)
     @assert size(R, 1) == size(R, 2) == size(r, 1)
     @assert size(cr) == ()

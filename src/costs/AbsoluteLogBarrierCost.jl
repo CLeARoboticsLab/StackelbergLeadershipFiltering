@@ -8,6 +8,13 @@ end
 
 const LARGE_NUMBER = 1e6
 
+function get_as_function(c::AbsoluteLogBarrierCost)
+    f(si, x, us, t) = begin
+        return _violates_bound(c, x) ? LARGE_NUMBER : -log(_get_input(c, x))
+    end
+end
+export get_as_function
+
 # Compute input to log function based on whether we have an upper or lower bound.
 function _get_input(c::AbsoluteLogBarrierCost, x)
     return (c.is_lower_bound) ? x[c.idx] - c.offset : c.offset - x[c.idx]

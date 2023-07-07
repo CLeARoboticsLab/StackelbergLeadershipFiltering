@@ -5,6 +5,11 @@ struct PlayerCost <: NonQuadraticCost
     si::SystemInfo   # Information about the game being played.
 end
 
+function get_as_function(c::PlayerCost)
+    return c.f
+end
+export get_as_function
+
 function compute_cost(c::PlayerCost, time_range, x, us)
     t = time_range[2]
     return c.f(c.si, x, us, t)
