@@ -53,13 +53,33 @@ end
 # Convenience homogenization tools for LQ systems #
 ###################################################
 
-# Helpers that get the homogenized Q and R matrices for a quadratic cost matrix.
-function get_homogenized_state_cost_matrix(c::QuadraticCost)
-    return homogenize_cost_matrix(c.Q, c.q, c.cq)
+function regularize_matrix(M, reg_param, ensure_pd)
+    # If already positive definite, no need to alter anything.
+    if iszero(reg_param) || isposdef(M)
+        return M
+    end
+
+    # If desired, ensure positive definiteness (after third step) by spectrally shifting by magnitude of smallest eigenvalue.
+    reg_M = deepcopy(M)
+    if ensure_pd
+        eig_min = minimum(eigvals(M))
+        @assert eig_min ≤ 0
+        reg_M = reg_M + abs(eig_min) * I
+    end
+
+    # Finally, spectral shift by the regularization parameter and return.
+    return reg_M + reg_param * I
 end
 
-function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int)
-    return homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
+# Helpers that get the homogenized Q and R matrices for a quadratic cost matrix.
+function get_homogenized_state_cost_matrix(c::QuadraticCost; reg_param=0.0, ensure_pd=false)
+    Qh = homogenize_cost_matrix(c.Q, c.q, c.cq)
+    return regularize_matrix(Qh, reg_param, ensure_pd)
+end
+
+function get_homogenized_control_cost_matrix(c::QuadraticCost, player_idx::Int; reg_param=0.0, ensure_pd=false)
+    Rh = homogenize_cost_matrix(c.Rs[player_idx], c.rs[player_idx], c.crs[player_idx])
+    return regularize_matrix(Rh, reg_param, ensure_pd)
 end
 
 export get_homogenized_state_cost_matrix, get_homogenized_control_cost_matrix
