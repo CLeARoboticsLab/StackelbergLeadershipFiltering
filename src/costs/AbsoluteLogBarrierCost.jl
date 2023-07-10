@@ -2,7 +2,7 @@
 # This is a 1D barrier on state values, independent of other dimensions.
 struct AbsoluteLogBarrierCost <: NonQuadraticCost
     idx::Int             # a single index of the state
-    offset::Real              # offset with size identical to x
+    offset::Real         # offset with size identical to x
     is_lower_bound::Bool # true indicates lower bound barrier, false indicates upper bound
 end
 

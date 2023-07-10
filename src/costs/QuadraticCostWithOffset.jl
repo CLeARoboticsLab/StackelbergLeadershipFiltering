@@ -14,9 +14,10 @@ function get_as_function(c::QuadraticCostWithOffset)
         dx = x - c.x0
         dus = us - c.u0s
 
-        cost = (1//2) * (dx' * c.Q * dx) + (dx' * c.q) + c.cq
-        cost = cost + (1//2) * dus[1]' * c.Rs[1] * dus[1] + (dus[1]' * c.rs[1]) + c.crs[1]
-        cost = cost + (1//2) * dus[2]' * c.Rs[2] * dus[2] + (dus[2]' * c.rs[2]) + c.crs[2]
+        terms = c.q_cost
+        cost = (1//2) * (dx' * terms.Q * dx) + (dx' * terms.q) + terms.cq
+        cost = cost + (1//2) * dus[1]' * terms.Rs[1] * dus[1] + (dus[1]' * terms.rs[1]) + terms.crs[1]
+        cost = cost + (1//2) * dus[2]' * terms.Rs[2] * dus[2] + (dus[2]' * terms.rs[2]) + terms.crs[2]
         return cost
     end
     return f

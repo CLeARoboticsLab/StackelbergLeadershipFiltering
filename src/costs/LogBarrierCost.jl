@@ -13,6 +13,16 @@ LogBarrierCost(indices, a::Vector{Float64}, b::Vector{Float64}) = LogBarrierCost
 # Use the 2 norm.
 P_NORM = 2
 
+function get_as_function(c::LogBarrierCost)
+    f(si, x, us, t) = begin
+        norm_dx = norm(x[c.indices] - c.a[c.indices], P_NORM)
+        return c.c * (-log(norm_dx) + log(norm(c.b[c.indices] - c.a[c.indices])))
+    end
+    return f
+end
+export get_as_function
+
+
 function compute_cost(c::LogBarrierCost, time_range, x::AbstractVector{Float64}, us::AbstractVector{<:AbstractVector{Float64}})
     @assert size(x, 1) == size(c.a, 1)
     norm_dx = norm(x[c.indices] - c.a[c.indices], P_NORM)
