@@ -22,8 +22,15 @@ mutable struct SILQGamesObject
 
     # configuration
     threshold::Float64
-    max_iters
-    step_size
+    max_iters::Int
+
+    step_size::Float64
+
+    initial_step_size::Float64
+    step_size_reduce_factor::Float64
+    min_step_size::Float64
+    check_valid::Function # for checking constraints in backstepping, f(xs, us, ts)
+
     verbose
 
     # regularization config
