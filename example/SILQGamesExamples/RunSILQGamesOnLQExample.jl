@@ -32,30 +32,33 @@ using ElectronDisplay
 using Plots
 
 # Plot positions, other two states, controls, and convergence.
-q = @layout [a b c; d e f; g h i]
+# q = @layout [a b c; d e f; g h i]
+p = @layout grid(3, 1)
+plot_title = "SILQGames on LQ Game"
 
 q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
 
 # Plot convergence metrics.
 conv_x = cumsum(ones(num_iters)) .- 1
-title8 = "conv. (|⋅|∞)"
-q8 = plot(title=title8, yaxis=:log, legend=:outertopright)
-plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1")
-plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
+title8 = "convergence"
+q8 = plot(title=title8, yaxis=:log, legend=:outertopright, xlabel="number iterations", ylabel="|xₖ-xₖ₋₁|∞ (m)")
+plot!(conv_x, conv_metrics[1, 1:num_iters], label="P1")
+plot!(conv_x, conv_metrics[2, 1:num_iters], label="P2")
 
 conv_sum = conv_metrics[1, 1:num_iters] + conv_metrics[2, 1:num_iters]
 plot!(conv_x, conv_sum, label="total")
 
 title9 = "evaluated costs"
-q9 = plot(title=title9, yaxis=:log, legend=:outertopright)
+q9 = plot(title=title9, yaxis=:log, legend=:outertopright, xlabel="number iterations", ylabel="cost")
 plot!(conv_x, evaluated_costs[1, 1:num_iters], label="p1")
 plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2")
 
 cost_sum = evaluated_costs[1, 1:num_iters] + evaluated_costs[2, 1:num_iters]
 plot!(conv_x, cost_sum, label="total")
 
-plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
+# plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
+plot(q1, q8, q9, layout=p, plot_title=plot_title)
 
 
 
