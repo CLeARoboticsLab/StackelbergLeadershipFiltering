@@ -88,22 +88,51 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
 end
 export initialize_silq_games_object
 
+function backward_pass(sg, leader_idx, t0, times, xs_km1, us_km1)
+    T = sg.horizon
+
+    # 1. Extract linear dynamics and quadratic costs wrt to the current guess for the state and controls.
+    lin_dyns = Array{LinearDynamics}(undef, T)
+    quad_costs = [Array{QuadraticCost}(undef, num_agents(sg.dyn)) for tt in 1:T]
+
+    for tt in 1:T
+        prev_time = (tt == 1) ? t0 : times[tt-1]
+        curr_time = times[tt]
+        time_range = (prev_time, curr_time)
+
+        us_km1_tt = [us_km1[ii][:, tt] for ii in 1:num_agents(sg.dyn)]
+
+        # Produce a continuous-time linear system from the dynamical system,
+        # then discretize it at the sampling time of the original system.
+        # Finally, regularize the quadratic cost terms inside.
+        cont_lin_dyn = linearize(sg.dyn, time_range, xs_km1[:, tt], us_km1_tt)
+        lin_dyns[tt] = discretize(cont_lin_dyn, sampling_time(sg.dyn))
+        for ii in 1:num_players
+            quad_costs[tt][ii] = quadraticize_costs(sg.costs[ii], time_range, xs_km1[:, tt], us_km1_tt)
+        end
+    end
+
+    # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
+    ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=true)
+    return ctrl_strats
+end
+
 
 function forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
     # TODO(hamzah) - turn this into a control strategy/generalize the other one.
     xs_k = zeros(size(xs_km1))
     xs_k[:, 1] = xs_km1[:, 1] # initial state should be same across all iterations
-    us_k = [zeros(size(us_km1[ii])) for ii in 1:num_players]
+    us_k = [zeros(size(us_km1[ii])) for ii in 1:num_agents(sg.dyn)]
 
     for tt in 1:sg.horizon-1
         ttp1 = tt + 1
         prev_time = (tt == 1) ? t0 : times[tt]
         curr_time = times[ttp1]
 
-        for ii in 1:num_players
+        for ii in 1:num_agents(sg.dyn)
             us_k[ii][:, tt] = us_km1[ii][:, tt] - Ks[ii][:, :, tt] * (xs_k[:, tt] - xs_km1[:, tt]) - step_size * ks[ii][:, tt]
         end
-        us_k_tt = [us_k[ii][:, tt] for ii in 1:num_players]
+        us_k_tt = [us_k[ii][:, tt] for ii in 1:num_agents(sg.dyn)]
         time_range = (prev_time, curr_time)
         xs_k[:, ttp1] = propagate_dynamics(sg.dyn, time_range, xs_k[:, tt], us_k_tt)
     end
@@ -111,13 +140,57 @@ function forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
 end
 
 
+# # TODO(hamzah) - Implement the Armijo condition. Requires computing the gradient at each time step for each cost.
+# function compute_armijo_condition()
+
+#     # NOTE: As of 07/16/23, this function passes in discrete times to compute_cost, not continuous times.
+#     adjusted_func_evals = [evaluate(sg.costs[ii], xs, us) for ii in 1:num_agents(sg.dyn)]
+#     c₁ = 0.5 # for now, TODO(hamzah): move to be configurable
+#     grad_Js = Gus(sg.costs[ii], time_range, xs[:, tt], us_at_tt)
+#     sufficient_decreases = [evaluate(sg.costs[ii], xs_km1, us_km1) + c₁ * α *  for ii in 1:num_agents(sg.dyn)]
+    
+#     for tt in 1:sg.horizon
+#         for ii in 1:num_agents(sg.dyn)
+#             grad_Js = Gus(sg.costs[ii], )
+#             new_us_tt = [us[ii][:, tt] + τ *  for ii in 1:num_agents(sg.dyn)]
+
+#             J[ii](u0 + t * grad_J) > J[ii](u0) + alpha * t * dot(grad_J[ii], grad_J[ii])
+#         end
+#     end
+# end
+
+# TODO(hamzah) - Implement the Armijo condition. Requires computing the gradient at each time step for each cost.
+# TODO(hamzah) - Assumes gradient descent direction.
+function validating_line_search(sg, t0, times, xs_km1, us_km1, Ks, ks; step_size_override=nothing)
+    is_valid = false
+    α = (isnothing(step_size_override)) ? sg.step_size : step_size_override
+
+    iters = 0
+
+    # Generate a forward pass trajectory with the initial step size.
+    xs, us = forward_pass(sg, t0, times, α, xs_km1, us_km1, Ks, ks)
+
+    while !sg.check_valid(xs, us, times) # if invalid trajectory, repeat
+        # Shorten the step size and rerun the forward pass.
+        α = max(sg.ss_reduce * α, sg.α_min)
+        xs, us = forward_pass(sg, t0, times, α, xs_km1, us_km1, Ks, ks)
+        
+        # Update iteration count.
+        iters += 1
+        if iters > sg.max_linesearch_iters
+            error("exceeded $(sg.max_linesearch_iters) in linesearch")
+        end 
+    end
+
+    return xs, us
+end
+
 function stackelberg_ilqgames(sg::SILQGamesObject,
                               leader_idx::Int,
                               t0,
                               times,
                               x₁::AbstractVector{Float64},
                               us_1::AbstractVector{<:AbstractArray{Float64}})
-    T = sg.horizon
     sg.current_idx += 1
     if sg.current_idx > sg.num_runs
         error("too many runs - please provide fresh SILQGames object.")
@@ -162,29 +235,7 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         ###########################
         #### I. Backwards pass ####
         ###########################
-        # 1. Extract linear dynamics and quadratic costs wrt to the current guess for the state and controls.
-        lin_dyns = Array{LinearDynamics}(undef, T)
-        quad_costs = [Array{QuadraticCost}(undef, num_players) for tt in 1:T]
-
-        for tt in 1:T
-            prev_time = (tt == 1) ? t0 : times[tt-1]
-            curr_time = times[tt]
-            time_range = (prev_time, curr_time)
-
-            us_km1_tt = [us_km1[ii][:, tt] for ii in 1:num_players]
-
-            # Produce a continuous-time linear system from the dynamical system,
-            # then discretize it at the sampling time of the original system.
-            # Finally, regularize the quadratic cost terms inside.
-            cont_lin_dyn = linearize(sg.dyn, time_range, xs_km1[:, tt], us_km1_tt)
-            lin_dyns[tt] = discretize(cont_lin_dyn, sampling_time(sg.dyn))
-            for ii in 1:num_players
-                quad_costs[tt][ii] = quadraticize_costs(sg.costs[ii], time_range, xs_km1[:, tt], us_km1_tt)
-            end
-        end
-
-        # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
-        ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=true)
+        ctrl_strats = backward_pass(sg, leader_idx, t0, times, xs_km1, us_km1)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
 
@@ -193,8 +244,9 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         ##########################
 
         # On the first iteration, choose a step size of 1.
-        step_size = iszero(num_iters) ? 1. : sg.step_size
-        xs_k, us_k = forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
+        step_size_override = iszero(num_iters) ? 1. : nothing
+        # xs_k, us_k = forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
+        xs_k, us_k = validating_line_search(sg, t0, times, xs_km1, us_km1, Ks, ks; step_size_override)
 
         #############################################
         #### III. Compute convergence and costs. ####
