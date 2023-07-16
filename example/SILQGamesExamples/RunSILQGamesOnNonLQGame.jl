@@ -13,8 +13,13 @@ max_iters=1000
 step_size=1e-2
 verbose=true
 
+# ensure p2 has bounded position
+check_valid(xs, us, ts) = begin
+    return all(xs[5:6, :] .> -bound_val) && all(xs[5:6, :] .< bound_val)
+end
+
 sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs;
-                                      threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
+                                      threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose, check_valid=check_valid)
 xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, x₁, us_1)
 
 println("Converged status (", is_converged, ") after ", num_iters, " iterations.")
