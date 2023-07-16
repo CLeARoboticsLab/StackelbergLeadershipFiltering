@@ -32,8 +32,8 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     # TODO(hamzah) - should this be replaced with a tracking trajectory cost?
     const_1 = 1.
     Q1 = zeros(8, 8)
-    Q1[1, 1] = const_1 * 3.
-    Q1[2, 2] = const_1 * 1.
+    Q1[1, 1] = const_1 * 1.
+    Q1[2, 2] = const_1 * 0.
     Q1[3, 3] = const_1 * 1.
     Q1[4, 4] = const_1 * 1.
     q_cost1 = QuadraticCost(Q1)
@@ -43,9 +43,9 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
 
     Q2 = zeros(8, 8)
     Q2[5, 5] = const_1 * 1.
-    Q2[6, 6] = const_1 * 1.
-    Q2[7, 7] = const_1 * 3.
-    Q2[8, 8] = const_1 * 3.
+    Q2[6, 6] = const_1 * 0.
+    Q2[7, 7] = const_1 * 1.
+    Q2[8, 8] = const_1 * 1.
     q_cost2 = QuadraticCost(Q2)
     add_control_cost!(q_cost2, 1, zeros(udim(si, 1), udim(si, 1)))
     add_control_cost!(q_cost2, 2, zeros(udim(si, 2), udim(si, 2)))
@@ -54,7 +54,7 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     # 2. avoid collisions
     avoid_collisions_cost_fn(si, x, us, t) = begin
         # This log barrier avoids agents getting within some configured radius of one another.
-       return -0.5 * log(norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m)
+       return - log(norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m)
     end
 
     c1b = PlayerCost(avoid_collisions_cost_fn, si)
@@ -72,9 +72,9 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     c2c_iii = AbsoluteLogBarrierCost(7, cfg.θ₀+cfg.max_heading_deviation, false)
     c2c_iv = AbsoluteLogBarrierCost(7, cfg.θ₀-cfg.max_heading_deviation, true)
 
-    # 4, 5. minimize and bound control effort
+    # 4, 5. minimize and bound control effort - acceleration should be easier than rotation
     c1de = QuadraticCost(zeros(8, 8), zeros(8), 0.)
-    R11 = [1. 0; 0 1.]
+    R11 = [1. 0; 0 0.1]
     add_control_cost!(c1de, 1, R11)
     add_control_cost!(c1de, 2, zeros(udim(si, 2), udim(si, 2)))
 
@@ -88,7 +88,7 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     c1de_iv = AbsoluteLogBarrierControlCost(1, [0.; 1.], -max_accel, true)
 
     c2de = QuadraticCost(zeros(8, 8))
-    R22 = [1. 0; 0 1.]
+    R22 = [1. 0; 0 0.1]
     add_control_cost!(c2de, 2, R22)
     add_control_cost!(c2de, 1, zeros(udim(si, 1), udim(si, 1)))
 

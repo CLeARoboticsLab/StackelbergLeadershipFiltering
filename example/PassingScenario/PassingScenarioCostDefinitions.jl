@@ -17,7 +17,7 @@ horizon = T * dt
 times = dt * cumsum(ones(2*T)) .- dt
 
 # Get the configuration.
-cfg = PassingScenarioConfig(collision_radius_m=0.0)
+cfg = PassingScenarioConfig(collision_radius_m=0.01)
                             # max_heading_deviation=pi/6)
 
 # Defined the dynamics of the game.
@@ -27,10 +27,10 @@ si = dyn.sys_info
 # Define the starting and goal state.
 v_init = 10.
 rlb_x = get_right_lane_boundary_x(cfg)
-x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/4.; 0.; pi/2; 2*v_init]
+x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/2.; 0.; pi/2; v_init]
 
-p1_goal = vcat([x₁[1]; 40.; pi/2; 0.], zeros(4))
-p2_goal = vcat(zeros(4),                [x₁[5]; 120.; pi/2; 2*v_init])
+p1_goal = vcat([x₁[1]; 60; pi/2; v_init], zeros(4))
+p2_goal = vcat(zeros(4),                [x₁[5]; 50.; pi/2; v_init])
 
 # Define the costs for the agents.
 num_subcosts = 14
@@ -39,7 +39,8 @@ weights_p2 = ones(num_subcosts)
 
 # Adjust goal tracking weights.
 weights_p1[1] = 1.
-weights_p2[2] = 1.
+weights_p2[1] = 1.
+# weights_p1[2] = 1//2
 costs = create_passing_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
 
 # Generate a ground truth trajectory on which to run the leadership filter.
@@ -68,7 +69,7 @@ vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e0 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
 # CONFIG: 
@@ -76,14 +77,14 @@ Q = 1e0 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.05 * I
+R = zeros(xdim(dyn), xdim(dyn)) + 0.01 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
 num_particles = 100
 
 p_transition = 0.98
-p_init = 0.3
+p_init = 0.5
 
 discrete_state_transition, state_trans_P = generate_discrete_state_transition(p_transition, p_transition)
 s_init_distrib = Bernoulli(p_init)
@@ -141,8 +142,8 @@ anim = @animate for t in iter
     plot!(p1, true_xs[2, 1:T], -true_xs[1, 1:T], label="P1 true pos")
     plot!(p1, true_xs[6, 1:T], -true_xs[5, 1:T], label="P2 true pos")
 
-    plot!(p1, zs[2, 1:T], -zs[1, 1:T], label="P1 meas pos", color=:blue, linewidth=0.15)
-    plot!(p1, zs[6, 1:T], -zs[5, 1:T], label="P2 meas pos", color=:red, linewidth=0.15)
+    scatter!(p1, zs[2, 1:T], -zs[1, 1:T], label="P1 meas pos", color=:blue, markersize=0.5, marker=:+)
+    scatter!(p1, zs[6, 1:T], -zs[5, 1:T], label="P2 meas pos", color=:red, markersize=0.5, marker=:+)
 
     plot!(p1, x̂s[2, 1:T], -x̂s[1, 1:T], label="P1 est. pos", color=:blue, linewidth=0.25)
     plot!(p1, x̂s[6, 1:T], -x̂s[5, 1:T], label="P2 est. pos", color=:red, linewidth=0.25)
@@ -160,14 +161,14 @@ anim = @animate for t in iter
     plot!(p2, [times[t], times[t]], [-1, 2], label="", color=:black)
 
     # plot 3
-    title3 = "LF estimated heading (x̂) over time"
+    title3 = "LF estimated heading (θ̂) over time"
     p3 = plot(legend=:outertopright, xlabel="t (s)", ylabel="θ (rad)", title=title3)
     plot!(p3, times[1:T], x̂s[3,1:T], label="P1 θ")
     plot!(p3, times[1:T], x̂s[7,1:T], label="P2 θ")
     plot!(p3, [times[t], times[t]], [-pi, pi], label="", color=:black)
 
     # plot 3
-    title3 = "LF estimated velocity (x̂) over time"
+    title3 = "LF estimated velocity (v̂) over time"
     p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="vel (m/2)", title=title3)
     plot!(p4, times[1:T], x̂s[4,1:T], label="P1 v")
     plot!(p4, times[1:T], x̂s[8,1:T], label="P2 v")
@@ -198,18 +199,19 @@ anim = @animate for t in iter
     end
 
     # plot 4
-    title5 = "Input acceleration controls (u) over time"
+    title5 = "Input controls (u) over time"
     p5 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
     plot!(p5, times[1:T], us_k[1][1, 1:T], label="P1 ω")
     plot!(p5, times[1:T], us_k[2][1, 1:T], label="P2 ω")
     plot!(p5, times[1:T], us_k[1][2, 1:T], label="P1 a")
     plot!(p5, times[1:T], us_k[2][2, 1:T], label="P2 a")
-    plot!(p5, [times[t], times[t]], [-1, 1], label="", color=:black)
+    plot!(p5, [times[t], times[t]], [-cfg.speed_limit_mps, cfg.speed_limit_mps], label="", color=:black)
 
     # probability plot - plot 5
     title6 = "Probability over time"
     p6 = plot(xlabel="t (s)", ylabel="prob. leadership", ylimit=(-0.1, 1.1), label="", legend=:outertopright, title=title6)
     plot!(p6, times[1:T], probs[1:T], label="p(L=P1)")
+    plot!(p6, times[1:T], 1 .- probs[1:T], label="p(L=P2)")
     plot!(p6, [times[t], times[t]], [0, 1], label="", color=:black)
 
     plot(p1, p2, p3, p4, p5, p6, plot_title=plot_title, layout = p, size=(1260, 1080))
