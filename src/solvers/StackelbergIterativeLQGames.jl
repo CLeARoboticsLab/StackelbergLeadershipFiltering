@@ -24,12 +24,11 @@ mutable struct SILQGamesObject
     threshold::Float64
     max_iters::Int
 
-    step_size::Float64
-
-    initial_step_size::Float64
-    step_size_reduce_factor::Float64
-    min_step_size::Float64
-    check_valid::Function # for checking constraints in backstepping, f(xs, us, ts)
+    step_size::Float64          # initial step size α₀
+    ss_reduce::Float64          # reduction factor τ
+    α_min::Float64              # min step size
+    max_linesearch_iters::Int   # maximum number of linesearch iterations
+    check_valid::Function       # for checking constraints in backstepping, f(xs, us, ts)
 
     verbose
 
@@ -57,7 +56,9 @@ MAX_ITERS = 100
 # initialize_silq_games_object - initializes an SILQ Games Object which contains the data required within the algorithm
 function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::AbstractVector{<:Cost};
                                       state_reg_param=1e-2, control_reg_param=1e-2,
-                                      threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS, step_size=1.0, verbose=false)
+                                      threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS,
+                                      step_size=1.0, ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
+                                      check_valid=(xs, us, ts)->true, verbose=false)
     num_players = num_agents(dyn)
     @assert length(costs) == num_players
     num_states = xdim(dyn)
@@ -77,13 +78,37 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
     current_idx = 0
     return SILQGamesObject(num_runs, current_idx,
                            horizon, dyn, costs,
-                           threshold, max_iters, step_size, verbose,
+                           threshold, max_iters, 
+                           step_size, ss_reduce, α_min, max_linesearch_iters, 
+                           check_valid, verbose,
                            state_reg_param, control_reg_param,
                            leader_idxs,
                            xks, uks,
                            Kks, kks, convergence_metrics, num_iterations, evaluated_costs)
 end
 export initialize_silq_games_object
+
+
+function forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
+    # TODO(hamzah) - turn this into a control strategy/generalize the other one.
+    xs_k = zeros(size(xs_km1))
+    xs_k[:, 1] = xs_km1[:, 1] # initial state should be same across all iterations
+    us_k = [zeros(size(us_km1[ii])) for ii in 1:num_players]
+
+    for tt in 1:sg.horizon-1
+        ttp1 = tt + 1
+        prev_time = (tt == 1) ? t0 : times[tt]
+        curr_time = times[ttp1]
+
+        for ii in 1:num_players
+            us_k[ii][:, tt] = us_km1[ii][:, tt] - Ks[ii][:, :, tt] * (xs_k[:, tt] - xs_km1[:, tt]) - step_size * ks[ii][:, tt]
+        end
+        us_k_tt = [us_k[ii][:, tt] for ii in 1:num_players]
+        time_range = (prev_time, curr_time)
+        xs_k[:, ttp1] = propagate_dynamics(sg.dyn, time_range, xs_k[:, tt], us_k_tt)
+    end
+    return xs_k, us_k
+end
 
 
 function stackelberg_ilqgames(sg::SILQGamesObject,
@@ -107,6 +132,8 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
 
     # Compute the initial states based on the initial controls.
     xs_1 = unroll_raw_controls(sg.dyn, times, us_1, x₁)
+    is_initial_trajectory_valid = sg.check_valid(xs_1, us_1, times)
+    @assert is_initial_trajectory_valid "Provided control trajectory does not results in valid state trajectory."
 
     # Initialize the state iterations
     xs_km1 = xs_1
@@ -165,25 +192,9 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         #### II. Forward pass ####
         ##########################
 
-        # TODO(hamzah) - turn this into a control strategy/generalize the other one.
-        xs_k = zeros(size(xs_km1))
-        xs_k[:, 1] = x₁
-        us_k = [zeros(size(us_km1[ii])) for ii in 1:num_players]
-
         # On the first iteration, choose a step size of 1.
         step_size = iszero(num_iters) ? 1. : sg.step_size
-        for tt in 1:T-1
-            ttp1 = tt + 1
-            prev_time = (tt == 1) ? t0 : times[tt]
-            curr_time = times[ttp1]
-
-            for ii in 1:num_players
-                us_k[ii][:, tt] = us_km1[ii][:, tt] - Ks[ii][:, :, tt] * (xs_k[:, tt] - xs_km1[:, tt]) - step_size * ks[ii][:, tt]
-            end
-            us_k_tt = [us_k[ii][:, tt] for ii in 1:num_players]
-            time_range = (prev_time, curr_time)
-            xs_k[:, ttp1] = propagate_dynamics(sg.dyn, time_range, xs_k[:, tt], us_k_tt)
-        end
+        xs_k, us_k = forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
 
         #############################################
         #### III. Compute convergence and costs. ####
