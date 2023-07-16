@@ -50,7 +50,7 @@ anim = @animate for t in iter
     p = @layout [a b; c d; e f]
 
     plot_title = string("LF (", t, "/", T, ") on Stack(L=P", leader_idx, "), Ts=", Ts, ", Ns=", num_particles, ", p(transition)=", p_transition, ", #games: ", num_games)
-    println(plot_title)
+    
     title1="x-y plot of agent positions over time"
     p1 = plot(title=title1, legend=:outertopright, ylabel="y (m)", xlabel="x (m)", ylimit=(-2.0, 2.0), xlimit=(-2.0, 2.0))
     plot!(p1, true_xs[1, 1:T], true_xs[2, 1:T], label="P1 true pos")
