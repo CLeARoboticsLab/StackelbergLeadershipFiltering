@@ -9,7 +9,7 @@ num_runs=1
 
 # config variables
 threshold=1e-3
-max_iters=1000
+max_iters=2000
 step_size=1e-2
 verbose=true
 
@@ -27,8 +27,9 @@ using ElectronDisplay
 using Plots
 
 # Plot positions, other two states, controls, and convergence.
-q = @layout [a b; c d; e f]
+# q = @layout [a b; c d; e f]
 # q = @layout [a b; c d]#; e f]
+q = @layout grid(3, 1)
 
 # Indices for shepherd and sheep game.
 p1x_idx = xidx(dyn, 1)
@@ -36,7 +37,7 @@ p1y_idx = yidx(dyn, 1)
 p2x_idx = xidx(dyn, 2)
 p2y_idx = yidx(dyn, 2)
 
-q1 = plot(legend=:outertopright)
+q1 = plot(legend=:outertopright, yaxis=[-2.5, 2.5], xaxis=[-2.5, 2.5])
 plot!(q1, xs_k[p1x_idx, :], xs_k[p1y_idx, :], label="P1 pos")
 plot!(q1, xs_k[p2x_idx, :], xs_k[p2y_idx, :], label="P2 pos")
 
@@ -85,7 +86,8 @@ cost_sum = costs_1 + costs_2
 plot!(conv_x, cost_sum, label="total", yaxis=:log)
 
 # plot(q1, q2, q3, q4, layout = q)
-plot(q1, q2, q3, q4, q5, q6, layout = q)
+# plot(q1, q2, q3, q4, q5, q6, layout = q)
+plot(q1, q5, q6, layout = q)
 
 
 
