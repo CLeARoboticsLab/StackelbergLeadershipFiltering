@@ -29,6 +29,7 @@ mutable struct SILQGamesObject
     # regularization config
     state_reg_param::Float64
     control_reg_param::Float64
+    ensure_pd::Bool
 
     # who was the leader each time we ran
     leader_idxs::AbstractVector{<:Int}
@@ -49,7 +50,7 @@ THRESHOLD = 1e-2
 MAX_ITERS = 100
 # initialize_silq_games_object - initializes an SILQ Games Object which contains the data required within the algorithm
 function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::AbstractVector{<:Cost};
-                                      state_reg_param=1e-2, control_reg_param=1e-2,
+                                      state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
                                       threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS, step_size=1.0, verbose=false)
     num_players = num_agents(dyn)
     @assert length(costs) == num_players
@@ -71,7 +72,7 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
     return SILQGamesObject(num_runs, current_idx,
                            horizon, dyn, costs,
                            threshold, max_iters, step_size, verbose,
-                           state_reg_param, control_reg_param,
+                           state_reg_param, control_reg_param, ensure_pd,
                            leader_idxs,
                            xks, uks,
                            Kks, kks, convergence_metrics, num_iterations, evaluated_costs)
@@ -150,7 +151,7 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         end
 
         # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
-        ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=true)
+        ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=sg.ensure_pd)
         Ks = get_linear_feedback_gains(ctrl_strats)
         ks = get_constant_feedback_gains(ctrl_strats)
 

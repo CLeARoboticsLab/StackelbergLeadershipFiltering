@@ -72,10 +72,10 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         R₂₁ = get_homogenized_control_cost_matrix(costs[follower_idx], leader_idx)
 
         # Ensure that we have (semi-)positive definiteness in the relevant costs.
-        @assert isposdef(Q_leader) || minimum(eigvals(Q_leader)) == 0
-        @assert isposdef(Q_follower) || minimum(eigvals(Q_follower)) == 0
-        @assert isposdef(R₁₁)
-        @assert isposdef(R₂₂)
+        @assert !ensure_pd || isposdef(Q_leader) || minimum(eigvals(Q_leader)) == 0
+        @assert !ensure_pd || isposdef(Q_follower) || minimum(eigvals(Q_follower)) == 0
+        @assert !ensure_pd || isposdef(R₁₁)
+        @assert !ensure_pd || isposdef(R₂₂)
 
         Lₖ₊₁ = [all_Ls[leader_idx][:, :, tt+1], all_Ls[follower_idx][:, :, tt+1]]
 
