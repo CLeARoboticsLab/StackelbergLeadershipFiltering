@@ -2,6 +2,7 @@
 # - probabilites (multiple actors)
 # - state vs. time (multiple actors)
 # - position in two dimensions (multiple actors)
+using LaTeXStrings
 using Plots
 
 # TODO(hamzah) - refactor this to be tied DoubleIntegrator Dynamics instead of Linear Dynamics.
@@ -103,7 +104,6 @@ end
 export plot_states_and_controls
 
 
-
 function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
 
 
@@ -142,3 +142,69 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     return q8, q9
 end
 export plot_convergence_and_costs
+
+
+# This function plots an x-y plot along with measurement data of the positions and particle trajectories representing
+# the games played within the Stackelberg measurement model.
+function plot_leadership_filter_position(num_particles, sg_t, true_xs, est_xs, zs)
+    x₁ = true_xs[:, 1]
+
+    p1 = plot(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
+    plot!(p1, true_xs[1, :], true_xs[3, :], label="True P1", color=:red)
+    plot!(p1, true_xs[5, :], true_xs[7, :], label="True P2", color=:blue)
+
+    plot!(p1, est_xs[1, :], est_xs[3, :], label="Est. P1", color=:lightred)
+    plot!(p1, est_xs[5, :], est_xs[7, :], label="Est. P2", color=:lightblue)
+
+    scatter!(p1, zs[1, :], zs[3, :], color=:red, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P1")
+    scatter!(p1, zs[5, :], zs[7, :], color=:blue, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P2")
+
+    # Add particles
+    for n in 1:num_particles
+
+        num_iter = sg_t.num_iterations[n]
+
+        # println("particle n thinks leader is: ", n)
+        # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
+        # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
+
+        x1_idx = xidx(dyn, 1)
+        y1_idx = yidx(dyn, 1)
+        x2_idx = xidx(dyn, 2)
+        y2_idx = yidx(dyn, 2)
+
+        xks = sg_t.xks[n, num_iter, :, :]
+
+        # TODO(hamzah) - change color based on which agent is leader
+        color = (sg_t.leader_idxs[n] == 1) ? "red" : "blue"
+        scatter!(p1, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
+        scatter!(p1, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
+
+        scatter!(p1, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
+        scatter!(p1, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
+    end
+
+    return p1
+end
+export plot_leadership_filter_position
+
+# This function generates two probability plots (both lines on one plot is too much to see), one for the probablity of
+# each agent as leader.
+function make_probability_plots(times, t_idx, probs)
+    t = times[t_idx]
+
+    # probability plot for P1 - plot 5
+    p5 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
+    plot!(p5, times[1:T], probs[1:T], color=:red, label="P1")
+    plot!(p5, times[1:T], (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, sigdigits=3)) s", color=:black, linestyle=:dot, linewidth=3)
+
+     # probability plot for P2 - plot 6
+    p6 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
+    plot!(p6, times[1:T], 1 .- probs[1:T], color=:blue, label="P2")
+    plot!(p6, times[1:T], ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, sigdigits=3)) s", color=:black, linestyle=:dot, linewidth=3)
+
+    return p5, p6
+end
+export make_probability_plots

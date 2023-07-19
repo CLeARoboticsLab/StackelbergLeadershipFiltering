@@ -22,7 +22,7 @@ pc_cost_2 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 2)
 costs = [pc_cost_1, pc_cost_2]
 
 
-leader_idx = 2
+leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
 pos_unc = 1e-3
@@ -38,7 +38,7 @@ Q = 1e-1 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
+R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
@@ -48,9 +48,10 @@ p_transition = 0.98
 p_init = 0.5
 
 
-threshold = 1e-3
-max_iters = 50
-step_size = 1e-2
+# No need for these because we use the LQ Stackelberg game.
+# threshold = 1e-3
+# max_iters = 50
+# step_size = 1e-2
 
 
 # Solve an LQ Stackelberg game based on the shepherd and sheep example.

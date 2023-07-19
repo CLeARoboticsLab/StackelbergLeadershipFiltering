@@ -1,4 +1,5 @@
 using Distributions
+using ProgressBars
 using Random
 using SparseArrays
 
@@ -154,7 +155,8 @@ function leadership_filter(dyn::Dynamics,
                            max_iters=1000,
                            step_size=0.01,
                            Ns=1000,
-                           verbose=false)
+                           verbose=false,
+                           ensure_pd=true)
     num_times = T
     num_players = num_agents(dyn)
     dyn_w_hist = DynamicsWithHistory(dyn, num_games+1)
@@ -197,8 +199,11 @@ function leadership_filter(dyn::Dynamics,
     meas_size = xdim(dyn_w_hist.dyn)
     pf = initialize_particle_filter(X, big_P, s_init_distrib, t0, Ns, num_times, meas_size, rng)
 
-    for tt in 1:num_times
-        println("leadership_filter tt ", tt)
+    iter = ProgressBar(1:num_times)
+    for tt in iter
+        if verbose
+            println("leadership_filter tt ", tt)
+        end
 
         # Get inputs at time tt.
         us_at_tt = [us[ii][:, tt] for ii in 1:num_players]
@@ -209,6 +214,7 @@ function leadership_filter(dyn::Dynamics,
 
         # Initialize an SILQ Games Object for this set of runs.
         sg_objs[tt] = initialize_silq_games_object(num_runs_per_game, Ts+1, dyn, costs;
+                                              ensure_pd=ensure_pd,
                                               threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 
         # Create the measurement models.
