@@ -106,6 +106,7 @@ export plot_states_and_controls
 
 function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
 
+
     # Plot convergence metric max absolute state difference between iterations.
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
@@ -115,13 +116,28 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     plot!(q8, conv_x, conv_sum, label="Merit Fn", color=:green)
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot)
 
+
+    costs_1 = evaluated_costs[1, 1:num_iters]
+    costs_2 = evaluated_costs[2, 1:num_iters]
+
+    # # Shift the cost if any are negative to ensure they become all positive for the log-scaled plot.
+    min_cost1 = minimum(evaluated_costs[1, 1:num_iters-1])
+    min_cost2 = minimum(evaluated_costs[2, 1:num_iters-1])
+
+    if min_cost1 < 0
+        costs_1 = costs_1 .+ 2 * abs(min_cost1)
+    end
+    if min_cost2 < 0
+        costs_2 = costs_2 .+ 2 * abs(min_cost1)
+    end
+
     title9 = "evaluated costs"
     q9 = plot(title=title9, yaxis=:log, xlabel="# Iterations", ylabel="Cost")
-    plot!(conv_x, evaluated_costs[1, 1:num_iters], label="P1", color=:red)
-    plot!(conv_x, evaluated_costs[2, 1:num_iters], label="P2", color=:blue)
+    plot!(conv_x, costs_1[1:num_iters], label="P1", color=:red)
+    plot!(conv_x, costs_2[1:num_iters], label="P2", color=:blue)
 
-    cost_sum = evaluated_costs[1, 1:num_iters] + evaluated_costs[2, 1:num_iters]
-    plot!(conv_x, cost_sum, label="total", color=:green, linestyle=:dash, linewidth=2)
+    cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
+    plot!(conv_x, cost_sum, label="Total", color=:green, linestyle=:dash, linewidth=2)
 
     return q8, q9
 end
