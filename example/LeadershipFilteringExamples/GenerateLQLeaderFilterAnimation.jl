@@ -7,8 +7,6 @@ using LinearAlgebra
 using Random
 using Plots
 
-gr()
-
 include("leadfilt_LQ_parameters.jl")
 
 
@@ -49,7 +47,6 @@ gr()
 
 # This generates a pdf.
 
-
 # Create the folder if it doesn't exist
 folder_name = "lq_L$(leader_idx)_leadfilt_$(Dates.now())"
 isdir(folder_name) || mkdir(folder_name)
@@ -57,18 +54,28 @@ isdir(folder_name) || mkdir(folder_name)
 snapshot_freq = Int((T - 1)/10)
 iter1 = ProgressBar(2:snapshot_freq:T)
 ii = 1
-for t in iter1
-    p1 = plot_leadership_filter_position(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
-    plot!(p1, legend=:bottomleft)
 
-    p5, p6 = make_probability_plots(times[1:T], t, probs)
+# Only needs to be generated once.
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
+
+pos_main_filepath = joinpath(folder_name, "lf_lq_positions_main_L$(leader_idx).pdf")
+savefig(p1a, pos_main_filepath)
+
+for t in iter1
+    
+    plot!(p1a, legend=:bottomleft)
+
+    p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s)
+
+    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T])
     plot!(p5, title="")
     plot!(p6, title="")
 
-    pos_filepath = joinpath(folder_name, "0$(ii)_lf_$(t)_lq_positions_L$(leader_idx).pdf")
-    prob1_filepath = joinpath(folder_name, "0$(ii)_lf_$(t)_lq_probs_P1_L$(leader_idx).pdf")
-    prob2_filepath = joinpath(folder_name, "0$(ii)_lf_$(t)_lq_probs_P2_L$(leader_idx).pdf")
-    savefig(p1, pos_filepath)
+    pos2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_lq_positions_detail_L$(leader_idx).pdf")
+    prob1_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_lq_probs_P1_L$(leader_idx).pdf")
+    prob2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_lq_probs_P2_L$(leader_idx).pdf")
+    
+    savefig(p1b, pos2_filepath)
     savefig(p5, prob1_filepath)
     savefig(p6, prob2_filepath)
 
@@ -77,31 +84,35 @@ end
 
 
 # This generates the gif.
+
+# This plot need not be in the loop.
+title="x-y plot of agent positions over time"
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
+plot!(p1a, title=title, legend=:outertopright)
+
 iter = ProgressBar(2:T)
 anim = @animate for t in iter
-    p = @layout [a b; c d; e f]
+    p = @layout [a b; grid(1, 3); e f]
 
     plot_title = string("LF (", t, "/", T, ") on Stack(L=P", leader_idx, "), Ts=", Ts, ", Ns=", num_particles, ", p(transition)=", p_transition, ", #games: ", num_games)
-    title="x-y plot of agent positions over time"
-    p1 = plot_leadership_filter_position(num_particles, sg_objs[t], true_xs, zs)
-    plot!(p1, title=title, legend=:outertopright)
+    p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s)
 
-    _, p_px, p_py, p_vx, p_vy, p_ax, p_ay = plot_states_and_controls(dyn, times[1:T], x̂s, us)
+    _, p_px, p_py, p_vx, p_vy, p_ax, p_ay = plot_states_and_controls(dyn, times[1:T], true_xs, us)
 
     # plot 2 - positions
-    title1 = "LF estimated pos. (x̂/ŷ)"
+    title1 = "LF est. pos. (x̂/ŷ)"
     plot!(p_px, [times[t], times[t]], [-2, 2], label="", color=:black)
     plot!(p_py, [times[t], times[t]], [-2, 2], label="", color=:black)
     p2 = plot!(p_px, p_py, overlay = true, title=title1)
 
     # plot 3 - velocities
-    title2 = "LF estimated velocity (v̂) over time"
+    title2 = "LF est. velocity (v̂)"
     plot!(p_vx, [times[t], times[t]], [-2, 2], label="", color=:black)
     plot!(p_vy, [times[t], times[t]], [-2, 2], label="", color=:black)
     p3 = plot!(p_vx, p_vy, overlay = true, title=title2)
 
     # plot 4 - acceleration inputs
-    title4 = "Input acceleration controls (u) over time"
+    title4 = "Input accel. (u)"
     p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title4)
     plot!(p4, times[1:T], us[1][1, 1:T], label="P1 ax")
     plot!(p4, times[1:T], us[1][2, 1:T], label="P1 ay")
@@ -112,11 +123,11 @@ anim = @animate for t in iter
     # probability plots 5 and 6
     title5 = "Probability over time for P1"
     title6 = "Probability over time for P2"
-    p5, p6 = make_probability_plots(times[1:T], t, probs)
+    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T])
     plot!(p5, title=title5)
     plot!(p6, title=title6)
 
-    plot(p1, p2, p3, p4, p5, p6, plot_title=plot_title, layout = p, size=(1260, 1080))
+    plot(p1a, p1b, p2, p3, p4, p5, p6, plot_title=plot_title, layout = p, size=(1260, 1080))
 end
 
 # Speeds up call to gif (p.1/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
