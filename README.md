@@ -1,5 +1,7 @@
 # Stackelberg Control Hypotheses Filtering
 
+[![CI](https://github.com/CLeARoboticsLab/StackelbergControlHypothesesFiltering/actions/workflows/ci.yaml/badge.svg)](https://github.com/CLeARoboticsLab/StackelbergControlHypothesesFiltering/actions/workflows/ci.yaml)
+
 ## Setup
 
 This repo is structured as a Julia package. To activate this package, type
