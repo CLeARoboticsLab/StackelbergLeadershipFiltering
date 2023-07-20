@@ -1,4 +1,5 @@
 using StackelbergControlHypothesesFiltering
+using LaTeXStrings
 using LinearAlgebra: norm, Diagonal, I
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
@@ -27,7 +28,7 @@ si = dyn.sys_info
 # Define the starting and goal state.
 v_init = 10.
 rlb_x = get_right_lane_boundary_x(cfg)
-x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/2.; 0.; pi/2; v_init]
+x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
 
 p1_goal = vcat([x₁[1]; 60; pi/2; v_init], zeros(4))
 p2_goal = vcat(zeros(4),                [x₁[5]; 50.; pi/2; v_init])
@@ -130,99 +131,103 @@ using Printf
 using ProgressBars
 gr()
 
-# N = Int(sg_obj.num_iterations[1]+1)
+rotated_true_xs = rotate_state(dyn, true_xs)
+rotated_zs = rotate_state(dyn, zs)
+rotated_x̂s = rotate_state(dyn, x̂s)
+rotate_particle_state(xs) = rotate_state(dyn, xs)
+
+# This generates a pdf.
+
+# Create the folder if it doesn't exist
+folder_name = "passing_scenario_1_leadfilt_$(Dates.now())"
+isdir(folder_name) || mkdir(folder_name)
+
+snapshot_freq = Int((T - 1)/10)
+iter1 = ProgressBar(2:snapshot_freq:T)
+ii = 1
+
+# Only needs to be generated once.
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
+plot!(p1a, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+
+pos_main_filepath = joinpath(folder_name, "lf_nonlq_positions_main_L$(leader_idx).pdf")
+savefig(p1a, pos_main_filepath)
+
+for t in iter1
+    p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
+    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+
+    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T]; include_gt=false)
+    plot!(p5, title="")
+    plot!(p6, title="")
+
+    pos2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_positions_detail_L$(leader_idx).pdf")
+    prob1_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_probs_P1_L$(leader_idx).pdf")
+    prob2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_probs_P2_L$(leader_idx).pdf")
+
+    savefig(p1b, pos2_filepath)
+    savefig(p5, prob1_filepath)
+    savefig(p6, prob2_filepath)
+
+    global ii += 1
+end
+
+
+# This generates the gif.
+
+# This plot need not be in the loop.
+title="x-y plot of agent positions over time"
+p1a = plot_leadership_filter_positions(dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
+plot!(p1a, title=title, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+
 iter = ProgressBar(2:T)
 anim = @animate for t in iter
-    p = @layout [a; b c; d e; f]
+    p = @layout [a b; grid(1, 3); e f]
 
-    plot_title = string("LF (", t, "/", T, ") on Stack(L=P", gt_leader_idx, "), Ts=", Ts, ", Ns=", num_particles, ", p(transition)=", p_transition, ", #games: ", num_games)
-    println(plot_title)
-    title1="x-y plot of agent positions over time"
-    p1 = plot(title=title1, legend=:outertopright, ylabel="-x (m)", xlabel="y (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
-    plot!(p1, true_xs[2, 1:T], -true_xs[1, 1:T], label="P1 true pos")
-    plot!(p1, true_xs[6, 1:T], -true_xs[5, 1:T], label="P2 true pos")
+    plot_title = string("LF (", t, "/", T, ") on Stack(L=P", leader_idx, "), Ts=", Ts, ", Ns=", num_particles, ", p(transition)=", p_transition, ", #games: ", num_games)
+    p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T]; transform_particle_fn=rotate_particle_state)
+    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
 
-    scatter!(p1, zs[2, 1:T], -zs[1, 1:T], label="P1 meas pos", color=:blue, markersize=0.5, marker=:+)
-    scatter!(p1, zs[6, 1:T], -zs[5, 1:T], label="P2 meas pos", color=:red, markersize=0.5, marker=:+)
+    _, p_px, p_py, p_θ, p_v, _, _ = plot_states_and_controls(dyn, times[1:T], true_xs[:, 1:T], us)
 
-    plot!(p1, x̂s[2, 1:T], -x̂s[1, 1:T], label="P1 est. pos", color=:blue, linewidth=0.25)
-    plot!(p1, x̂s[6, 1:T], -x̂s[5, 1:T], label="P2 est. pos", color=:red, linewidth=0.25)
+    # plot 2 - positions
+    title1 = "LF est. pos. (x̂/ŷ)"
+    plot!(p_px, [times[t], times[t]], [-2, 2], label="", color=:black)
+    plot!(p_py, [times[t], times[t]], [-2, 2], label="", color=:black)
+    p2 = plot!(p_px, p_py, overlay = true, title=title1)
 
-    p1 = scatter!([x₁[2]], [-x₁[1]], color="blue", label="start P1")
-    p1 = scatter!([x₁[6]], [-x₁[5]], color="red", label="start P2")
+    # plot 3 - velocities
+    title2 = "LF est. heading/velocity (θ̂/v̂)"
+    plot!(p_θ, [times[t], times[t]], [-2, 2], label="", color=:black)
+    plot!(p_v, [times[t], times[t]], [-2, 2], label="", color=:black)
+    p3 = plot!(p_θ, p_v, overlay = true, title=title2)
 
-    # plot 2
-    title2 = "LF estimated states (x̂) over time"
-    p2 = plot(legend=:outertopright, xlabel="t (s)", ylabel="pos (m)", title=title2)
-    plot!(p2, times[1:T], x̂s[1,1:T], label="P1 px")
-    plot!(p2, times[1:T], x̂s[2,1:T], label="P1 py")
-    plot!(p2, times[1:T], x̂s[5,1:T], label="P2 px")
-    plot!(p2, times[1:T], x̂s[6,1:T], label="P2 py")
-    plot!(p2, [times[t], times[t]], [-1, 2], label="", color=:black)
+    # plot 4 - accel. controls
+    title5 = "Input acceleration controls (u) over time"
+    p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
+    plot!(p4, times[1:T], true_us[1][1, 1:T], label="P1 ω")
+    plot!(p4, times[1:T], true_us[2][1, 1:T], label="P2 ω")
+    plot!(p4, times[1:T], true_us[1][2, 1:T], label="P1 a")
+    plot!(p4, times[1:T], true_us[2][2, 1:T], label="P2 a")
+    plot!(p4, [times[t], times[t]], [-1, 1], label="", color=:black)
 
-    # plot 3
-    title3 = "LF estimated heading (θ̂) over time"
-    p3 = plot(legend=:outertopright, xlabel="t (s)", ylabel="θ (rad)", title=title3)
-    plot!(p3, times[1:T], x̂s[3,1:T], label="P1 θ")
-    plot!(p3, times[1:T], x̂s[7,1:T], label="P2 θ")
-    plot!(p3, [times[t], times[t]], [-pi, pi], label="", color=:black)
+    # probability plots 5 and 6
+    title5 = "Probability over time for P1"
+    title6 = "Probability over time for P2"
+    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T]; include_gt=false)
+    plot!(p5, title=title5)
+    plot!(p6, title=title6)
 
-    # plot 3
-    title3 = "LF estimated velocity (v̂) over time"
-    p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="vel (m/2)", title=title3)
-    plot!(p4, times[1:T], x̂s[4,1:T], label="P1 v")
-    plot!(p4, times[1:T], x̂s[8,1:T], label="P2 v")
-    plot!(p4, [times[t], times[t]], [0, cfg.speed_limit_mps], label="", color=:black)
-
-
-    # Add particles
-    num_iters = [0, 0]
-    for n in 1:num_particles
-
-        num_iter = sg_objs[t].num_iterations[n]
-
-        x1_idx = 1
-        y1_idx = 2
-        x2_idx = 5
-        y2_idx = 6
-
-        xks = sg_objs[t].xks[n, num_iter, :, :]
-
-        # TODO(hamzah) - change color based on which agent is leader
-        scatter!(p1, xks[y1_idx, :], -xks[x1_idx, :], color=:black, markersize=0.5, label="")
-
-        color = (sg_objs[t].leader_idxs[n] == 1) ? :blue : :red
-        scatter!(p1, [xks[y1_idx, 2]], -[xks[x1_idx, 2]], color=color, markersize=3., label="")
-
-        scatter!(p1, xks[y2_idx, :], -xks[x2_idx, :], color=:black, markersize=0.5, label="")
-        scatter!(p1, [xks[y2_idx, 2]], -[xks[x2_idx, 2]], color=color, markersize=3., label="")
-    end
-
-    # plot 4
-    title5 = "Input controls (u) over time"
-    p5 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
-    plot!(p5, times[1:T], us_k[1][1, 1:T], label="P1 ω")
-    plot!(p5, times[1:T], us_k[2][1, 1:T], label="P2 ω")
-    plot!(p5, times[1:T], us_k[1][2, 1:T], label="P1 a")
-    plot!(p5, times[1:T], us_k[2][2, 1:T], label="P2 a")
-    plot!(p5, [times[t], times[t]], [-cfg.speed_limit_mps, cfg.speed_limit_mps], label="", color=:black)
-
-    # probability plot - plot 5
-    title6 = "Probability over time"
-    p6 = plot(xlabel="t (s)", ylabel="prob. leadership", ylimit=(-0.1, 1.1), label="", legend=:outertopright, title=title6)
-    plot!(p6, times[1:T], probs[1:T], label="p(L=P1)")
-    plot!(p6, times[1:T], 1 .- probs[1:T], label="p(L=P2)")
-    plot!(p6, [times[t], times[t]], [0, 1], label="", color=:black)
-
-    plot(p1, p2, p3, p4, p5, p6, plot_title=plot_title, layout = p, size=(1260, 1080))
+    plot(p1a, p1b, p2, p3, p4, p5, p6, plot_title=plot_title, layout = p, size=(1260, 1080))
 end
+
 
 # Speeds up call to gif (p.1/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
 previous_GKSwstype = get(ENV, "GKSwstype", "")
 ENV["GKSwstype"] = "100"
 
 println("giffying...")
-filename = string("passing_scenario_",string(Dates.now()),".gif")
+filename = joinpath(folder_name, "passing_scenario_1.gif")
 gif(anim, filename, fps=10)
 println("done")
 
