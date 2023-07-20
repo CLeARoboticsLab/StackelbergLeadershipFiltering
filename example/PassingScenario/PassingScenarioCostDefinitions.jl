@@ -44,6 +44,7 @@ weights_p2[1] = 1.
 # weights_p1[2] = 1//2
 costs = create_passing_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
 
+
 # Generate a ground truth trajectory on which to run the leadership filter.
 gt_threshold=1e-3
 gt_max_iters=120
@@ -60,8 +61,7 @@ xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt
 plot_silqgames_gt(dyn, times[1:T], xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs)
 
 
-
-# # Run the leadership filter.
+# Run the leadership filter.
 
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 pos_unc = 1e-2
