@@ -71,11 +71,11 @@ function solve_lq_stackelberg_feedback(dyns::AbstractVector{LinearDynamics},
         R₁₂ = get_homogenized_control_cost_matrix(costs[leader_idx], follower_idx)
         R₂₁ = get_homogenized_control_cost_matrix(costs[follower_idx], leader_idx)
 
-        # Ensure that we have (semi-)positive definiteness in the relevant costs.
-        @assert isposdef(Q_leader) || minimum(eigvals(Q_leader)) == 0 string("Q leader not semi-posdef, min eigvals: ", minimum(eigvals(Q_leader)))
-        @assert isposdef(Q_follower) || minimum(eigvals(Q_follower)) == 0 string("Q follower not semi-posdef, min eigvals: ", minimum(eigvals(Q_follower)))
-        @assert isposdef(R₁₁) string("R₁₁ not posdef, min eigvals: ", minimum(eigvals(R₁₁)))
-        @assert isposdef(R₂₂) string("R₂₂ not posdef, min eigvals: ", minimum(eigvals(R₂₂)))
+        # Ensure that we have (semi-)positive definiteness in the relevant costs when ensure_pd enabled.
+        @assert !ensure_pd || isposdef(Q_leader) || minimum(eigvals(Q_leader)) == 0 "Q leader not semi-posdef, min eigvals: $(minimum(eigvals(Q_leader)))"
+        @assert !ensure_pd || isposdef(Q_follower) || minimum(eigvals(Q_follower)) == 0 "Q follower not semi-posdef, min eigvals: $(minimum(eigvals(Q_follower)))"
+        @assert !ensure_pd || isposdef(R₁₁)
+        @assert !ensure_pd || isposdef(R₂₂)
 
         Lₖ₊₁ = [all_Ls[leader_idx][:, :, tt+1], all_Ls[follower_idx][:, :, tt+1]]
 

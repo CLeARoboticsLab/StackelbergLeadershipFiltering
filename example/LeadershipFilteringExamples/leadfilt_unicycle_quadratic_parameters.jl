@@ -4,8 +4,8 @@ using Random: seed!
 seed!(0)
 
 
-dt = 0.01
-T = 501
+dt = 0.05
+T = 201
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -32,18 +32,18 @@ Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
+R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
-Ts = 80
+Ts = 30
 num_games = 1
 num_particles = 50
 
 p_transition = 0.98
-p_init = 0.3
+p_init = 0.5
 
 
-threshold = 1e-2
-max_iters = 25
+threshold = 1e-3
+max_iters = 50
 step_size = 1e-2
 
 # Generate the ground truth.
@@ -52,8 +52,8 @@ costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 # leader_idx=2
 gt_silq_num_runs=1
 
-# config variables
-gt_silq_threshold=0.001
+# config variables match the SILQGames configurations
+gt_silq_threshold=2e-3
 gt_silq_max_iters=1000
 gt_silq_step_size=1e-2
 gt_silq_verbose=true

@@ -38,7 +38,7 @@ Q = 1e-1 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
+R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
@@ -48,6 +48,7 @@ p_transition = 0.98
 p_init = 0.5
 
 
+# We use these in the measurement model.
 threshold = 1e-3
 max_iters = 50
 step_size = 1e-2
@@ -58,8 +59,8 @@ Ps_strategies, Zs_future_costs = solve_lq_stackelberg_feedback(dyn, ss_costs, T,
 xs, us = unroll_feedback(dyn, times, Ps_strategies, x₁)
 
 # Augment the remaining states so we have T+Ts-1 of them.
-xs = hcat(xs, zeros(xdim(dyn), Ts-1))
-us = [hcat(us[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
+true_xs = hcat(xs, zeros(xdim(dyn), Ts-1))
+true_us = [hcat(us[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
 
 # Fill in z as noisy state measurements.
 for tt in 1:T

@@ -13,12 +13,13 @@ costs = [pc_cost_1, pc_cost_2]
 num_runs=1
 
 # config variables
-threshold=1e-3
+threshold=1e-2
 max_iters=1000
 step_size=1e-2
 verbose=true
 
 sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs;
+                                      state_reg_param=0.0, control_reg_param=1e-32, ensure_pd=false,
                                       threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, x₁, us_1)
 
@@ -32,30 +33,30 @@ using ElectronDisplay
 using Plots
 
 # Plot positions, other two states, controls, and convergence.
-q = @layout [a b c; d e f; g h i]
+# q = @layout [a b c; d e f; g h i]
+p = @layout grid(3, 1)
+plot_title = "SILQGames on LQ Game"
 
 q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
 
-# Plot convergence metrics.
-conv_x = cumsum(ones(num_iters)) .- 1
-title8 = "conv. (|⋅|∞)"
-q8 = plot(title=title8, yaxis=:log, legend=:outertopright)
-plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1")
-plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
+q8, q9 = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
 
-conv_sum = conv_metrics[1, 1:num_iters] + conv_metrics[2, 1:num_iters]
-plot!(conv_x, conv_sum, label="total")
+# plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
+plot(q1, q8, q9, layout=p, plot_title=plot_title)
 
-title9 = "evaluated costs"
-q9 = plot(title=title9, yaxis=:log, legend=:outertopright)
-plot!(conv_x, evaluated_costs[1, 1:num_iters], label="p1")
-plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2")
 
-cost_sum = evaluated_costs[1, 1:num_iters] + evaluated_costs[2, 1:num_iters]
-plot!(conv_x, cost_sum, label="total")
+plot!(q1, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 11, tickfontsize=11, fontsize=11)
+filename = string("silq_lq_results_leader", leader_idx, "_3_position.pdf")
+savefig(q1, filename)
 
-plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
+plot!(q8, title="", xaxis=[-0.1, 1.1], xticks=[0, 1], legendfontsize = 11, tickfontsize=11, fontsize=11)
+filename = string("silq_lq_results_leader", leader_idx, "_3_convergence.pdf")
+savefig(q8, filename)
+
+plot!(q9, title="", xaxis=[-0.1, 1.1], xticks=[0, 1], legendfontsize = 11, tickfontsize=11, fontsize=11)
+filename = string("silq_lq_results_leader", leader_idx, "_3_cost.pdf")
+savefig(q9, filename)
 
 
 

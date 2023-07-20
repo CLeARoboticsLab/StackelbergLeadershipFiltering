@@ -9,7 +9,7 @@ costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 num_runs=1
 
 # config variables
-threshold=1e-3
+threshold=2e-3
 max_iters=1000
 step_size=1e-2
 verbose=true
@@ -32,23 +32,25 @@ q = @layout [a b c; d e f; g h i]
 
 q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
-# Plot convergence.
-conv_x = cumsum(ones(num_iters)) .- 1
-title8 = "convergence (|⋅|∞)"
-q8 = plot(title=title8, yaxis=:log, legend=:outertopright)
-plot!(conv_x, conv_metrics[1, 1:num_iters], label="p1")
-plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2")
 
-conv_sum = conv_metrics[1, 1:num_iters] + conv_metrics[2, 1:num_iters]
-plot!(conv_x, conv_sum, label="total")
+# Plot convergence and costs.
+q8, q9 = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
 
-q9 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log, legend=:outertopright)
-plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
-
-cost_sum = evaluated_costs[1, 1:num_iters] + evaluated_costs[2, 1:num_iters]
-plot!(conv_x, cost_sum, label="total", yaxis=:log)
 
 plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
+
+
+plot!(q1, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 11, tickfontsize=11, fontsize=11)
+filename = string("silq_uq_results_leader", leader_idx, "_3_position.pdf")
+savefig(q1, filename)
+
+plot!(q8, title="", legendfontsize = 14)
+filename = string("silq_uq_results_leader", leader_idx, "_3_convergence.pdf")
+savefig(q8, filename)
+
+plot!(q9, title="", legendfontsize = 14)
+filename = string("silq_uq_results_leader", leader_idx, "_3_cost.pdf")
+savefig(q9, filename)
 
 
 

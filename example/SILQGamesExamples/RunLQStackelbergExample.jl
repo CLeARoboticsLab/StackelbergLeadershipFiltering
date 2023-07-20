@@ -19,3 +19,9 @@ q = @layout [a b; c d ;e f; g h]
 q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs, us)
 
 plot(q1, q2, q3, q4, q5, q6, q7, layout = q)
+
+plot!(q1, title="", xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 14, legend=:bottomleft)
+filename = "lqstacksolve_leader$(leader_idx)_1.pdf"
+
+savefig(q1, filename)
+

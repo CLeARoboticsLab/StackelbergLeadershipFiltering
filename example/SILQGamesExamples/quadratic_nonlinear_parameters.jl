@@ -6,7 +6,7 @@ seed = 1
 rng = MersenneTwister(seed)
 
 dt = 0.05
-T = 301
+T = 201
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 

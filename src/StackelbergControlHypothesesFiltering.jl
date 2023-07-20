@@ -37,4 +37,6 @@ include("LeadershipFilterUtils.jl")
 
 include("LeadershipFilter.jl")
 
+include("PlotUtils.jl")
+
 end # module

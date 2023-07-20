@@ -1,23 +1,23 @@
 using StackelbergControlHypothesesFiltering
 
-dt = 0.01
-T = 401
+dt = 0.02
+T = 251
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
 times = dt * (cumsum(ones(2*T)) .- 1)
 
 dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
-bound_val = 2.1
+bound_val = 2.5
 use_autodiff = true
 costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, bound_val, use_autodiff)
 # costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (0., bound_val))
 num_players = num_agents(dyn)
 
-leader_idx = 1
+leader_idx = 2
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 # top half of plane
-x₁ = [-2.; 1.; 0; 0.; 1.; -2; 0; 0]
+x₁ = [2.; 1.; 7*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
@@ -30,7 +30,8 @@ vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+# Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
 # CONFIG: 
@@ -38,14 +39,14 @@ Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = zeros(xdim(dyn), xdim(dyn)) + 0.001 * I
+R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
-Ts = 20
+Ts = 30
 num_games = 1
 num_particles = 100
 
 p_transition = 0.98
-p_init = 0.7
+p_init = 0.5
 
 threshold = 1e-3
 max_iters = 50
@@ -55,7 +56,7 @@ gt_silq_num_runs=1
 
 # config variables
 gt_silq_threshold=1e-3
-gt_silq_max_iters=1000
+gt_silq_max_iters=2000
 gt_silq_step_size=1e-2
 gt_silq_verbose=true
 

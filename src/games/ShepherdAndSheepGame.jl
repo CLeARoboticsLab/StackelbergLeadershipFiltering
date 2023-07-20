@@ -25,13 +25,13 @@ shepherd_A() = vcat(hcat(shepherd_Ã(), zeros(4, 4)),
                       hcat(zeros(4, 4), shepherd_Ã()))
 
 B₁() = vcat([0   0;
-             1  0;
+             1   0;
              0   0;
              0   1],
              zeros(4, 2))
 B₂() = vcat(zeros(4, 2),
             [0   0;
-             1  0;
+             1   0;
              0   0;
              0   1])
 
@@ -50,7 +50,8 @@ ShepherdAndSheepCosts(dyn::Dynamics) = begin
     Q₁[p2x_idx, p2x_idx] = 1.0
     Q₁[p2y_idx, p2y_idx] = 1.0
     c₁ = QuadraticCost(1*Q₁)
-    add_control_cost!(c₁, 1, .1 * diagm([1, 1]))
+    ctrl_const = .1
+    add_control_cost!(c₁, 1, ctrl_const * diagm([1, 1]))
     add_control_cost!(c₁, 2, zeros(2, 2))
 
     Q₂ = zeros(8, 8)
@@ -63,7 +64,7 @@ ShepherdAndSheepCosts(dyn::Dynamics) = begin
     Q₂[p1y_idx, p2y_idx] = -1.0
     Q₂[p2y_idx, p1y_idx] = -1.0
     c₂ = QuadraticCost(1*Q₂)
-    add_control_cost!(c₂, 2, .1 * diagm([1, 1]))
+    add_control_cost!(c₂, 2, ctrl_const * diagm([1, 1]))
     add_control_cost!(c₂, 1, zeros(2, 2))
 
     return [c₁, c₂]

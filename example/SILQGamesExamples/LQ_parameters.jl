@@ -32,10 +32,10 @@ x₁[[2, 4, 6, 8]] .= 0
 
 # Initial controls
 us_1 = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
-for ii in 1:num_players
-    us_1[ii][1,:] .= -0.1
-    us_1[ii][2,:] .= -0.01
-end
+# for ii in 1:num_players
+#     us_1[ii][1,:] .= -0.1
+#     us_1[ii][2,:] .= -0.01
+# end
 # duration = (T-1) * dt
 # us_1[ii][1, :] .= (xf[3] - x0[3]) / duration # omega
 # us_1[ii][2, :] .= (xf[4] - x0[4]) / duration # accel
