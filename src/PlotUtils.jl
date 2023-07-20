@@ -13,23 +13,28 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us)
     @assert udim(dyn, 2) == 2
     x₁ = xs[:, 1]
 
-    title1 = "pos. traj."
-    q1 = plot(legend=:outertopright, title=title1, xlabel="x (m)", ylabel="y (m)")
-    plot!(q1, xs[1, :], xs[3, :], label="P1 pos", color=:red)
-    plot!(q1, xs[5, :], xs[7, :], label="P2 pos", color=:blue)
+    x1_idx = xidx(dyn, 1)
+    y1_idx = yidx(dyn, 1)
+    x2_idx = xidx(dyn, 2)
+    y2_idx = yidx(dyn, 2)
 
-    q1 = scatter!([x₁[1]], [x₁[3]], color=:red, label="start P1")
-    q1 = scatter!([x₁[5]], [x₁[7]], color=:blue, label="start P2")
+    title1 = "pos. traj."
+    q1 = plot(legend=:outertopright, title=title1, xlabel=L"$x$ (m)", ylabel=L"$y$ (m)")
+    plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label="P1 pos", color=:red)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2 pos", color=:blue)
+
+    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 start")
+    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 start")
 
     title2a = "x-pos"
     q2a = plot(legend=:outertopright, title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[1,:], label="P1 px")
-    plot!(times, xs[5,:], label="P2 px")
+    plot!(times, xs[x1_idx,:], label="P1 px")
+    plot!(times, xs[x2_idx,:], label="P2 px")
 
     title2b = "y-pos"
     q2b = plot(legend=:outertopright, title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[3,:], label="P1 py")
-    plot!(times, xs[7,:], label="P2 py")
+    plot!(times, xs[y1_idx,:], label="P1 py")
+    plot!(times, xs[y2_idx,:], label="P2 py")
 
     title3 = "x-vel"
     q3 = plot(legend=:outertopright, title=title3, xlabel="t (s)", ylabel="vel. (mps)")
@@ -60,23 +65,28 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us)
 
     x₁ = xs[:, 1]
 
+    x1_idx = xidx(dyn, 1)
+    y1_idx = yidx(dyn, 1)
+    x2_idx = xidx(dyn, 2)
+    y2_idx = yidx(dyn, 2)
+
     title1 = "pos. traj."
     q1 = plot(legend=:outertopright, title=title1, xlabel="x (m)", ylabel="y (m)")
-    plot!(q1, xs[1, :], xs[2, :], label="P1 pos", color=:red)
-    plot!(q1, xs[5, :], xs[6, :], label="P2 pos", color=:blue)
+    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label="P1 pos", color=:red)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2 pos", color=:blue)
 
-    q1 = scatter!([x₁[1]], [x₁[2]], color=:red, label="start P1")
-    q1 = scatter!([x₁[5]], [x₁[6]], color=:blue, label="start P2")
+    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="start P1")
+    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="start P2")
 
     title2a = "x-pos"
     q2a = plot(legend=:outertopright, title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[1,:], label="P1 px")
-    plot!(times, xs[5,:], label="P2 px")
+    plot!(times, xs[x1_idx,:], label="P1 px")
+    plot!(times, xs[x2_idx,:], label="P2 px")
 
     title2b = "y-pos"
     q2b = plot(legend=:outertopright, title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[2,:], label="P1 py")
-    plot!(times, xs[6,:], label="P2 py")
+    plot!(times, xs[y1_idx,:], label="P1 py")
+    plot!(times, xs[y2_idx,:], label="P2 py")
 
     title3 = "θ"
     q3 = plot(legend=:outertopright, title=title3, xlabel="t (s)", ylabel="θ (rad)")
@@ -105,8 +115,6 @@ export plot_states_and_controls
 
 
 function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
-
-
     # Plot convergence metric max absolute state difference between iterations.
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
@@ -144,20 +152,57 @@ end
 export plot_convergence_and_costs
 
 
-# This function plots an x-y plot along with measurement data of the positions and particle trajectories representing
-# the games played within the Stackelberg measurement model.
-function plot_leadership_filter_position(num_particles, sg_t, true_xs, est_xs, zs)
+# This function makes an x-y plot containing (1) the ground truth trajectory,
+#                                            (2) simulated measured positions of the trajectory, and 
+#                                            (3) the estimated position trajectory produced by the leadership filter.
+function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs, zs)
     x₁ = true_xs[:, 1]
 
+    x1_idx = xidx(dyn, 1)
+    y1_idx = yidx(dyn, 1)
+    x2_idx = xidx(dyn, 2)
+    y2_idx = yidx(dyn, 2)
+
     p1 = plot(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
-    plot!(p1, true_xs[1, :], true_xs[3, :], label="True P1", color=:red)
-    plot!(p1, true_xs[5, :], true_xs[7, :], label="True P2", color=:blue)
+    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label="True P1", color=:red, linewidth=2, ls=:dash)
+    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label="True P2", color=:blue, linewidth=2, ls=:dash)
 
-    plot!(p1, est_xs[1, :], est_xs[3, :], label="Est. P1", color=:lightred)
-    plot!(p1, est_xs[5, :], est_xs[7, :], label="Est. P2", color=:lightblue)
+    plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label="Est. P1", color=:orange)
+    plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label="Est. P2", color=:turquoise2)
 
-    scatter!(p1, zs[1, :], zs[3, :], color=:red, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P1")
-    scatter!(p1, zs[5, :], zs[7, :], color=:blue, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P2")
+    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P1")
+    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P2")
+
+    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 Start")
+    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 Start")
+
+    return p1
+end
+export plot_leadership_filter_positions
+
+# This function makes an x-y plot (1) the ground truth trajectories (in black to avoid color conflict),
+#                                 (2) the estimated position trajectory produced by the leadership filter, and
+#                                 (3) particles representing the solutions to the games played within the Stackelberg
+#                                     measurement model. The waypoint at the current time is highlighted. Measurement
+#                                     data and particles are colored to match the agent assumed by the particle to be
+#                                     leader.
+function plot_leadership_filter_measurement_details(num_particles, sg_t, true_xs, est_xs)
+    x₁ = true_xs[:, 1]
+
+    x1_idx = xidx(sg_t.dyn, 1)
+    y1_idx = yidx(sg_t.dyn, 1)
+    x2_idx = xidx(sg_t.dyn, 2)
+    y2_idx = yidx(sg_t.dyn, 2)
+
+    p2 = plot(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
+    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], label="True P1", color=:black, linewidth=3)
+    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], label="True P2", color=:black, linewidth=3)
+
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label="Est. P1", color=:orange)
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label="Est. P2", color=:turquoise2)
+
+    scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 Start")
+    scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 Start")
 
     # Add particles
     for n in 1:num_particles
@@ -168,42 +213,38 @@ function plot_leadership_filter_position(num_particles, sg_t, true_xs, est_xs, z
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
 
-        x1_idx = xidx(dyn, 1)
-        y1_idx = yidx(dyn, 1)
-        x2_idx = xidx(dyn, 2)
-        y2_idx = yidx(dyn, 2)
-
         xks = sg_t.xks[n, num_iter, :, :]
 
         # TODO(hamzah) - change color based on which agent is leader
         color = (sg_t.leader_idxs[n] == 1) ? "red" : "blue"
-        scatter!(p1, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
-        scatter!(p1, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
+        scatter!(p2, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=0.3, markerstrokewidth=0, label="")
+        scatter!(p2, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=2., markerstrokewidth=0, label="")
 
-        scatter!(p1, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
-        scatter!(p1, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
+        scatter!(p2, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=0.3, markerstrokewidth=0, label="")
+        scatter!(p2, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
     end
 
-    return p1
+    return p2
 end
-export plot_leadership_filter_position
+export plot_leadership_filter_measurement_details
 
 # This function generates two probability plots (both lines on one plot is too much to see), one for the probablity of
 # each agent as leader.
-function make_probability_plots(times, t_idx, probs)
+function make_probability_plots(leader_idx, times, t_idx, probs)
     t = times[t_idx]
+    T = length(times)
 
     # probability plot for P1 - plot 5
     p5 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
-    plot!(p5, times[1:T], probs[1:T], color=:red, label="P1")
-    plot!(p5, times[1:T], (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
-    plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, sigdigits=3)) s", color=:black, linestyle=:dot, linewidth=3)
+    plot!(p5, times, probs, color=:red, label="P1")
+    plot!(p5, times, (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 
      # probability plot for P2 - plot 6
     p6 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
-    plot!(p6, times[1:T], 1 .- probs[1:T], color=:blue, label="P2")
-    plot!(p6, times[1:T], ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
-    plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, sigdigits=3)) s", color=:black, linestyle=:dot, linewidth=3)
+    plot!(p6, times, 1 .- probs, color=:blue, label="P2")
+    plot!(p6, times, ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 
     return p5, p6
 end
