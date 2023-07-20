@@ -5,6 +5,23 @@
 using LaTeXStrings
 using Plots
 
+# By default rotates clockwise 90 degrees
+function rotate_state(dyn::UnicycleDynamics, xs)
+    x1_idx = xidx(dyn, 1)
+    y1_idx = yidx(dyn, 1)
+    x2_idx = xidx(dyn, 2)
+    y2_idx = yidx(dyn, 2)
+
+    rotated_xs = deepcopy(xs)
+    rotated_xs[x1_idx, :] = xs[y1_idx, :]
+    rotated_xs[y1_idx, :] = -xs[x1_idx, :]
+    rotated_xs[x2_idx, :] = xs[y2_idx, :]
+    rotated_xs[y2_idx, :] = -xs[x2_idx, :]
+
+    return rotated_xs
+end
+export rotate_state
+
 # TODO(hamzah) - refactor this to be tied DoubleIntegrator Dynamics instead of Linear Dynamics.
 function plot_states_and_controls(dyn::LinearDynamics, times, xs, us)
     @assert num_agents(dyn) == 2
@@ -186,7 +203,7 @@ export plot_leadership_filter_positions
 #                                     measurement model. The waypoint at the current time is highlighted. Measurement
 #                                     data and particles are colored to match the agent assumed by the particle to be
 #                                     leader.
-function plot_leadership_filter_measurement_details(num_particles, sg_t, true_xs, est_xs)
+function plot_leadership_filter_measurement_details(num_particles, sg_t, true_xs, est_xs; transform_particle_fn=(xs)->xs)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(sg_t.dyn, 1)
@@ -213,7 +230,7 @@ function plot_leadership_filter_measurement_details(num_particles, sg_t, true_xs
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
 
-        xks = sg_t.xks[n, num_iter, :, :]
+        xks = transform_particle_fn(sg_t.xks[n, num_iter, :, :])
 
         # TODO(hamzah) - change color based on which agent is leader
         color = (sg_t.leader_idxs[n] == 1) ? "red" : "blue"
@@ -230,20 +247,24 @@ export plot_leadership_filter_measurement_details
 
 # This function generates two probability plots (both lines on one plot is too much to see), one for the probablity of
 # each agent as leader.
-function make_probability_plots(leader_idx, times, t_idx, probs)
+function make_probability_plots(leader_idx, times, t_idx, probs; include_gt=true)
     t = times[t_idx]
     T = length(times)
 
     # probability plot for P1 - plot 5
     p5 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
     plot!(p5, times, probs, color=:red, label="P1")
-    plot!(p5, times, (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    if !include_gt
+        plot!(p5, times, (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    end
     plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 
      # probability plot for P2 - plot 6
     p6 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
     plot!(p6, times, 1 .- probs, color=:blue, label="P2")
-    plot!(p6, times, ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    if !include_gt
+        plot!(p6, times, ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    end
     plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 
     return p5, p6
