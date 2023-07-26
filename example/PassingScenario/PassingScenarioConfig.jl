@@ -45,3 +45,38 @@ function get_right_lane_boundary_x(cfg::PassingScenarioConfig)
     return cfg.cl_x + cfg.lane_width_m
 end
 
+function get_validator(si, cfg)
+    function check_valid(xs, us, ts)
+        T = length(ts)
+        for tt in 1:T
+            x = xs[:, tt]
+            u1 = us[1][:, tt]
+            u2 = us[2][:, tt]
+
+            no_collision = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) > cfg.collision_radius_m
+            p1_within_lane_lines = x[1] > get_left_lane_boundary_x(cfg) && x[1] < get_right_lane_boundary_x(cfg)
+            p2_within_lane_lines = true # x[5] > get_left_lane_boundary_x(cfg) && x[5] < get_right_lane_boundary_x(cfg)
+            within_speed_limit = abs(x[4]) < cfg.speed_limit_mps && abs(x[8]) < cfg.speed_limit_mps
+            within_heading_limit = true #abs(x[3] - cfg.θ₀) < cfg.max_heading_deviation && abs(x[7] - cfg.θ₀) < cfg.max_heading_deviation
+            within_angvel_limits = abs(u1[1]) < cfg.max_rotational_velocity_radps && abs(u2[1]) < cfg.max_rotational_velocity_radps
+            within_accel_limits = abs(u1[2]) < cfg.max_acceleration_mps && abs(u2[2]) < cfg.max_acceleration_mps
+
+            satisfies_all_constraints_at_tt = (no_collision && p1_within_lane_lines && p2_within_lane_lines 
+                                               && within_speed_limit  && within_heading_limit
+                                               && within_angvel_limits && within_accel_limits)
+            if !satisfies_all_constraints_at_tt
+                println("$(tt) - no collision: $(no_collision) $(norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order)), 
+                                 lane_lines (p1): $(p1_within_lane_lines) $(x[1]),
+                                 lane_lines (p2): $(p2_within_lane_lines) $(x[5]),
+                                 speed limit: $(within_speed_limit) $(x[4]) $(x[8]),
+                                 heading_limit: $(within_heading_limit) $(x[3]) $(x[7]),
+                                 rotvel limit: $(within_angvel_limits) $(u1[1]) $(u2[1]),
+                                 accel. limit: $(within_accel_limits) $(u1[2]) $(u2[2])")
+
+                return false
+            end
+        end
+        return true
+    end
+    return check_valid
+end

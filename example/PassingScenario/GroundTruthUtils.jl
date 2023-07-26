@@ -6,6 +6,65 @@ using StackelbergControlHypothesesFiltering
 using JLD
 using Plots
 
+function get_passing_trajectory_scenario_101(cfg, x₁)
+
+    rlb_x = get_right_lane_boundary_x(cfg)
+    v_init = 10
+
+    # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
+
+    w1 = zeros(2, 101) # Agent 1 keeps going in straight line
+
+    # Agent 2 does a passing maneuver.
+    w2 = vcat(hcat( ones(1, 8),
+                   -ones(1, 8),
+                   zeros(1, 60),
+                   -ones(1, 8),
+                    ones(1, 8),
+                   zeros(1, 9)), 
+              hcat( 5  *ones(1, 10),
+                    8.7*ones(1, 15),
+                       zeros(1, 49),
+                   -8.7*ones(1, 17),
+                   -5  *ones(1, 10)))
+
+    ws = [w1, w2]
+
+    xs = unroll_raw_controls(dyn, times[1:T], ws, x₁)
+    return xs, ws
+end
+
+function get_passing_trajectory_scenario_151(cfg, x₁)
+
+    rlb_x = get_right_lane_boundary_x(cfg)
+    v_init = 10
+
+    # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
+
+    w1 = zeros(2, 151) # Agent 1 keeps going in straight line
+
+    # Agent 2 does a passing maneuver after a short follow.
+    w2 = vcat(hcat(zeros(1, 50),
+                    ones(1, 8),
+                   -ones(1, 8),
+                   zeros(1, 60),
+                   -ones(1, 8),
+                    ones(1, 8),
+                   zeros(1, 9)), 
+              hcat(    zeros(1, 50),
+                    5  *ones(1, 10),
+                    8.7*ones(1, 15),
+                       zeros(1, 49),
+                   -8.7*ones(1, 17),
+                   -5  *ones(1, 10)))
+
+    ws = [w1, w2]
+
+    xs = unroll_raw_controls(dyn, times[1:T], ws, x₁)
+    return xs, ws
+end
+
+
 # For saving the trajectory - in case we want to use it later.
 function save_trajectory(filename, xs, us, times, T, dt)
     # Create some data to save

@@ -66,7 +66,7 @@ for t in iter1
 
     p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s)
 
-    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T])
+    p5, p6 = make_probability_plots(times[1:T], t, probs[1:T]; include_gt_val=leader_idx)
     plot!(p5, title="")
     plot!(p6, title="")
 
@@ -122,7 +122,7 @@ anim = @animate for t in iter
     # probability plots 5 and 6
     title5 = "Probability over time for P1"
     title6 = "Probability over time for P2"
-    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T])
+    p5, p6 = make_probability_plots(times[1:T], t, probs[1:T]; include_gt_val=leader_idx)
     plot!(p5, title=title5)
     plot!(p6, title=title6)
 

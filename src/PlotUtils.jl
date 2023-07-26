@@ -180,7 +180,7 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs, zs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = plot(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
+    p1 = plot(ylabel=L"$y$ m", xlabel=L"$x$ m")
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label="True P1", color=:red, linewidth=2, ls=:dash)
     plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label="True P2", color=:blue, linewidth=2, ls=:dash)
 
@@ -247,23 +247,23 @@ export plot_leadership_filter_measurement_details
 
 # This function generates two probability plots (both lines on one plot is too much to see), one for the probablity of
 # each agent as leader.
-function make_probability_plots(leader_idx, times, t_idx, probs; include_gt=true)
+function make_probability_plots(times, t_idx, probs; include_gt=nothing)
     t = times[t_idx]
     T = length(times)
 
     # probability plot for P1 - plot 5
     p5 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
     plot!(p5, times, probs, color=:red, label="P1")
-    if !include_gt
-        plot!(p5, times, (leader_idx%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    if !isnothing(include_gt)
+        plot!(p5, times, (include_gt%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
     end
     plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 
      # probability plot for P2 - plot 6
     p6 = plot(xlabel="t (s)", ylabel=L"""$\mathbb{P}(L=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
     plot!(p6, times, 1 .- probs, color=:blue, label="P2")
-    if !include_gt
-        plot!(p6, times, ((leader_idx+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    if !isnothing(include_gt)
+        plot!(p6, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
     end
     plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
 

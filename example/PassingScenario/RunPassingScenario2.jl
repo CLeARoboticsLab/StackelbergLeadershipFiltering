@@ -1,6 +1,9 @@
 using StackelbergControlHypothesesFiltering
+
+using Dates
 using LaTeXStrings
 using LinearAlgebra: norm, Diagonal, I
+using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
 
@@ -11,14 +14,14 @@ include("PassingScenarioConfig.jl")
 # Define game and timing related configuration.
 num_players = 2
 
-T = 101
+T = 151
 t₀ = 0.0
 dt = 0.05
 horizon = T * dt
 times = dt * cumsum(ones(2*T)) .- dt
 
 # Get the configuration.
-cfg = PassingScenarioConfig(collision_radius_m=0.01)
+cfg = PassingScenarioConfig(collision_radius_m=0.2, lane_width_m=2.5)
                             # max_heading_deviation=pi/6)
 
 # Defined the dynamics of the game.
@@ -28,7 +31,7 @@ si = dyn.sys_info
 # Define the starting and goal state.
 v_init = 10.
 rlb_x = get_right_lane_boundary_x(cfg)
-x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
+x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/2; 0.; pi/2; v_init]
 
 p1_goal = vcat([x₁[1]; 60; pi/2; v_init], zeros(4))
 p2_goal = vcat(zeros(4),                [x₁[5]; 50.; pi/2; v_init])
@@ -45,20 +48,18 @@ weights_p2[1] = 1.
 costs = create_passing_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
 
 
-# Generate a ground truth trajectory on which to run the leadership filter.
-gt_threshold=1e-3
-gt_max_iters=120
-gt_step_size=1e-2
-gt_verbose=true
-gt_num_runs=1
-sg_obj = initialize_silq_games_object(gt_num_runs, T, dyn, costs;
-                                      threshold=gt_threshold, max_iters=gt_max_iters, step_size=gt_step_size, verbose=gt_verbose)
+# Generate a ground truth trajectory on which to run the leadership filter for a passing trajectory.
+if T == 151
+    x_refs, us_refs = get_passing_trajectory_scenario_151(cfg, x₁)
+elseif T == 101
+    x_refs, us_refs = get_passing_trajectory_scenario_101(cfg, x₁)
+end
+check_valid = get_validator(si, cfg)
+@assert check_valid(x_refs, us_refs, times[1:T])
 
-# An initial control estimate.
-gt_leader_idx = 1
-us_1 = [zeros(udim(si, 1), T), zeros(udim(si, 1), T)]
-xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg_obj, gt_leader_idx, times, x₁, us_1)
-plot_silqgames_gt(dyn, times[1:T], xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs)
+
+
+
 
 
 # Run the leadership filter.
@@ -93,18 +94,29 @@ s_init_distrib = Bernoulli(p_init)
 process_noise_distribution = MvNormal(zeros(xdim(dyn)), Q)
 
 
-threshold = 1e-2
-max_iters = 50
-step_size = 1e-2
-
 # Augment the remaining states so we have T+Ts-1 of them.
-true_xs = hcat(xs_k, zeros(xdim(dyn), Ts-1))
-true_us = [hcat(us_k[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
+true_xs = hcat(x_refs, zeros(xdim(dyn), Ts-1))
+true_us = [hcat(us_refs[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
 
 # Fill in z as noisy state measurements.
 for tt in 1:T
     zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
 end
+
+# l = @layout [a{0.3h}; grid(2, 3)]
+
+# pos_plot, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times[1:T], rotate_state(dyn, x_refs[:, 1:T]), us_refs)
+
+# plot_zs = rotate_state(dyn, zs)
+# scatter!(pos_plot, plot_zs[1, :], plot_zs[2, :], color=:turquoise, label="", ms=0.5)
+# scatter!(pos_plot, plot_zs[5, :], plot_zs[6, :], color=:orange, label="", ms=0.5)
+
+# plot(pos_plot, p2, p3, p4, p5, p6, p7, layout=l)
+
+
+threshold = 1e-2
+max_iters = 50
+step_size = 1e-2
 
 x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            T,         # simulation horizon
@@ -112,13 +124,14 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            num_games, # number of stackelberg games played for measurement
                            x₁,        # initial state at the beginning of simulation
                            P₁,        # initial covariance at the beginning of simulation
-                           us_k,      # the control inputs that the actor takes
+                           us_refs,      # the control inputs that the actor takes
                            zs,        # the measurements
                            R,
                            process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;
                            threshold=threshold,
+                           # check_valid=check_valid,
                            rng,
                            max_iters=max_iters,
                            step_size=step_size,
@@ -139,7 +152,7 @@ rotate_particle_state(xs) = rotate_state(dyn, xs)
 # This generates a pdf.
 
 # Create the folder if it doesn't exist
-folder_name = "passing_scenario_1_leadfilt_$(Dates.now())"
+folder_name = "passing_scenario_2_leadfilt_$(Dates.now())"
 isdir(folder_name) || mkdir(folder_name)
 
 snapshot_freq = Int((T - 1)/10)
@@ -147,23 +160,24 @@ iter1 = ProgressBar(2:snapshot_freq:T)
 ii = 1
 
 # Only needs to be generated once.
+leader_idx = 0 # no leader
 p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
-plot!(p1a, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+plot!(p1a, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 120))
 
-pos_main_filepath = joinpath(folder_name, "lf_nonlq_positions_main_L$(leader_idx).pdf")
+pos_main_filepath = joinpath(folder_name, "passing_scenario_2_positions_main_L$(leader_idx).pdf")
 savefig(p1a, pos_main_filepath)
 
 for t in iter1
     p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
-    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 120))
 
-    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T]; include_gt=false)
+    p5, p6 = make_probability_plots(times[1:T], t, probs[1:T]; include_gt=false)
     plot!(p5, title="")
     plot!(p6, title="")
 
-    pos2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_positions_detail_L$(leader_idx).pdf")
-    prob1_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_probs_P1_L$(leader_idx).pdf")
-    prob2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_nonlq_probs_P2_L$(leader_idx).pdf")
+    pos2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_passing_scenario_2_positions_detail_L$(leader_idx).pdf")
+    prob1_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_passing_scenario_2_probs_P1_L$(leader_idx).pdf")
+    prob2_filepath = joinpath(folder_name, "0$(ii)_lf_t$(t)_passing_scenario_2_probs_P2_L$(leader_idx).pdf")
 
     savefig(p1b, pos2_filepath)
     savefig(p5, prob1_filepath)
@@ -178,7 +192,7 @@ end
 # This plot need not be in the loop.
 title="x-y plot of agent positions over time"
 p1a = plot_leadership_filter_positions(dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
-plot!(p1a, title=title, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+plot!(p1a, title=title, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 120))
 
 iter = ProgressBar(2:T)
 anim = @animate for t in iter
@@ -186,9 +200,9 @@ anim = @animate for t in iter
 
     plot_title = string("LF (", t, "/", T, ") on Stack(L=P", leader_idx, "), Ts=", Ts, ", Ns=", num_particles, ", p(transition)=", p_transition, ", #games: ", num_games)
     p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T]; transform_particle_fn=rotate_particle_state)
-    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 75.))
+    plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=(-5., 120))
 
-    _, p_px, p_py, p_θ, p_v, _, _ = plot_states_and_controls(dyn, times[1:T], true_xs[:, 1:T], us)
+    _, p_px, p_py, p_θ, p_v, _, _ = plot_states_and_controls(dyn, times[1:T], true_xs[:, 1:T], us_refs)
 
     # plot 2 - positions
     title1 = "LF est. pos. (x̂/ŷ)"
@@ -214,7 +228,7 @@ anim = @animate for t in iter
     # probability plots 5 and 6
     title5 = "Probability over time for P1"
     title6 = "Probability over time for P2"
-    p5, p6 = make_probability_plots(leader_idx, times[1:T], t, probs[1:T]; include_gt=false)
+    p5, p6 = make_probability_plots(times[1:T], t, probs[1:T]; include_gt=false)
     plot!(p5, title=title5)
     plot!(p6, title=title6)
 
@@ -227,7 +241,7 @@ previous_GKSwstype = get(ENV, "GKSwstype", "")
 ENV["GKSwstype"] = "100"
 
 println("giffying...")
-filename = joinpath(folder_name, "passing_scenario_1.gif")
+filename = joinpath(folder_name, "passing_scenario_2.gif")
 gif(anim, filename, fps=10)
 println("done")
 

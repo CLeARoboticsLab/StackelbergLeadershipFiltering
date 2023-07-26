@@ -32,7 +32,7 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     # TODO(hamzah) - should this be replaced with a tracking trajectory cost?
     const_1 = 1.
     Q1 = zeros(8, 8)
-    Q1[1, 1] = const_1 * 1.
+    Q1[1, 1] = const_1 * 2.
     Q1[2, 2] = const_1 * 0.
     Q1[3, 3] = const_1 * 1.
     Q1[4, 4] = const_1 * 1.
@@ -54,7 +54,8 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     # 2. avoid collisions
     avoid_collisions_cost_fn(si, x, us, t) = begin
         # This log barrier avoids agents getting within some configured radius of one another.
-       return - log(norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m)
+        dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
+        return (dist_to_boundary ≤ 0) ? 1e6 : -log(dist_to_boundary)
     end
 
     c1b = PlayerCost(avoid_collisions_cost_fn, si)
