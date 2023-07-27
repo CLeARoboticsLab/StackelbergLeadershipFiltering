@@ -124,8 +124,18 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
         # Get the state at the previous time tt-1. This will be the initial state in the game.
         prev_state = get_state(dyn_w_hist, X, 2)
 
+        # Get the particle's previous control trajectory. Note that this may interact badly with resampling and mix past trajectories.
+        # @assert !iszero(sg_obj.current_idx)
+        # run_idx = sg_obj.current_idx+1
+        # us_1_from_ttm1 = sg_obj.uks
+        # num_iters_ttm1 = sg_obj.num_iterations[run_idx]
+        # us_1_from_tt = [sg_obj.uks[ii][run_idx, num_iters_ttm1, :, :] for ii in 1:num_agents(dyn)]
+
         # Play a stackelberg games starting at this previous state using the times/controls we extracted.
-        xs, us = stackelberg_ilqgames(sg_obj, leader_idx, stack_times[1], stack_times, prev_state, us_1_from_tt)
+        xs, us, is_converged, num_iters, convergence_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, stack_times[1], stack_times, prev_state, us_1_from_tt)
+        # if !is_converged
+        #     println("$tt - not converged with metric convergence_metrics in $num_iters => $(convergence_metrics[1, num_iters]) > $(sg_obj.threshold)\n")
+        # end
 
         # Process the stackelberg trajectory to get the desired output and vectorize.
         return extract_measurements_from_stack_trajectory(xs, tt-1, tt)
@@ -150,6 +160,7 @@ function leadership_filter(dyn::Dynamics,
                            process_noise_distribution,
                            s_init_distrib::Distribution{Univariate, Discrete},
                            discrete_state_transition::Function;
+                           check_valid=(xs, us, ts)->true,
                            threshold,
                            rng,
                            max_iters=1000,
@@ -214,7 +225,7 @@ function leadership_filter(dyn::Dynamics,
 
         # Initialize an SILQ Games Object for this set of runs.
         sg_objs[tt] = initialize_silq_games_object(num_runs_per_game, Ts+1, dyn, costs;
-                                              ensure_pd=ensure_pd,
+                                              ensure_pd=ensure_pd, check_valid,
                                               threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 
         # Create the measurement models.

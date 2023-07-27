@@ -30,3 +30,6 @@ Manifest.toml
 *.synctex.gz
 *.log
 
+# These files are annoying
+*.DS_Store
+
