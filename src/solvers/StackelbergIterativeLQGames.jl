@@ -59,7 +59,7 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
                                       state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
                                       threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS,
                                       step_size=1.0, ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
-                                      check_valid=(xs, us, ts)->true, verbose=false)
+                                      check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true)
     num_players = num_agents(dyn)
     @assert length(costs) == num_players
     num_states = xdim(dyn)
@@ -67,9 +67,13 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
     xks = zeros(num_runs, max_iters+1, num_states, horizon)
     uks = [zeros(num_runs, max_iters+1, udim(dyn, ii), horizon) for ii in 1:num_players]
 
-    Kks = [zeros(num_runs, max_iters, udim(dyn, ii), num_states, horizon) for ii in 1:num_players]
-    kks = [zeros(num_runs, max_iters, udim(dyn, ii), horizon) for ii in 1:num_players]
-    
+    Kks = []
+    kks = []
+    if !ignore_Kks
+        Kks = [zeros(num_runs, max_iters, udim(dyn, ii), num_states, horizon) for ii in 1:num_players]
+        kks = [zeros(num_runs, max_iters, udim(dyn, ii), horizon) for ii in 1:num_players]
+    end
+
     leader_idxs = zeros(Int, num_runs)
 
     num_iterations = zeros(Int, num_runs)
@@ -281,8 +285,12 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
         sg.xks[sg.current_idx, num_iters+2, :, :] = xs_k
         for ii in 1:num_players
             sg.uks[ii][sg.current_idx, num_iters+2, :, :] = us_k[ii]
-            sg.Kks[ii][sg.current_idx, num_iters+1, :, :, :] = Ks[ii]
-            sg.kks[ii][sg.current_idx, num_iters+1, :, :] = ks[ii]
+
+            should_store_feedback = !isempty(sg.Kks)
+            if should_store_feedback
+                sg.Kks[ii][sg.current_idx, num_iters+1, :, :, :] = Ks[ii]
+                sg.kks[ii][sg.current_idx, num_iters+1, :, :] = ks[ii]
+            end
         end
 
         xs_km1 = xs_k
