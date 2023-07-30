@@ -47,7 +47,7 @@ mutable struct SILQGamesObject
     # track the derivative data we are interested in
     Kks  # [num_runs x max_iters x num_ctrls(ii) x num_states x num_times]
     kks  # [num_runs x max_iters x num_ctrls(ii) x num_times]
-    convergence_metrics # num_runs x max_iters
+    convergence_metrics # num_runs x num_players x max_iters
     num_iterations      # num_runs
     evaluated_costs     # num_runs x num_players x max_iters+1
 end
@@ -59,13 +59,18 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
                                       state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
                                       threshold::Float64 = THRESHOLD, max_iters = MAX_ITERS,
                                       step_size=1.0, ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
-                                      check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true)
+                                      check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true, ignore_xkuk_iters=true)
     num_players = num_agents(dyn)
     @assert length(costs) == num_players
     num_states = xdim(dyn)
 
-    xks = zeros(num_runs, max_iters+1, num_states, horizon)
-    uks = [zeros(num_runs, max_iters+1, udim(dyn, ii), horizon) for ii in 1:num_players]
+    if !ignore_xkuk_iters
+        xks = zeros(num_runs, max_iters+1, num_states, horizon)
+        uks = [zeros(num_runs, max_iters+1, udim(dyn, ii), horizon) for ii in 1:num_players]
+    else
+        xks = zeros(num_runs, num_states, horizon)
+        uks = [zeros(num_runs, udim(dyn, ii), horizon) for ii in 1:num_players]
+    end
 
     Kks = []
     kks = []
@@ -118,7 +123,7 @@ function backward_pass(sg, leader_idx, t0, times, xs_km1, us_km1)
     end
 
     # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
-    ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=true)
+    ctrl_strats, _ = solve_lq_stackelberg_feedback(lin_dyns, quad_costs, T, leader_idx; state_reg_param=sg.state_reg_param, control_reg_param=sg.control_reg_param, ensure_pd=sg.ensure_pd)
     return ctrl_strats
 end
 
@@ -195,14 +200,20 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
                               t0,
                               times,
                               x₁::AbstractVector{Float64},
-                              us_1::AbstractVector{<:AbstractArray{Float64}})
-    sg.current_idx += 1
-    if sg.current_idx > sg.num_runs
+                              us_1::AbstractVector{<:AbstractArray{Float64}};
+                              manual_idx=nothing) # for use with distributed computing
+    if isnothing(manual_idx)
+        sg.current_idx += 1
+    end
+
+    # Setting this variable allows for distributed processing.
+    current_idx = (isnothing(manual_idx)) ? sg.current_idx : manual_idx
+    if current_idx > sg.num_runs
         error("too many runs - please provide fresh SILQGames object.")
     end
 
     # Store which actor was assumed to be leader.
-    sg.leader_idxs[sg.current_idx] = leader_idx
+    sg.leader_idxs[current_idx] = leader_idx
 
     num_players = num_agents(sg.dyn)
     num_x = xdim(sg.dyn)
@@ -227,9 +238,19 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
     convergence_metrics = zeros(num_players, sg.max_iters+1)
 
     # Fill in debug data.
-    sg.xks[sg.current_idx, 1, :, :] = xs_1
-    for ii in 1:num_players
-        sg.uks[ii][sg.current_idx, 1, :, :] = us_1[ii]
+    ignore_xkuk_iters = ndims(sg.xks) == 3 # if we want to save all of them, it should be 4
+    should_store_feedback = !isempty(sg.Kks)
+
+    if !ignore_xkuk_iters
+        sg.xks[current_idx, 1, :, :] = xs_1
+        for ii in 1:num_players
+            sg.uks[ii][current_idx, 1, :, :] = us_1[ii]
+        end
+    else
+        sg.xks[current_idx, :, :] = xs_1
+        for ii in 1:num_players
+            sg.uks[ii][current_idx, :, :] = us_1[ii]
+        end
     end
 
     num_iters = 0
@@ -281,15 +302,24 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
             println("iter ", num_iters, ": convergence metric (diff, new, old): ", round(new_metric - old_metric, digits=8), " ", round(new_metric, digits=8), " ", round(old_metric, digits=8))
         end
 
-        # Fill in debug data.
-        sg.xks[sg.current_idx, num_iters+2, :, :] = xs_k
-        for ii in 1:num_players
-            sg.uks[ii][sg.current_idx, num_iters+2, :, :] = us_k[ii]
-
-            should_store_feedback = !isempty(sg.Kks)
-            if should_store_feedback
-                sg.Kks[ii][sg.current_idx, num_iters+1, :, :, :] = Ks[ii]
-                sg.kks[ii][sg.current_idx, num_iters+1, :, :] = ks[ii]
+        # Fill in debug data, either with the most recent iteration or every.
+        if !ignore_xkuk_iters
+            sg.xks[current_idx, num_iters+2, :, :] = xs_k
+            for ii in 1:num_players
+                sg.uks[ii][current_idx, num_iters+2, :, :] = us_k[ii]
+                if should_store_feedback
+                    sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
+                    sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
+                end
+            end
+        else
+            sg.xks[current_idx, :, :] = xs_k
+            for ii in 1:num_players
+                sg.uks[ii][current_idx, :, :] = us_k[ii]
+                if should_store_feedback
+                    sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
+                    sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
+                end
             end
         end
 
@@ -300,9 +330,9 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
     end
 
     # Update debug data.
-    sg.num_iterations[sg.current_idx] = num_iters
-    sg.evaluated_costs[sg.current_idx, :, :] = evaluated_costs
-    sg.convergence_metrics[sg.current_idx, :, :] = convergence_metrics
+    sg.num_iterations[current_idx] = num_iters
+    sg.evaluated_costs[current_idx, :, :] = evaluated_costs
+    sg.convergence_metrics[current_idx, :, :] = convergence_metrics
 
     # Return the results from the current run of the algorithm for convenience.
     return xs_km1, us_km1, is_converged, num_iters, convergence_metrics, evaluated_costs

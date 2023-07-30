@@ -54,6 +54,7 @@ function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
     # 2. avoid collisions
     avoid_collisions_cost_fn(si, x, us, t) = begin
         # This log barrier avoids agents getting within some configured radius of one another.
+        # TODO(hamzah) - this may accidentally be using 1-norm.
         dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
         return (dist_to_boundary ≤ 0) ? 1e6 : -log(dist_to_boundary)
     end
