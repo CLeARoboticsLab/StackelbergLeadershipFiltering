@@ -19,7 +19,7 @@ horizon = T * dt
 times = dt * cumsum(ones(2*T)) .- dt
 
 # Get the configuration.
-cfg = PassingScenarioConfig(collision_radius_m=0.01)
+cfg = PassingScenarioConfig(collision_radius_m=0.2, lane_width_m=2.5)
                             # max_heading_deviation=pi/6)
 
 # define limits for plots
@@ -35,7 +35,7 @@ v_init = 10.
 rlb_x = get_right_lane_boundary_x(cfg)
 # P2 offset in x, front decels a bit
 x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init] # back slightly smaller
-p1_goal = vcat([x₁[1]; 70; pi/2; 0.9*v_init], zeros(4))
+p1_goal = vcat([x₁[1]; 70; pi/2; v_init], zeros(4))
 
 # one behind the other same speed, P1 wants to go to 0.9v
 # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/2; 0.; pi/2; v_init]

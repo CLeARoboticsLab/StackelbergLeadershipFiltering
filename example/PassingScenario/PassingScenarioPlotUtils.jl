@@ -23,7 +23,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     # Only needs to be generated once.
     p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
-    plot!(p1a, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+    plot!(p1a,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
     p1a = add_lane_lines!(p1a, cfg, limits)
 
     pos_main_filepath = joinpath(folder_name, "LF_passing_scenario_main.pdf")
@@ -32,7 +32,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
     ii = 1
     for t in iter1
         p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
-        plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+        plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
@@ -66,7 +66,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
     # This plot need not be in the loop.
     title="x-y plot of agent positions over time"
     p1a = plot_leadership_filter_positions(dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
-    plot!(p1a, title=title, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+    plot!(p1a, title=title,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
     p1a = add_lane_lines!(p1a, cfg, limits)
 
     iter = ProgressBar(2:T)
@@ -75,7 +75,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
 
         plot_title = string("LF (", t, "/", T, "), Ts=", Ts, ", Ns=", num_particles, ", p(not transition)=", p_transition, ", #games: ", num_games)
         p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T]; transform_particle_fn=rotate_particle_state)
-        plot!(p1b, legend=:outertopright, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+        plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         _, p_px, p_py, p_θ, p_v, _, _ = plot_states_and_controls(dyn, times[1:T], true_xs[:, 1:T], true_us)
@@ -94,7 +94,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
 
         # plot 4 - accel. controls
         title5 = "Input acceleration controls (u) over time"
-        p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
+        p4 = plot( xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
         plot!(p4, times[1:T], true_us[1][1, 1:T], label="P1 ω")
         plot!(p4, times[1:T], true_us[2][1, 1:T], label="P2 ω")
         plot!(p4, times[1:T], true_us[1][2, 1:T], label="P1 a")
