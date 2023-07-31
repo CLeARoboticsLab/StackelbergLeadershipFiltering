@@ -1,3 +1,4 @@
+using LaTeXStrings
 using Plots
 using Statistics
 using StatsBase
@@ -23,8 +24,7 @@ function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1
     # Set headings to be pointed towards the middle.
     xi₁[3] = wrap_angle(p1_angle - pi)
     xi₁[7] = wrap_angle(new_angle - pi)
-
-    println("$iter - new IC: $xi₁")
+    # println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
 
@@ -71,7 +71,11 @@ function plot_convergence(sg; lower_bound=-Inf, upper_bound=Inf)
     upper = min.(upper_bound .- means, stddevs)
     # println(means, lower, upper)
 
-    plot!(convergence_plot, conv_x, means, label="Mean Merit Fn", color=:green, ribbon=(lower, upper), fillalpha=0.3)
+    if final_idx > 2
+        plot!(convergence_plot, conv_x, means, label="Mean Merit Fn", color=:green, ribbon=(lower, upper), fillalpha=0.3)
+    else
+        scatter!(convergence_plot, conv_x, means, yerr=(lower, upper), label=L"Mean $\ell_{\infty}$ Merit Function", color=:green)
+    end
     plot!(convergence_plot, [0, final_idx-1], [sg.threshold, sg.threshold], label="Threshold", color=:purple, linestyle=:dot)
 
     return convergence_plot
@@ -79,7 +83,10 @@ end
 
 function plot_convergence_histogram(sg, num_bins)
     println("num iterations to converge: $(sg.num_iterations)")
-    return histogram(sg.num_iterations .- 1, nbins=num_bins, legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
+    if all(sg.num_iterations .== 2)
+        return histogram(sg.num_iterations .- 1, bins=range(0.5, 1.5, step=1), yticks=range(0, sg.num_runs, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
+    end
+    return histogram(sg.num_iterations .- 1, nbins=num_bins, legend=false, yticks=range(0, sg.num_runs, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
 end
 
 function plot_distance_to_origin(dyn, sg; lower_bound=0., upper_bound=Inf)

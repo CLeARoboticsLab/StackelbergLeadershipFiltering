@@ -6,7 +6,7 @@ using LaTeXStrings
 using Plots
 
 function get_standard_plot(include_legend=:outertop)
-    return plot(legendfontsize=6, tickfontsize=16, fontsize=12, labelfontsize=14, legend=include_legend, legend_column=-1, ncol=2, fg_legend = :transparent)
+    return plot(legendfontsize=12, tickfontsize=16, fontsize=12, labelfontsize=14, legend=include_legend, legend_column=-1, fg_legend = :transparent)
 end
 export get_standard_plot
 
@@ -158,7 +158,11 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel="Max Absolute State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
-    plot!(q8, conv_x, conv_sum, label="Merit Fn", color=:green)
+    if num_iters > 2
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
+    else
+        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
+    end
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot)
 
 

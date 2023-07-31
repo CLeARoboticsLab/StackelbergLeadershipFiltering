@@ -46,15 +46,15 @@ q8, q9 = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 plot(q1, q8, q9, layout=p, plot_title=plot_title)
 
 
-plot!(q1, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 11, tickfontsize=11, fontsize=11)
+plot!(q1, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5])
 filename = string("silq_lq_results_leader", leader_idx, "_3_position.pdf")
 savefig(q1, filename)
 
-plot!(q8, title="", xaxis=[-0.1, 1.1], xticks=[0, 1], legendfontsize = 11, tickfontsize=11, fontsize=11)
+plot!(q8, title="", xaxis=[-0.1, 1.1], xticks=[0, 1])
 filename = string("silq_lq_results_leader", leader_idx, "_3_convergence.pdf")
 savefig(q8, filename)
 
-plot!(q9, title="", xaxis=[-0.1, 1.1], xticks=[0, 1], legendfontsize = 11, tickfontsize=11, fontsize=11)
+plot!(q9, title="", xaxis=[-0.1, 1.1], xticks=[0, 1])
 filename = string("silq_lq_results_leader", leader_idx, "_3_cost.pdf")
 savefig(q9, filename)
 

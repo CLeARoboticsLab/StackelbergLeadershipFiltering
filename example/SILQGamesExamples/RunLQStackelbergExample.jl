@@ -1,3 +1,5 @@
+using StackelbergControlHypothesesFiltering
+
 using Plots
 
 include("LQ_parameters.jl")
@@ -16,11 +18,11 @@ using ElectronDisplay
 # Plot positions, other two states, controls, and convergence.
 q = @layout [a b; c d ;e f; g h]
 
-q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs, us)
+q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs, us; include_legend=:outertop)
 
 plot(q1, q2, q3, q4, q5, q6, q7, layout = q)
 
-plot!(q1, title="", xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 14, legend=:bottomleft)
+plot!(q1, title="", xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5])
 filename = "lqstacksolve_leader$(leader_idx)_1.pdf"
 
 savefig(q1, filename)
