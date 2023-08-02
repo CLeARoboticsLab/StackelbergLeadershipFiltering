@@ -38,7 +38,7 @@ B₂() = vcat(zeros(4, 2),
 ShepherdAndSheepDynamics() = ContinuousLinearDynamics(shepherd_A(), [B₁(), B₂()])
 
 # Gets a vector of costs, one per player.
-ShepherdAndSheepCosts(dyn::Dynamics) = begin
+ShepherdAndSheepCosts(dyn::Dynamics; ctrl_const=1.) = begin
     
     # Costs reflecting the preferences above.
     p1x_idx = xidx(dyn, 1)
@@ -50,7 +50,6 @@ ShepherdAndSheepCosts(dyn::Dynamics) = begin
     Q₁[p2x_idx, p2x_idx] = 1.0
     Q₁[p2y_idx, p2y_idx] = 1.0
     c₁ = QuadraticCost(1*Q₁)
-    ctrl_const = .1
     add_control_cost!(c₁, 1, ctrl_const * diagm([1, 1]))
     add_control_cost!(c₁, 2, zeros(2, 2))
 
@@ -170,7 +169,7 @@ ShepherdAndSheepWithLogBarrierCost(dyn::Dynamics, agent_idx, bounded_agent_idx, 
     # add_control_cost!(qc, 1, 1 * diagm([1, 1]))
     # add_control_cost!(qc, 2, zeros(2, 2))
 
-    c5 = ShepherdAndSheepCosts(dyn)[agent_idx]
+    c5 = ShepherdAndSheepCosts(dyn; ctrl_const=.1)[agent_idx]
 
     # Put the costs together.
     w = ones(5)
@@ -194,7 +193,7 @@ ShepherdAndSheepWithLogBarrierCost(dyn::Dynamics, agent_idx, bounded_agent_idx, 
         end
         return PlayerCost(g, dyn.sys_info)
     else
-        costs = [c1, c2, c3, c4, QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn)[agent_idx])]
+        costs = [c1, c2, c3, c4, QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn; ctrl_const=.1)[agent_idx])]
         return WeightedCost(w, costs)
     end
     
@@ -204,7 +203,7 @@ ShepherdAndSheepWithLogBarrierOverallCosts(dyn::Dynamics, bound_val::Real, use_a
 ShepherdAndSheepWithLogBarrierOverallCosts(dyn::Dynamics, x_bounds, y_bounds, use_autodiff::Bool) = begin
     return [ShepherdAndSheepWithLogBarrierCost(dyn, 1, 2, x_bounds, y_bounds; use_autodiff=use_autodiff),
             # ShepherdAndSheepWithLogBarrierCost(dyn, 2, 1, x_bounds, y_bounds)]
-            QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn)[2])]
+            QuadraticCostWithOffset(ShepherdAndSheepCosts(dyn; ctrl_const=.1)[2])]
 end
 
 
