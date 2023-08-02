@@ -10,7 +10,7 @@ function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_a
     xi₁ = deepcopy(init_x₁)
     new_angle = wrap_angle(p1_angle + angle_diff)
     xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
-    # println("$iter - new IC: $xi₁")
+    println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
 
@@ -24,7 +24,7 @@ function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1
     # Set headings to be pointed towards the middle.
     xi₁[3] = wrap_angle(p1_angle - pi)
     xi₁[7] = wrap_angle(new_angle - pi)
-    # println("$iter - new IC: $xi₁")
+    println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
 
@@ -51,6 +51,7 @@ function get_avg_convergence_w_uncertainty(sg)
 
         curr_iters = curr_iters + 1
     end
+    # println(mean_metrics, "\n", std_metrics, "\n\n")
 
     return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1
 end
@@ -84,7 +85,7 @@ end
 function plot_convergence_histogram(sg, num_bins)
     println("num iterations to converge: $(sg.num_iterations)")
     if all(sg.num_iterations .== 2)
-        return histogram(sg.num_iterations .- 1, bins=range(0.5, 1.5, step=1), yticks=range(0, sg.num_runs, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
+        return histogram(sg.num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
     end
     return histogram(sg.num_iterations .- 1, nbins=num_bins, legend=false, yticks=range(0, sg.num_runs, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
 end

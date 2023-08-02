@@ -22,7 +22,7 @@ pc_cost_2 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 2)
 costs = [pc_cost_1, pc_cost_2]
 
 
-leader_idx = 2
+leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
 pos_unc = 1e-3
@@ -49,7 +49,7 @@ p_init = 0.5
 
 
 # We use these in the measurement model.
-threshold = 1e-3
+threshold = 1.5e-2
 max_iters = 50
 step_size = 1e-2
 

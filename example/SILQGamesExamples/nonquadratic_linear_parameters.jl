@@ -15,6 +15,10 @@ dyn = ShepherdAndSheepDynamics(); dyn = discretize(dyn, dt)
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0] # double integrator dynamics
 x₁[[2, 4, 6, 8]] .= 0
 
+x₁ = [2.0, 0.0, 1.0, 0.0, -2.0, 0.0, -1.0000000000000004, 0.0]
+x₁ = [2.0, 0.0, 1.0, 0.0, 1.5930960382153592, 0.0, 1.5690905050450492, 0.0]
+x₁ = [2.0, 0.0, 1.0, 0.0, 2.0, 0.0, 1.0000000000000002, 0.0]
+
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
 # x₁ = [1.; 0.; 0.01; 0.; -1.; 0; -0.01; 0]
@@ -25,12 +29,12 @@ x₁[[2, 4, 6, 8]] .= 0
 # # Initial condition chosen randomly. Ensure both have relatively low speed.
 # x₁ = [2.; 1.; -3*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 
-bound_val = 2.1
+bound_val = 2.5
 use_autodiff = true
 costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val), use_autodiff)
 num_players = num_agents(dyn)
 
-leader_idx = 2
+leader_idx = 1
 
 
 # Initial controls

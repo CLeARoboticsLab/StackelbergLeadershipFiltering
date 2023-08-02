@@ -11,8 +11,17 @@ horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 
 dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
-costs = ShepherdAndSheepCosts(dyn)
+ss_costs = ShepherdAndSheepCosts(dyn; ctrl_const=.1)
 num_players = num_agents(dyn)
+
+
+function make_quadratic_player_cost(si, ss_costs, player_idx)
+    f = get_as_function(ss_costs[player_idx])
+    return PlayerCost(f, si)
+end
+pc_cost_1 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 1)
+pc_cost_2 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 2)
+
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.

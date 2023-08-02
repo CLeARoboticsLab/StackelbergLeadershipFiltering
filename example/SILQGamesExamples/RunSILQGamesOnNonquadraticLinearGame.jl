@@ -9,7 +9,7 @@ include("nonquadratic_linear_parameters.jl")
 num_runs=1
 
 # config variables
-threshold=1e-3
+threshold=5e-4
 max_iters=2000
 step_size=1e-2
 verbose=true
@@ -33,7 +33,7 @@ using Plots
 
 
 
-q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
+q1_lnq, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs_k, us_k)
 
 
 # Plot convergence and costs.
@@ -43,9 +43,11 @@ q8, q9 = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 # plot(q1, q2, q3, q4, q5, q6, q7, q8, q9, layout = q)
 
 
-plot!(q1, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5], legendfontsize = 11, tickfontsize=11, fontsize=11)
+plot!(q1_lnq, title="", legend=:bottomleft, xaxis=[-2.5, 2.5], yaxis=[-2.5, 2.5])
+xticks!(-2.5:1:2.5)
+yticks!(-2.5:1:2.5)
 filename = string("silq_lnq_bound_2_1_results_leader", leader_idx, "_3_position.pdf")
-savefig(q1, filename)
+savefig(q1_lnq, filename)
 
 plot!(q8, title="", legendfontsize = 14)
 filename = string("silq_lnq_bound_2_1_results_leader", leader_idx, "_3_convergence.pdf")

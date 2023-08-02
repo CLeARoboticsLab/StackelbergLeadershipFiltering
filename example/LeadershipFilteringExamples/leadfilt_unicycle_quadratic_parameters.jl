@@ -12,19 +12,32 @@ horizon = T * dt
 times = dt * (cumsum(ones(2*T)) .- 1)
 
 dyn = ShepherdAndSheepWithUnicycleDynamics(dt)
-costs = ShepherdAndSheepCosts(dyn)
+ss_costs = ShepherdAndSheepCosts(dyn; ctrl_const=.1)
 num_players = num_agents(dyn)
+
+# function make_quadratic_player_cost(si, ss_costs, player_idx)
+#     f = get_as_function(ss_costs[player_idx])
+#     return PlayerCost(f, si)
+# end
+# pc_cost_1 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 1)
+# pc_cost_2 = make_quadratic_player_cost(dyn.sys_info, ss_costs, 2)
+
+# costs = [pc_cost_1, pc_cost_2]
+costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
+# costs = ss_costs
 
 leader_idx = 1
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 x₁ = [2.; 1.; 0.; 0.; -1.; 2; 0; 0]
+x₁ = [2.0, 1.0, 0.46364760900080615, 0.0, -2.0, -1.0000000000000004, -2.677945044588987, 0.0]
+
 pos_unc = 1e-3
 θ_inc = 1e-3
 vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+Q = 5e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
 # CONFIG: 
@@ -47,7 +60,6 @@ max_iters = 50
 step_size = 1e-2
 
 # Generate the ground truth.
-costs = [QuadraticCostWithOffset(costs[1]), QuadraticCostWithOffset(costs[2])]
 
 # leader_idx=2
 gt_silq_num_runs=1
