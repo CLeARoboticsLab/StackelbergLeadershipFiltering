@@ -28,12 +28,17 @@ end
 export rotate_state
 
 # TODO(hamzah) - refactor this to be tied DoubleIntegrator Dynamics instead of Linear Dynamics.
-function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_legend=:none)
+function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_legend=:none, ms0=6)
     @assert num_agents(dyn) == 2
     @assert xdim(dyn) == 8
     @assert udim(dyn, 1) == 2
     @assert udim(dyn, 2) == 2
     x₁ = xs[:, 1]
+
+    num_times = length(times)
+
+    # Indicates that only the first time has a marker.
+    marksize = vcat([ms0], zeros(num_times-1))
 
     x1_idx = xidx(dyn, 1)
     y1_idx = yidx(dyn, 1)
@@ -42,9 +47,9 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_le
 
     title1 = "pos. traj."
     q1 = get_standard_plot(include_legend)
-    plot!(title=title1, xlabel=L"$x$ (m)", ylabel=L"$y$ (m)")
-    plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label="P1 pos", color=:red)
-    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2 pos", color=:blue)
+    plot!(title=title1, xlabel="horizontal position (m)", ylabel="vertical position (m)")
+    plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label="P1", color=:red, marker=:circle,  markersize=marksize, markerstrokewidth=0)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2", color=:blue, marker=:circle,  markersize=marksize, markerstrokewidth=0)
 
     q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 start")
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 start")
@@ -101,9 +106,9 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
 
     title1 = "pos. traj."
     q1 = get_standard_plot(include_legend)
-    plot!(title=title1, xlabel="x (m)", ylabel="y (m)")
-    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label="P1 pos", color=:red)
-    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2 pos", color=:blue)
+    plot!(title=title1, xlabel="horizontal position (m)", ylabel="vertical position (m)")
+    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label="P1", color=:red)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2", color=:blue)
 
     q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="start P1")
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="start P2")
