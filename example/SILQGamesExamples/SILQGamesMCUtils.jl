@@ -144,6 +144,8 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
 
         zs = zeros(xdim(dyn), T)
 
+        is_completed = [false for _ in 1:num_sims]
+
         # Fill in z as noisy state measurements.
         for tt in 1:T
             zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R_meas))
@@ -152,30 +154,42 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
         all_zs[ss, :, :] = zs
 
         elapsed_times[ss] = @elapsed begin
-            all_x̂s[ss, :, :], all_P̂s[ss, :, :, :], all_probs[ss, :], pf, sgs = leadership_filter(dyn, costs, t0, lf_times,
-                               T,         # simulation horizon
-                               Ts,        # horizon over which the stackelberg game should be played,
-                               num_games, # number of stackelberg games played for measurement
-                               xs[:, 1],  # initial state at the beginning of simulation
-                               init_cov_P,        # initial covariance at the beginning of simulation
-                               us,        # the control inputs that the actor takes
-                               zs,        # the measurements
-                               R_meas,
-                               process_noise_distribution,
-                               s_init_distrib,
-                               discrete_state_transition;
-                               threshold=lf_threshold,
-                               rng,
-                               max_iters=lf_max_iters,
-                               step_size=lf_step_size,
-                               Ns=num_particles,
-                               verbose=false)
+            try 
+                all_x̂s[ss, :, :], all_P̂s[ss, :, :, :], all_probs[ss, :], pf, sgs = leadership_filter(dyn, costs, t0, lf_times,
+                                   T,         # simulation horizon
+                                   Ts,        # horizon over which the stackelberg game should be played,
+                                   num_games, # number of stackelberg games played for measurement
+                                   xs[:, 1],  # initial state at the beginning of simulation
+                                   init_cov_P,        # initial covariance at the beginning of simulation
+                                   us,        # the control inputs that the actor takes
+                                   zs,        # the measurements
+                                   R_meas,
+                                   process_noise_distribution,
+                                   s_init_distrib,
+                                   discrete_state_transition;
+                                   threshold=lf_threshold,
+                                   rng,
+                                   max_iters=lf_max_iters,
+                                   step_size=lf_step_size,
+                                   Ns=num_particles,
+                                   verbose=false)
+                is_completed[ss] = true
+            catch e
+                println("\n\nLF simulation $ss from start position $(xs[:, 1]) failed.")
+                println("$e\n\n")
+            end
         end
 
         for tt in 2:T
-            all_particle_leader_idxs[ss, tt, :] = sgs[tt].leader_idxs
-            all_particle_num_iterations[ss, tt, :] = sgs[tt].num_iterations
-            all_particle_xs[ss, tt, :, :, :] = sgs[tt].xks[:, :, :]
+            if is_completed[ss]
+                all_particle_leader_idxs[ss, tt, :] = sgs[tt].leader_idxs
+                all_particle_num_iterations[ss, tt, :] = sgs[tt].num_iterations
+                all_particle_xs[ss, tt, :, :, :] = sgs[tt].xks[:, :, :]
+            else
+                all_particle_leader_idxs[ss, tt, :] .= 0
+                all_particle_num_iterations[ss, tt, :] .= -1
+                all_particle_xs[ss, tt, :, :, :] .=  xs[:, 1]
+            end
         end
     end
 
@@ -188,6 +202,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
     lf_data = Dict("timestamp" => silq_dict["timestamp"],
                 "silq" => silq_dict,
                 "silq_path" => mc_silq_filepath,
+                "is_completed" => is_completed,
 
                 "times" => lf_times,
                 "dt" => dt,
@@ -206,7 +221,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
                 "lf_max_iters" => sg.max_iters,
 
                 "lf_step_size" => sg.step_size,      # initial step size α₀
-                "lf_ss_reduce" => sg.ss_reduce,          # reduction factor τ
+                "lf_ss_reduce" => sg.ss_reduce,      # reduction factor τ
                 "lf_α_min" => sg.α_min,              # min step size
                 "lf_max_linesearch_iters" => sg.max_linesearch_iters,
 
