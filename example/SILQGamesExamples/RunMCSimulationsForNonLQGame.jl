@@ -11,7 +11,12 @@ using StatsBase
 include("DELETE_leadfilt_non_LQ_parameters.jl")
 include("SILQGamesMCUtils.jl")
 
+data_folder = "mc_data"
+
 num_sims = 20
+
+topfolder_name = joinpath(data_folder, "nonlq_mc$(num_sims)_L$(leader_idx)_$(get_date_str())")
+isdir(topfolder_name) || mkdir(topfolder_name)
 
 # config variables
 mc_threshold=1e-3
