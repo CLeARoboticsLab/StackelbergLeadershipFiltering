@@ -1,6 +1,7 @@
 
 mc_folder = "mc_data"
 
+
 function get_lq_paths()
     data_folder = "lq_mc2_L2_8_3_17_41"
     silq_data_file = "lq_silq_mc2_L2_th0.015_ss0.01_M50.jld"
@@ -20,6 +21,11 @@ function get_lq_paths()
     # data_folder = "lq_mc2_L2_8_6_16_36"
     # silq_data_file = "lq_silq_mc2_L2_th0.015_ss0.01_M50.jld"
     # lf_data_file = "lq_lf_mc2_L2_th0.015_ss0.01_M50.jld"
+
+    #x20 on server
+    data_folder = "lq_mc20_L2_8_7_2_41"
+    silq_data_file = "lq_silq_mc20_L2_th0.015_ss0.01_M50.jld"
+    lf_data_file = "lq_lf_mc20_L2_th0.015_ss0.01_M50.jld"
 
     return data_folder, silq_data_file, lf_data_file
 end
@@ -57,4 +63,5 @@ data_folder = "uq_mc20_L1_8_5_12_4"
 lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
 silq_data_file = "uq_silq_mc20_L1_th0.004_ss0.01_M1000.jld"
 
-data_folder, silq_data_file, lf_data_file = get_lnq_paths()
+# data_folder, silq_data_file, lf_data_file = get_lnq_paths()
+data_folder, silq_data_file, lf_data_file = get_lq_paths()
