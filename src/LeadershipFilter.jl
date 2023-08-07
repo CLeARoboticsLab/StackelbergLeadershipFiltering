@@ -237,7 +237,9 @@ function leadership_filter(dyn::Dynamics,
         # TODO(hamzah) - update for multiple historical states
         Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
 
-        f_dynamics(time_range, X, us, rng) = propagate_dynamics(dyn_w_hist, time_range, X, us) + vcat(zeros(xdim(dyn_w_hist) - xdim(dyn)), rand(rng, process_noise_distribution))
+        f_dynamics(time_range, X, us, rng) = begin
+            return propagate_dynamics(dyn_w_hist, time_range, X, us) + vcat(zeros(xdim(dyn_w_hist) - xdim(dyn)), rand(rng, process_noise_distribution))
+        end
 
         ttm1 = (tt == 1) ? 1 : tt-1
         time_range = (times[ttm1], times[tt])

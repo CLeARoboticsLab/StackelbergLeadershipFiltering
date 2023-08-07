@@ -44,7 +44,7 @@ gr()
 # This generates a pdf.
 
 # Create the folder if it doesn't exist
-folder_name = "uq_L$(leader_idx)_leadfilt_$(Dates.now())"
+folder_name = "uq_L$(leader_idx)_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
 snapshot_freq = Int((T - 1)/10)

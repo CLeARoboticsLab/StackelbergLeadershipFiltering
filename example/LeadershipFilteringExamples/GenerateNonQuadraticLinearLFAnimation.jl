@@ -29,10 +29,10 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t0, times,
                            process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;
-                           threshold=threshold,
+                           threshold=lf_threshold,
                            rng,
-                           max_iters=max_iters,
-                           step_size=step_size,
+                           max_iters=lf_max_iters,
+                           step_size=lf_step_size,
                            Ns=num_particles,
                            verbose=false)
 
@@ -47,7 +47,7 @@ gr()
 # This generates a pdf.
 
 # Create the folder if it doesn't exist
-folder_name = "lnq_L$(leader_idx)_leadfilt_$(Dates.now())"
+folder_name = "lnq_L$(leader_idx)_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
 snapshot_freq = Int((T - 1)/10)

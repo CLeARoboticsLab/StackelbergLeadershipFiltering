@@ -1,5 +1,7 @@
 # Utilities
 
+using Dates
+
 # TODO(hamzah) - Combine split_vec and split functions.
 
 # A function that splits 2D arrays into vectors of 2D arrays
@@ -104,3 +106,20 @@ function wrap_angle(angle_rad)
 end
 
 export wrap_angle
+
+
+
+function get_date_str()
+    # Get the current date and time
+    current_datetime = Dates.now()
+
+    # Extract the month, day, hour, and minute
+    current_month = Dates.month(current_datetime)
+    current_day = Dates.day(current_datetime)
+    current_hour = Dates.hour(current_datetime)
+    current_minute = Dates.minute(current_datetime)
+
+    # Create a formatted string
+    return string(current_month, "_", current_day, "_", current_hour, "_", current_minute)
+end
+export get_date_str

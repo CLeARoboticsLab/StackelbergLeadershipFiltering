@@ -19,7 +19,7 @@ leader_idx = 2
 # Initial condition chosen randomly. Ensure both have relatively low speed.
 # top half of plane
 x₁ = [2.; 0.; 1.; 0.; -1.; 0; 2; 0]
-x₁ = [2.; 0.; 1.; 0.; -sqrt(5); 0; 0; 0]
+# x₁ = [2.; 0.; 1.; 0.; -sqrt(5); 0; 0; 0]
 
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
@@ -32,7 +32,7 @@ vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+Q = 1e-1 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 
 
 # CONFIG: 
@@ -40,7 +40,7 @@ Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
+R = 0.05 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
@@ -49,9 +49,13 @@ num_particles = 100
 p_transition = 0.98
 p_init = 0.5
 
+# threshold = 1e-3
+# max_iters = 50
+# step_size = 2e-2
+
 lf_threshold = 1e-3
-lf_max_iters = 100
-lf_step_size = 1e-2
+lf_max_iters = 50
+lf_step_size = 2e-2 #1e-2
 
 gt_silq_num_runs=1
 
@@ -59,7 +63,7 @@ gt_silq_num_runs=1
 gt_silq_threshold=1e-3
 gt_silq_max_iters=2500
 gt_silq_step_size=1e-2
-gt_silq_verbose=true
+gt_silq_verbose=false
 
 
 # Set initial controls so that we can solve a Stackelberg game with SILQGames.
@@ -74,16 +78,16 @@ us_init = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
 # us_init[2][2,:] .= .3
 
 
-# Generate the ground truth.
-sg_obj = initialize_silq_games_object(gt_silq_num_runs, T, dyn, costs;
-                                      threshold=gt_silq_threshold, max_iters=gt_silq_max_iters, step_size=gt_silq_step_size, verbose=gt_silq_verbose)
-true_xs, true_us, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times[1:T], x₁, us_init)
+# # Generate the ground truth.
+# sg_obj = initialize_silq_games_object(gt_silq_num_runs, T, dyn, costs;
+#                                       threshold=gt_silq_threshold, max_iters=gt_silq_max_iters, step_size=gt_silq_step_size, verbose=gt_silq_verbose)
+# true_xs, true_us, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times[1:T], x₁, us_init)
 
-# Augment the remaining states so we have T+Ts-1 of them.
-xs = hcat(true_xs, zeros(xdim(dyn), Ts-1))
-us = [hcat(true_us[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
+# # Augment the remaining states so we have T+Ts-1 of them.
+# xs = hcat(true_xs, zeros(xdim(dyn), Ts-1))
+# us = [hcat(true_us[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
 
-# Fill in z as noisy state measurements.
-for tt in 1:T
-    zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
-end
+# # Fill in z as noisy state measurements.
+# for tt in 1:T
+#     zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
+# end

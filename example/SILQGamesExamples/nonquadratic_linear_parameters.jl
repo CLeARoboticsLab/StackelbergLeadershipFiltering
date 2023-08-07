@@ -34,7 +34,7 @@ use_autodiff = true
 costs = ShepherdAndSheepWithLogBarrierOverallCosts(dyn, (-bound_val, bound_val), (-bound_val, bound_val), use_autodiff)
 num_players = num_agents(dyn)
 
-leader_idx = 1
+leader_idx = 2
 
 
 # Initial controls

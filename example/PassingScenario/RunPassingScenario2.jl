@@ -147,7 +147,7 @@ using Dates
 gr()
 
 # Create the folder if it doesn't exist
-folder_name = "passing_scenario_2_leadfilt_$(Dates.now())"
+folder_name = "passing_scenario_2_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
 # Generate the plots for the paper.

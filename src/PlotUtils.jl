@@ -5,8 +5,8 @@
 using LaTeXStrings
 using Plots
 
-function get_standard_plot(include_legend=:outertop)
-    return plot(legendfontsize=12, tickfontsize=16, fontsize=12, labelfontsize=14, legend=include_legend, legend_column=-1, fg_legend = :transparent)
+function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=12)
+    return plot(legendfontsize=legendfontsize, tickfontsize=16, fontsize=12, labelfontsize=14, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
 end
 export get_standard_plot
 
@@ -46,46 +46,46 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_le
     y2_idx = yidx(dyn, 2)
 
     title1 = "pos. traj."
-    q1 = get_standard_plot(include_legend)
-    plot!(title=title1, xlabel="horizontal position (m)", ylabel="vertical position (m)")
-    plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label="P1", color=:red, marker=:circle,  markersize=marksize, markerstrokewidth=0)
-    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2", color=:blue, marker=:circle,  markersize=marksize, markerstrokewidth=0)
+    q1 = get_standard_plot(;include_legend)
+    plot!(title=title1, xlabel="Horizontal Position (m)", ylabel="Vertical Position (m)")
+    plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label="P1", linewidth=3, color=:red, marker=:circle,  markersize=marksize, markerstrokewidth=0)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2", linewidth=3, color=:blue, marker=:circle,  markersize=marksize, markerstrokewidth=0)
 
     q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 start")
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 start")
 
     title2a = "x-pos"
-    q2a = get_standard_plot(include_legend)
+    q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
     plot!(times, xs[x1_idx,:], label="P1 px")
     plot!(times, xs[x2_idx,:], label="P2 px")
 
     title2b = "y-pos"
-    q2b = get_standard_plot(include_legend)
+    q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
     plot!(times, xs[y1_idx,:], label="P1 py")
     plot!(times, xs[y2_idx,:], label="P2 py")
 
     title3 = "x-vel"
-    q3 = get_standard_plot(include_legend)
+    q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="vel. (mps)")
     plot!(times, xs[2,:], label="P1 vx")
     plot!(times, xs[6,:], label="P2 vx")
 
     title4 = "y-vel"
-    q4 = get_standard_plot(include_legend)
+    q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
     plot!(times, xs[4,:], label="P1 vy")
     plot!(times, xs[8,:], label="P2 vy")
 
     title5 = "x-accel"
-    q5 = get_standard_plot(include_legend)
+    q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="accel (mpss)")
     plot!(times, us[1][1, :], label="P1 ax")
     plot!(times, us[2][1, :], label="P2 ax")
 
     title6 = "y-accel"
-    q6 = get_standard_plot(include_legend)
+    q6 = get_standard_plot(;include_legend)
     plot!(title=title6, xlabel="t (s)", ylabel="accel (mpss)")
     plot!(times, us[1][2, :], label="P1 ay")
     plot!(times, us[2][2, :], label="P2 ay")
@@ -105,8 +105,8 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     y2_idx = yidx(dyn, 2)
 
     title1 = "pos. traj."
-    q1 = get_standard_plot(include_legend)
-    plot!(title=title1, xlabel="horizontal position (m)", ylabel="vertical position (m)")
+    q1 = get_standard_plot(;include_legend)
+    plot!(title=title1, xlabel="Horizontal Position (m)", ylabel="Vertical Position (m)")
     plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label="P1", color=:red)
     plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label="P2", color=:blue)
 
@@ -114,37 +114,37 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="start P2")
 
     title2a = "x-pos"
-    q2a = get_standard_plot(include_legend)
+    q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
     plot!(times, xs[x1_idx,:], label="P1 px")
     plot!(times, xs[x2_idx,:], label="P2 px")
 
     title2b = "y-pos"
-    q2b = get_standard_plot(include_legend)
+    q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
     plot!(times, xs[y1_idx,:], label="P1 py")
     plot!(times, xs[y2_idx,:], label="P2 py")
 
     title3 = "θ"
-    q3 = get_standard_plot(include_legend)
+    q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="θ (rad)")
     plot!(times, wrap_angle.(xs[3,:]), label="P1 θ")
     plot!(times, wrap_angle.(xs[7,:]), label="P2 θ")
 
     title4 = "vel"
-    q4 = get_standard_plot(include_legend)
+    q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
     plot!(times, xs[4,:], label="P1 v")
     plot!(times, xs[8,:], label="P2 v")
 
     title5 = "ang vel"
-    q5 = get_standard_plot(include_legend)
+    q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="ang. vel. (rad/s)")
     plot!(times, us[1][1, :], label="P1 ω")
     plot!(times, us[2][1, :], label="P2 ω")
 
     title6 = "accel"
-    q6 = get_standard_plot(include_legend)
+    q6 = get_standard_plot(;include_legend)
     plot!(title=title6, xlabel="t (s)", ylabel="accel (mpss)")
     plot!(times, us[1][2, :], label="P1 accel")
     plot!(times, us[2][2, :], label="P2 accel")
@@ -164,11 +164,11 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
-        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green, linewidth=3)
     else
         scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
     end
-    plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot)
+    plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
 
     costs_1 = evaluated_costs[1, 1:num_iters]
@@ -188,11 +188,20 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     title9 = "evaluated costs"
     q9 = get_standard_plot()
     plot!(title=title9, yaxis=:log, xlabel="# Iterations", ylabel="Cost")
-    plot!(conv_x, costs_1[1:num_iters], label="P1", color=:red)
-    plot!(conv_x, costs_2[1:num_iters], label="P2", color=:blue)
 
-    cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
-    plot!(conv_x, cost_sum, label="Total", color=:green, linestyle=:dash, linewidth=2)
+    if num_iters > 2
+        plot!(conv_x, costs_1[1:num_iters], label="P1", color=:red, linewidth=2)
+        plot!(conv_x, costs_2[1:num_iters], label="P2", color=:blue, linewidth=2)
+
+        cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
+        plot!(conv_x, cost_sum, label="Total", color=:green, linestyle=:dash, linewidth=3)
+    else
+        scatter!(conv_x, costs_1[1:num_iters], label="P1", color=:red, marker=:plus, ms=8)
+        scatter!(conv_x, costs_2[1:num_iters], label="P2", color=:blue, marker=:plus, ms=8)
+
+        cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
+        scatter!(conv_x, cost_sum, label="Total", color=:green, xaxis=[-0.1, 1.1], xticks=[0, 1])
+    end
 
     return q8, q9
 end
@@ -210,16 +219,15 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs, zs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot()
-    plot!(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
-    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label="True P1", color=:red, linewidth=2, ls=:dash)
-    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label="True P2", color=:blue, linewidth=2, ls=:dash)
+    p1 = get_standard_plot(;columns=3, legendfontsize=10)
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
+    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label="P1 Ground Truth", color=:red, linewidth=2, ls=:dash)
+    plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label="P1 Estimate", color=:orange)
+    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label="P1 Measurements")
 
-    plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label="Est. P1", color=:orange)
-    plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label="Est. P2", color=:turquoise2)
-
-    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P1")
-    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=3, markerstrokewidth=0, label="Meas. P2")
+    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label="P2 Ground Truth", color=:blue, linewidth=2, ls=:dash)
+    plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label="P2 Estimate", color=:turquoise2)
+    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label="P2 Measurements")
 
     scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 Start")
     scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 Start")
@@ -234,43 +242,60 @@ export plot_leadership_filter_positions
 #                                     measurement model. The waypoint at the current time is highlighted. Measurement
 #                                     data and particles are colored to match the agent assumed by the particle to be
 #                                     leader.
-function plot_leadership_filter_measurement_details(num_particles, sg_t, true_xs, est_xs; transform_particle_fn=(xs)->xs)
+function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGamesObject, true_xs, est_xs; transform_particle_fn=(xs)->xs)
+    plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn)
+end
+
+function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs)
     x₁ = true_xs[:, 1]
 
-    x1_idx = xidx(sg_t.dyn, 1)
-    y1_idx = yidx(sg_t.dyn, 1)
-    x2_idx = xidx(sg_t.dyn, 2)
-    y2_idx = yidx(sg_t.dyn, 2)
+    x1_idx = xidx(dyn, 1)
+    y1_idx = yidx(dyn, 1)
+    x2_idx = xidx(dyn, 2)
+    y2_idx = yidx(dyn, 2)
 
-    p2 = get_standard_plot()
-    plot!(ylabel=L"$y$ m", xlabel=L"$x$ m", ylimit=(-2.5, 2.5), xlimit=(-2.5, 2.5))
-    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], label="True P1", color=:black, linewidth=3)
-    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], label="True P2", color=:black, linewidth=3)
-
-    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label="Est. P1", color=:orange)
-    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label="Est. P2", color=:turquoise2)
-
+    p2 = get_standard_plot(;columns=3)
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
+    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], label="P1 Ground Truth", color=:black, linewidth=3)
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label="P1 Estimate", color=:orange)
     scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="P1 Start")
+
+    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], label="P2 Ground Truth", color=:black, linewidth=3)
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label="P2 Estimate", color=:turquoise2)
     scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="P2 Start")
 
     # Add particles
+    has_labeled_p1 = false
+    has_labeled_p2 = false
     for n in 1:num_particles
 
-        num_iter = sg_t.num_iterations[n]
+        num_iter = particle_num_iterations_t[n]
 
         # println("particle n thinks leader is: ", n)
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
         # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
 
-        xks = transform_particle_fn(sg_t.xks[n, :, :])
+        xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
 
         # TODO(hamzah) - change color based on which agent is leader
-        color = (sg_t.leader_idxs[n] == 1) ? "red" : "blue"
+        does_p1_lead = (particle_leader_idxs_t[n] == 1)
+
+        color = (does_p1_lead) ? "red" : "blue"
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? "E Meas. (P1 leads)" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? "E Meas. (P2 leads)" : ""
+
+        if label_1 != ""
+            has_labeled_p1 = true
+        end
+        if label_2 != ""
+            has_labeled_p2 = true
+        end
+
         scatter!(p2, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=0.3, markerstrokewidth=0, label="")
-        scatter!(p2, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=2., markerstrokewidth=0, label="")
+        scatter!(p2, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label=label_1)
 
         scatter!(p2, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=0.3, markerstrokewidth=0, label="")
-        scatter!(p2, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label="")
+        scatter!(p2, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label=label_2)
     end
 
     return p2
