@@ -20,12 +20,12 @@ using JLD
 include("SILQGamesMCUtils.jl")
 include("LQ_parameters.jl")
 
-# costs = [QuadraticCostWithOffset(ss_costs[1]), QuadraticCostWithOffset(ss_costs[2])]
+costs = [QuadraticCostWithOffset(ss_costs[1]), QuadraticCostWithOffset(ss_costs[2])]
 # costs = ss_costs
 @assert tr(ss_costs[1].Rs[1]) == 2
 
 # For player cost
-costs = [pc_cost_1, pc_cost_2]
+# costs = [pc_cost_1, pc_cost_2]
 
 num_sims = 20
 
@@ -46,7 +46,8 @@ sg_obj = initialize_silq_games_object(num_sims, T, dyn, costs;
                                       threshold=mc_threshold, max_iters=mc_max_iters, step_size=mc_step_size, verbose=mc_verbose)
 
 # 2. Run the Monte Carlo SILQGames simulation.
-sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁)
+angle_range_lq=(0, 2*pi)#(2*pi/3, 4*pi/3)
+sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=angle_range_lq)
 
 # 3. Generate the data and save to the specified file.
 silq_data = generate_silq_jld_data(sg, leader_idx, times, dt, T, x1s, u1s, silq_elapsed)
