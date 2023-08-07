@@ -195,7 +195,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
 
     # The @sync block ensures that all threads finish their iterations before continuing
     Threads.@sync begin
-        println("\nCompleted leadership filter simulations.")
+        println("\nCompleted leadership filter simulations $(sum(is_completed))/$(num_sims).")
         # Further code you want to execute after all threads finish
     end
 
