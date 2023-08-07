@@ -174,15 +174,19 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
                                    Ns=num_particles,
                                    verbose=false)
                 is_completed[ss] = true
-                all_particle_leader_idxs[ss, tt, :] = sgs[tt].leader_idxs
-                all_particle_num_iterations[ss, tt, :] = sgs[tt].num_iterations
-                all_particle_xs[ss, tt, :, :, :] = sgs[tt].xks[:, :, :]
+                for tt in 1:T
+                    all_particle_leader_idxs[ss, tt, :] = sgs[tt].leader_idxs
+                    all_particle_num_iterations[ss, tt, :] = sgs[tt].num_iterations
+                    all_particle_xs[ss, tt, :, :, :] = sgs[tt].xks[:, :, :]
+                end
             catch e
                 println("\n\nLF simulation $ss from start position $(xs[:, 1]) failed.")
                 println("$e\n\n")
-                 all_particle_leader_idxs[ss, tt, :] .= 0
-                all_particle_num_iterations[ss, tt, :] .= -1
-                all_particle_xs[ss, tt, :, :, :] .=  xs[:, 1]
+                for tt in 1:T
+                    all_particle_leader_idxs[ss, tt, :] .= 0
+                    all_particle_num_iterations[ss, tt, :] .= -1
+                    all_particle_xs[ss, tt, :, :, :] .=  xs[:, 1]
+                end
             end
         end
     end

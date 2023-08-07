@@ -23,20 +23,20 @@ num_buckets = 100
 data = load(input_data_path)["data"]
 
 dyn = data["dyn"]
-T = data["silq_data"]["T"]
+T = data["silq"]["T"]
 times = data["times"]
 
 num_sims = data["num_sims"]
-all_xs = data["silq_data"]["xs"]
-all_us = data["silq_data"]["us"]
+all_xs = data["silq"]["xs"]
+all_us = data["silq"]["us"]
 
-gt_leader_idx = data["silq_data"]["gt_leader_idx"]
+gt_leader_idx = data["silq"]["gt_leader_idx"]
 all_leader_idxs = data["all_particle_leader_idxs"] # second index is time
 all_particle_xs = data["all_particle_xs"] # second index is time
 all_particle_num_iterations = data["all_particle_num_iterations"]
 
-mc_threshold = data["silq_data"]["threshold"]
-mc_max_iters = data["silq_data"]["max_iters"]
+mc_threshold = data["silq"]["threshold"]
+mc_max_iters = data["silq"]["max_iters"]
 
 num_particles = data["num_particles"]
 

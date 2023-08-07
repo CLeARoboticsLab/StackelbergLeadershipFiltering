@@ -79,7 +79,7 @@ num_particles = 50
 p_transition = 0.98
 p_init = 0.5
 
-lf_threshold = 1.5e-2
+lf_threshold = 1e-3
 lf_max_iters = 50
 lf_step_size = 1e-2
 
