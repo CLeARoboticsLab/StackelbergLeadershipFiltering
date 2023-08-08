@@ -281,7 +281,7 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
     return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1
 end
 
-function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=-Inf, upper_bound=Inf)
+function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf)
     convergence_plot = get_standard_plot()
     plot!(yaxis=:log, xlabel="# Iterations", ylabel="Max Absolute State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
@@ -300,8 +300,11 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     if final_idx > 2
         plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
     else
+        println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)
         upper_scatter = min.(upper_bound, means .+ stddevs)
+        println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
+        println("Mean: $means")
         scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, elinewidth=3)
     end
     plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
@@ -309,7 +312,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     return convergence_plot
 end
 
-function plot_convergence_histogram(num_iterations, num_bins)
+function plot_convergence_histogram(num_iterations; num_bins=:auto)
     num_sims = length(num_iterations)
     if all(num_iterations .== 2)
         return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")

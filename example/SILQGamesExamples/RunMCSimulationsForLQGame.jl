@@ -63,13 +63,13 @@ println("Saved $(num_sims) SILQ simulations to $(mc_silq_filepath).")
 # Leadership filtering.
 t0 = times[1]
 lf_times = dt * (cumsum(ones(2*T)) .- 1)
-pos_unc = 5e-3
+pos_unc = 1e-3
 θ_inc = 1e-3
 vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 
 # CONFIG: 
 # We define an uncertainty for the measurements R arbitrarily - easy for now.
@@ -84,7 +84,7 @@ num_particles = 50
 p_transition = 0.98
 p_init = 0.5
 
-lf_threshold = 1e-3
+lf_threshold = 1.5e-2
 lf_max_iters = 50
 lf_step_size = 1e-2
 
