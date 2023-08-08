@@ -3,17 +3,29 @@ mc_local_folder = "mc_data"
 mc_server_folder = "mc_data_server"
 
 
-function get_final_lq_paths()
+function get_final_lq_paths_p1()
     #x20 on server
-    data_folder = "FINAL_lq_mc20_L2_8_7_2_41"
-    silq_data_file = "lq_silq_mc20_L2_th0.015_ss0.01_M50.jld"
-    lf_data_file = "lq_lf_mc20_L2_th0.015_ss0.01_M50.jld"
+    data_folder = "lq_mc100_L1_8_8_13_14"
+    # "lq_mc20_L1_8_8_12_14"
+    #"FINAL_lq_mc20_L2_8_7_2_41"
+    silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"#"lq_silq_mc20_L1_th0.015_ss0.01_M50.jld"
+    lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"#"lq_lf_mc20_L1_th0.015_ss0.01_M50.jld"
 
 
-    # data_folder = "lq_mc20_L1_8_7_16_48"
-    data_folder = "lq_mc20_L1_8_7_22_49"
-    silq_data_file = "lq_silq_mc20_L1_th0.015_ss0.01_M50.jld"
-    lf_data_file = "lq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
+    # # data_folder = "lq_mc20_L1_8_7_16_48"
+    # data_folder = "lq_mc20_L1_8_7_22_49"
+    # silq_data_file = "lq_silq_mc20_L1_th0.015_ss0.01_M50.jld"
+    # lf_data_file = "lq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
+
+    # data_folder = ""
+
+    return data_folder, silq_data_file, lf_data_file
+end
+
+function get_final_lq_paths_p2()
+    data_folder="lq_mc20_L2_8_8_15_6"
+    silq_data_file="lq_silq_mc20_L2_th0.015_ss0.01_M50.jld"
+    lf_data_file="lq_lf_mc20_L2_th0.015_ss0.01_M50.jld"
     return data_folder, silq_data_file, lf_data_file
 end
 
@@ -88,5 +100,5 @@ silq_data_file = "uq_silq_mc20_L1_th0.004_ss0.01_M1000.jld"
 mc_folder = mc_local_folder
 data_folder, silq_data_file, lf_data_file = get_lq_paths()
 
-# mc_folder = mc_server_folder
-# data_folder, silq_data_file, lf_data_file = get_final_lq_paths()
+mc_folder = mc_server_folder
+data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p2()
