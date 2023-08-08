@@ -90,13 +90,13 @@ export SystemInfo, num_agents, xdim, udim, udims, vdim, sampling_time, is_contin
 # Note: implementations using the mod operator cause havoc with autodiff.
 function wrap_angle(angle_rad)
     ang = angle_rad + pi
-    while angle_rad >= 2*pi
-        angle_rad -= 2*pi
+    while ang >= 2*pi
+        ang -= 2*pi
     end
-    while angle_rad < 0
-        angle_rad += 2*pi
+    while ang < 0
+        ang += 2*pi
     end
-    return angle_rad - pi
+    return ang - pi
 
     # ang = angle_rad
     # while abs(angle_rad) >= pi

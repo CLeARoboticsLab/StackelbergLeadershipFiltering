@@ -12,6 +12,7 @@ function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_a
     us₁ = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
     xi₁ = deepcopy(init_x₁)
     new_angle = wrap_angle(angle_range[1] + angle_diff)
+    # println("ANGLE LinDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
     # new_angle = wrap_angle(p1_angle + angle_diff)
     xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
     println("$iter - new IC: $xi₁")
@@ -28,6 +29,7 @@ function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1
     xi₁ = deepcopy(init_x₁)
     # new_angle = wrap_angle(p1_angle + angle_diff)
     new_angle = wrap_angle(angle_range[1] + angle_diff)
+    # println("ANGLE UniDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
     xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
 
     # Set headings to be pointed towards the middle.
@@ -298,7 +300,9 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     if final_idx > 2
         plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
     else
-        scatter!(convergence_plot, conv_x, means, yerr=(lower, upper), label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, elinewidth=3)
+        lower_scatter = max.(lower_bound, means .- stddevs)
+        upper_scatter = min.(upper_bound, means .+ stddevs)
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, elinewidth=3)
     end
     plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
