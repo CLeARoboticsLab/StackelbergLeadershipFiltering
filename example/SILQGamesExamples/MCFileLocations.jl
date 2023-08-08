@@ -40,6 +40,10 @@ function get_lq_paths()
     silq_data_file = "lq_silq_mc2_L1_th0.015_ss0.01_M50.jld"
     lf_data_file = "lq_lf_mc2_L1_th0.015_ss0.01_M50.jld"
 
+    data_folder = "lq_mc20_L1_8_8_11_29"
+    silq_data_file = "lq_silq_mc20_L1_th0.015_ss0.01_M50.jld"
+    lf_data_file = "lq_lf_mc20_L1_th0.015_ss0.01_M50.jld"
+
     # # old
     # data_folder = "lq_mc2_L2_8_6_16_36"
     # silq_data_file = "lq_silq_mc2_L2_th0.015_ss0.01_M50.jld"

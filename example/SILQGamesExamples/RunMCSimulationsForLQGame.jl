@@ -76,7 +76,7 @@ Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
+R = 0.005 * Matrix(I, xdim(dyn), xdim(dyn))
 Ts = 30
 num_games = 1
 num_particles = 50
