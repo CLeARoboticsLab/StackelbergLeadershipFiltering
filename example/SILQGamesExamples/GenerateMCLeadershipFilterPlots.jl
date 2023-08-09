@@ -60,7 +60,7 @@ for iter in ProgressBar(1:num_sims)
         # Only needs to be generated once.
         p1a = plot_leadership_filter_positions(dyn, all_xs[iter, :, 1:T], all_x̂s[iter, :, 1:T], all_zs[iter, :, 1:T])
 
-        pos_main_filepath = joinpath(folder_name, "lf_lq_positions_main_L$(gt_leader_idx).pdf")
+        pos_main_filepath = joinpath(folder_name, "lf_positions_main_L$(gt_leader_idx).pdf")
         savefig(p1a, pos_main_filepath)
         plot!(p1a, legend=:bottomleft)
 
@@ -72,9 +72,9 @@ for iter in ProgressBar(1:num_sims)
         plot!(p5_jj, title="")
         plot!(p6_jj, title="")
 
-        pos2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_lq_positions_detail_L$(gt_leader_idx).pdf")
-        prob1_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_lq_probs_P1_L$(gt_leader_idx).pdf")
-        prob2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_lq_probs_P2_L$(gt_leader_idx).pdf")
+        pos2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_positions_detail_L$(gt_leader_idx).pdf")
+        prob1_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P1_L$(gt_leader_idx).pdf")
+        prob2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P2_L$(gt_leader_idx).pdf")
         
         savefig(p1b, pos2_filepath)
         savefig(p5_jj, prob1_filepath)
@@ -96,9 +96,9 @@ p5_unc, p6_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=
 plot!(p5_unc, title="", legend=:none)
 plot!(p6_unc, title="", legend=:none)
 
-filename = joinpath(plots_path, string("lf_lq_mc$(num_sims)_L$(gt_leader_idx)_prob_P1.pdf"))
+filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P1.pdf"))
 savefig(p5_unc, filename)
 
-filename = joinpath(plots_path, string("lf_lq_mc$(num_sims)_L$(gt_leader_idx)_prob_P2.pdf"))
+filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P2.pdf"))
 savefig(p6_unc, filename)
 

@@ -59,15 +59,15 @@ for iter in ProgressBar(1:num_sims)
     q8, q9 = plot_convergence_and_costs(all_num_iters[iter], mc_threshold, conv_metrics, evaluated_costs)
 
     plot!(q1, title="", linewidth=10)
-    filepath = joinpath(folder_name, "$(iter)_silq_lq_position_L$(leader_idx).pdf")
+    filepath = joinpath(folder_name, "$(iter)_silq_position_L$(leader_idx).pdf")
     savefig(q1, filepath)
 
     plot!(q8, title="")
-    filepath = joinpath(folder_name, "$(iter)_silq_lq_convergence_L$(leader_idx).pdf")
+    filepath = joinpath(folder_name, "$(iter)_silq_convergence_L$(leader_idx).pdf")
     savefig(q8, filepath)
 
     plot!(q9, title="")
-    filepath = joinpath(folder_name, "$(iter)_silq_lq_cost_L$(leader_idx).pdf")
+    filepath = joinpath(folder_name, "$(iter)_silq_cost_L$(leader_idx).pdf")
     savefig(q9, filepath)
 end
 
@@ -92,19 +92,19 @@ d2 = plot_distance_to_agents(dyn, times, all_xs)
 #### Save the figures. ####
 ###########################
 plot!(convergence_plot, title="")
-filename = joinpath(plots_path, string("silq_lq_mc$(num_sims)_convergence_L$(leader_idx).pdf"))
+filename = joinpath(plots_path, string("silq_mc$(num_sims)_convergence_L$(leader_idx).pdf"))
 savefig(convergence_plot, filename)
 
 plot!(convergence_histogram, title="", tickfontsize=16, fontsize=12, labelfontsize=14)
-filename = joinpath(plots_path, string("silq_lq_mc$(num_sims)_convhistogram_L$(leader_idx).pdf"))
+filename = joinpath(plots_path, string("silq_mc$(num_sims)_convhistogram_L$(leader_idx).pdf"))
 savefig(convergence_histogram, filename)
 
 plot!(d1, title="")
-filename = joinpath(plots_path, string("silq_lq_mc$(num_sims)_L$(leader_idx)_dist_to_origin.pdf"))
+filename = joinpath(plots_path, string("silq_mc$(num_sims)_L$(leader_idx)_dist_to_origin.pdf"))
 savefig(d1, filename)
 
 plot!(d2, title="")
-filename = joinpath(plots_path, string("silq_lq_mc$(num_sims)_L$(leader_idx)_dist_to_agent.pdf"))
+filename = joinpath(plots_path, string("silq_mc$(num_sims)_L$(leader_idx)_dist_to_agent.pdf"))
 savefig(d2, filename)
 
 
