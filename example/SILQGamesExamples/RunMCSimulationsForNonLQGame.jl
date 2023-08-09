@@ -21,7 +21,7 @@ include("SILQGamesMCUtils.jl")
 
 data_folder = "mc_data"
 
-num_sims = 20
+num_sims = 10
 
 topfolder_name = joinpath(data_folder, "nonlq_mc$(num_sims)_L$(leader_idx)_$(get_date_str())")
 isdir(topfolder_name) || mkdir(topfolder_name)

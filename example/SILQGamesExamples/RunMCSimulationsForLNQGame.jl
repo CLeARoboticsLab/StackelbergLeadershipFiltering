@@ -29,7 +29,7 @@ include("SILQGamesMCUtils.jl")
 # For player cost
 # costs = [pc_cost_1, pc_cost_2]
 
-num_sims = 20
+num_sims = 10
 
 data_folder = "mc_data"
 
