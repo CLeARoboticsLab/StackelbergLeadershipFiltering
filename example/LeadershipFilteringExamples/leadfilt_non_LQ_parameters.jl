@@ -21,6 +21,7 @@ leader_idx = 2
 # top half of plane
 x₁ = [2.; 1.; 7*pi/4; 0.; -1.; 2; -pi/4; 0] # unicycle dynamics
 # x₁ = [2.; 1.; 7*pi/4; 0.; -sqrt(5); 0; 0; 0]
+x₁ = [2.0, 1.0, -2.677945044588987, 0.0, -0.7533842212760272, 2.105329478996652, -1.2271487177940905, 0.0]
 
 # opposite diagonals
 # x₁ = [2.; 0.; -1.; 0.; -1.; 0; 2; 0]
@@ -42,7 +43,7 @@ Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = 0.02 * Matrix(I, xdim(dyn), xdim(dyn))
+R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1

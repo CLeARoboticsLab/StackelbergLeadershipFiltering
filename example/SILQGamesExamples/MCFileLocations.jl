@@ -43,7 +43,7 @@ function get_final_uq_paths_p1()
 end
 
 function get_final_lnq_paths_p2()
-    data_folder="lnq_mc10_L2_8_8_23_15"
+    data_folder="lnq_mc10_L2_8_8_23_39"
     silq_data_file="lnq_silq_mc10_L2_th0.0015_ss0.01_M2500.jld"
     lf_data_file=""
 
@@ -130,4 +130,4 @@ mc_folder = mc_local_folder
 data_folder, silq_data_file, lf_data_file = get_lq_paths()
 
 mc_folder = mc_server_folder
-data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2()
+data_folder, silq_data_file, lf_data_file = get_final_lnq_paths_p2()
