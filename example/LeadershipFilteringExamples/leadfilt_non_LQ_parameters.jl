@@ -42,7 +42,7 @@ Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
+R = 0.02 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
