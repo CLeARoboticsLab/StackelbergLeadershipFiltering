@@ -56,7 +56,7 @@ p_init = 0.5
 # step_size = 2e-2
 
 lf_threshold = 1e-3 #1e-3
-lf_max_iters = 50
+lf_max_iters = 100
 lf_step_size = 2e-2
 
 
