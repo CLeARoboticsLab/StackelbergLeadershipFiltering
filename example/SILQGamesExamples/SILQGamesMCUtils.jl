@@ -188,7 +188,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
                 for tt in 1:T
                     all_particle_leader_idxs[ss, tt, :] .= 0
                     all_particle_num_iterations[ss, tt, :] .= -1
-                    all_particle_xs[ss, tt, :, :, :] .=  xs[:, 1]
+                    # all_particle_xs[ss, tt, :, :, :] .=  xs[:, 1] # stays 0
                 end
             end
         end
