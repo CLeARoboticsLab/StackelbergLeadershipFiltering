@@ -29,11 +29,11 @@ include("SILQGamesMCUtils.jl")
 # For player cost
 # costs = [pc_cost_1, pc_cost_2]
 
-num_sims = 1
+num_sims = 10
 
-x₁ = [2.0, 0.0, 1.0, 0.0, -1.0791787750342463, 0.0, 1.9584108791353219, 0.0]
-angle_diff = 0.
-# angle_diff = 0.2
+# x₁ = [2.0, 0.0, 1.0, 0.0, -1.0791787750342463, 0.0, 1.9584108791353219, 0.0]
+# angle_diff = 0.
+angle_diff = 0.2
 
 
 data_folder = "mc_data"
