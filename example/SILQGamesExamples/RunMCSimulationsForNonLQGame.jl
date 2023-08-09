@@ -37,7 +37,12 @@ sg_obj = initialize_silq_games_object(num_sims, T, dyn, costs;
                                       threshold=mc_threshold, max_iters=mc_max_iters, step_size=mc_step_size, verbose=mc_verbose)
 
 # 2. Run the Monte Carlo SILQGames simulation.
-sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁)
+y2idx = yidx(dyn, 2)
+x2idx = xidx(dyn, 2)
+angle = atan(x₁[y2idx], x₁[x2idx])
+angle_diff = 0.2
+angle_range_nonlq=(angle-angle_diff, angle+angle_diff)
+sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=angle_range_nonlq)
 
 # 3. Generate the data and save to the specified file.
 silq_data = generate_silq_jld_data(sg, leader_idx, times, dt, T, x1s, u1s, silq_elapsed)
