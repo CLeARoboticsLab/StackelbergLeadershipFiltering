@@ -317,7 +317,7 @@ function plot_convergence_histogram(num_iterations; num_bins=:auto)
     if all(num_iterations .== 2)
         return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
     end
-    return histogram(num_iterations .- 1, nbins=num_bins, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
+    return histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
 end
 
 function plot_distance_to_origin(dyn, times, all_xs; lower_bound=0., upper_bound=Inf)
