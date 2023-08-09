@@ -29,7 +29,12 @@ include("SILQGamesMCUtils.jl")
 # For player cost
 # costs = [pc_cost_1, pc_cost_2]
 
-num_sims = 10
+num_sims = 1
+
+x₁ = [2.0, 0.0, 1.0, 0.0, -1.0791787750342463, 0.0, 1.9584108791353219, 0.0]
+angle_diff = 0.
+# angle_diff = 0.2
+
 
 data_folder = "mc_data"
 
@@ -49,7 +54,7 @@ sg_obj = initialize_silq_games_object(num_sims, T, dyn, costs;
 y2idx = yidx(dyn, 2)
 x2idx = xidx(dyn, 2)
 angle = atan(x₁[y2idx], x₁[x2idx])
-angle_diff = 0.2
+
 angle_range_lnq=(angle-angle_diff, angle+angle_diff)
 sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=angle_range_lnq)
 

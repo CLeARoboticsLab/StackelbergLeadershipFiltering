@@ -59,10 +59,15 @@ lf_step_size = 1e-2
 gt_silq_num_runs=1
 
 # config variables set to same values as for SILQGames scripts (for now 07/19 4:55am)
-gt_silq_threshold=1e-3
+gt_silq_threshold=1.5e-3
 gt_silq_max_iters=2500
 gt_silq_step_size=1e-2
 gt_silq_verbose=true
+
+# mc_threshold=1.5e-3
+# mc_max_iters=2500
+# mc_step_size=1e-2
+# mc_verbose=false
 
 
 # Set initial controls so that we can solve a Stackelberg game with SILQGames.

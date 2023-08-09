@@ -21,7 +21,10 @@ include("SILQGamesMCUtils.jl")
 
 data_folder = "mc_data"
 
-num_sims = 10
+num_sims = 1
+x₁ = [2.0, 1.0, -2.677945044588987, 0.0, -0.9192214382877095, 2.03838954750859, -1.1471487177940904, 0.0]
+# angle_diff = 0.2
+angle_diff = 0.
 
 topfolder_name = joinpath(data_folder, "nonlq_mc$(num_sims)_L$(leader_idx)_$(get_date_str())")
 isdir(topfolder_name) || mkdir(topfolder_name)
@@ -40,7 +43,6 @@ sg_obj = initialize_silq_games_object(num_sims, T, dyn, costs;
 y2idx = yidx(dyn, 2)
 x2idx = xidx(dyn, 2)
 angle = atan(x₁[y2idx], x₁[x2idx])
-angle_diff = 0.2
 angle_range_nonlq=(angle-angle_diff, angle+angle_diff)
 sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=angle_range_nonlq)
 
