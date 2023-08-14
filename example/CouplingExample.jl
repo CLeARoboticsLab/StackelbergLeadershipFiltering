@@ -48,58 +48,58 @@ p = plot(legend=:outertopright)
 # Nash feedback.
 α = 0.2
 plot!(p, xs_nash_feedback[1, :], xs_nash_feedback[3, :],
-      seriestype=:scatter, arrow=true, seriescolor=:blue, label="P1 Nash feedback")
+      seriestype=:scatter, arrow=true, seriescolor=:blue, label=L"\mathcal{A}_1 Nash feedback")
 plot!(p, xs_nash_feedback[1, :], xs_nash_feedback[3, :],
       seriestype=:quiver,  seriescolor=:blue,
       quiver=(0.1 * xs_nash_feedback[2, :], 0.1 * xs_nash_feedback[4, :]),
       seriesalpha=α,
-      label="P1 vel (Nash FB)")
+      label=L"\mathcal{A}_1 vel (Nash FB)")
 plot!(p, xs_nash_feedback[1, :], xs_nash_feedback[3, :],
       seriestype=:quiver,  seriescolor=:turquoise,
       quiver=(0.1 * us_nash_feedback[1][1, :], 0.1 * us_nash_feedback[1][2, :]),
       seriesalpha=α,
-      label="P1 acc (Nash FB)")
+      label=L"\mathcal{A}_1 acc (Nash FB)")
 
 plot!(p, xs_nash_feedback[5, :], xs_nash_feedback[7, :],
-      seriestype=:scatter, arrow=true, seriescolor=:red, label="P2 Nash feedback")
+      seriestype=:scatter, arrow=true, seriescolor=:red, label=L"\mathcal{A}_2 Nash feedback")
 plot!(p, xs_nash_feedback[5, :], xs_nash_feedback[7, :],
       seriestype=:quiver,  seriescolor=:red,
       quiver=(0.1 * xs_nash_feedback[6, :], 0.1 * xs_nash_feedback[8, :]),
       seriesalpha=α,
-      label="P2 vel (Nash FB)")
+      label=L"\mathcal{A}_2 vel (Nash FB)")
 plot!(p, xs_nash_feedback[5, :], xs_nash_feedback[7, :],
       seriestype=:quiver,  seriescolor=:pink,
       quiver=(0.1 * us_nash_feedback[2][1, :], 0.1 * us_nash_feedback[2][2, :]),
       seriesalpha=α,
-      label="P2 acc (Nash FB)")
+      label=L"\mathcal{A}_2 acc (Nash FB)")
 
 # Stackelberg feedback.
-p2_label = (stackelberg_leader_idx == 2) ? "P2 (leader) Stackelberg Feedback" : "P2 (follower) Stackelberg Feedback"
+p2_label = (stackelberg_leader_idx == 2) ? L"\mathcal{A}_2 (leader) Stackelberg Feedback" : L"\mathcal{A}_2 (follower) Stackelberg Feedback"
 plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
       seriestype=:scatter, arrow=true, seriescolor=:purple, label=p2_label)
 plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
       seriestype=:quiver,  seriescolor=:purple,
       quiver=(0.1 * xs_stackelberg_feedback[6, :], 0.1 * xs_stackelberg_feedback[8, :]),
       seriesalpha=α,
-      label="P2 vel (Stackelberg FB)")
+      label=L"\mathcal{A}_2 vel (Stackelberg FB)")
 plot!(p, xs_stackelberg_feedback[5, :], xs_stackelberg_feedback[7, :],
       seriestype=:quiver,  seriescolor=:magenta,
       quiver=(0.1 * us_stackelberg_feedback[2][1, :], 0.1 * us_stackelberg_feedback[2][2, :]),
       seriesalpha=α,
-      label="P2 acc (Stackelberg FB)")
+      label=L"\mathcal{A}_2 acc (Stackelberg FB)")
 
-p1_label = (stackelberg_leader_idx == 1) ? "P1 (leader) Stackelberg Feedback" : "P1 (follower) Stackelberg Feedback"
+p1_label = (stackelberg_leader_idx == 1) ? L"\mathcal{A}_1 (leader) Stackelberg Feedback" : L"\mathcal{A}_1 (follower) Stackelberg Feedback"
 plot!(p, xs_stackelberg_feedback[1, :], xs_stackelberg_feedback[3, :],
       seriestype=:scatter, arrow=true, seriescolor=:green, label=p1_label)
 plot!(p, xs_stackelberg_feedback[1, :], xs_stackelberg_feedback[3, :],
       seriestype=:quiver,  seriescolor=:green,
       quiver=(0.1 * xs_stackelberg_feedback[2, :], 0.1 * xs_stackelberg_feedback[4, :]),
       seriesalpha=α,
-      label="P1 vel (Stackelberg FB)")
+      label=L"\mathcal{A}_1 vel (Stackelberg FB)")
 plot!(p, xs_stackelberg_feedback[1, :], xs_stackelberg_feedback[3, :],
       seriestype=:quiver,  seriescolor=:lightgreen,
       quiver=(0.1 * us_stackelberg_feedback[1][1, :], 0.1 * us_stackelberg_feedback[1][2, :]),
       seriesalpha=α,
-      label="P1 acc (Stackelberg FB)")
+      label=L"\mathcal{A}_1 acc (Stackelberg FB)")
 
 display(p)

@@ -80,11 +80,11 @@ p = @layout [a; b]
 q1 = plot(legend=:outertopright, ylabel="y (m)", xlabel="x (m)", title=string("LF on Noisy LQ Stack., leader=", leader_idx,
                                                                               ", Ts=", Ts,
                                                                               ", Ns=", num_particles))
-plot!(q1, true_xs[1, :], true_xs[3, :], label="P1 pos", ylimit=(-2.0, 2.0), xlimit=(-2.0, 2.0))
-plot!(q1, true_xs[5, :], true_xs[7, :], label="P2 pos")
+plot!(q1, true_xs[1, :], true_xs[3, :], label=L"\mathcal{A}_1 pos", ylimit=(-2.0, 2.0), xlimit=(-2.0, 2.0))
+plot!(q1, true_xs[5, :], true_xs[7, :], label=L"\mathcal{A}_2 pos")
 
-plot!(q1, zs[1, :], zs[3, :], label="P1 meas pos", color=:blue, ms=0.2)
-plot!(q1, zs[5, :], zs[7, :], label="P2 meas pos", color=:red, ms=0.2)
+plot!(q1, zs[1, :], zs[3, :], label=L"\mathcal{A}_1 meas pos", color=:blue, ms=0.2)
+plot!(q1, zs[5, :], zs[7, :], label=L"\mathcal{A}_2 meas pos", color=:red, ms=0.2)
 
 # q1 = plot(xs_i[1,:], xs_i[2,:], label="", legend=:outertopright, title="Leadership Filter")
 q1 = scatter!([x₁[1]], [x₁[3]], color="blue", label="start P1")
@@ -124,28 +124,28 @@ PLOT_WHOLE_TRAJECTORY = false # if true, plot the whole trajectory at each cycle
 # end
     # t, particles[2, :, :][:, :]', color=:black, markersize=0.15, label="", yrange=(-plot_mult*5.0,plot_mult*5.0), legend=:outertopright, ylabel="position (m)")
 
-# q2 = plot(times, xs_k[1,:], label="P1 px", legend=:outertopright)
-# plot!(times, xs_k[3,:], label="P1 py")
-# plot!(times, xs_k[5,:], label="P2 px", legend=:outertopright)
-# plot!(times, xs_k[7,:], label="P2 py")
+# q2 = plot(times, xs_k[1,:], label=L"\mathcal{A}_1 px", legend=:outertopright)
+# plot!(times, xs_k[3,:], label=L"\mathcal{A}_1 py")
+# plot!(times, xs_k[5,:], label=L"\mathcal{A}_2 px", legend=:outertopright)
+# plot!(times, xs_k[7,:], label=L"\mathcal{A}_2 py")
 
 # q3 = plot(times, xs_k[2,:], label="vel1 x", legend=:outertopright)
 # plot!(times, xs_k[4,:], label="vel1 y")
 # plot!(times, xs_k[6,:], label="vel2 x")
 # plot!(times, xs_k[8,:], label="vel2 y")
 
-# q4 = plot(times, us_k[1][1, :], label="P1 accel x", legend=:outertopright)
-# plot!(times, us_k[1][2, :], label="P1 accel y")
-# plot!(times, us_k[2][1, :], label="P2 accel x", legend=:outertopright)
-# plot!(times, us_k[2][2, :], label="P2 accel y")
+# q4 = plot(times, us_k[1][1, :], label=L"\mathcal{A}_1 accel x", legend=:outertopright)
+# plot!(times, us_k[1][2, :], label=L"\mathcal{A}_1 accel y")
+# plot!(times, us_k[2][1, :], label=L"\mathcal{A}_2 accel x", legend=:outertopright)
+# plot!(times, us_k[2][2, :], label=L"\mathcal{A}_2 accel y")
 
 # # Plot convergence.
 # conv_x = cumsum(ones(num_iters)) .- 1
-# q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (|⋅|∞) by player", label="p1", yaxis=:log)
-# plot!(conv_x, conv_metrics[2, 1:num_iters], label="p2", yaxis=:log)
+# q5 = plot(conv_x, conv_metrics[1, 1:num_iters], title="convergence (|⋅|∞) by player", label=L"\mathcal{A}_1", yaxis=:log)
+# plot!(conv_x, conv_metrics[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
 
-# q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label="p1", yaxis=:log)
-# plot!(conv_x, evaluated_costs[2, 1:num_iters], label="p2", yaxis=:log)
+# q6 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
+# plot!(conv_x, evaluated_costs[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
 
 
 

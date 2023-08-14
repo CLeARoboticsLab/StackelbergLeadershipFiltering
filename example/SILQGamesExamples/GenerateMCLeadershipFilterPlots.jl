@@ -53,16 +53,20 @@ for iter in ProgressBar(1:num_sims)
     true_xs = all_xs[iter, :, :]
     true_us = [@view all_us[jj][iter, :, :] for jj in 1:num_agents(dyn)]
 
-    snapshot_freq = Int((T - 1)/10)
+    # Only needs to be generated once.
+    p1a_i = plot_leadership_filter_positions(dyn, all_xs[iter, :, 1:T], all_x̂s[iter, :, 1:T])
+    p1a_ii = plot_leadership_filter_measurements(dyn, all_xs[iter, :, 1:T], all_zs[iter, :, 1:T])
+
+    pos_main_filepath = joinpath(folder_name, "lf_positions_main_L$(gt_leader_idx).pdf")
+    pos_meas_filepath = joinpath(folder_name, "lf_positions_measurements_L$(gt_leader_idx).pdf")
+    savefig(p1a_i, pos_main_filepath)
+    savefig(p1a_ii, pos_meas_filepath)
+    # plot!(p1a, legend=:bottomleft)
+
+    snapshot_freq = Int((T - 1)/20)
     jj = 0
     for t in 2:snapshot_freq:T
         jj += 1
-        # Only needs to be generated once.
-        p1a = plot_leadership_filter_positions(dyn, all_xs[iter, :, 1:T], all_x̂s[iter, :, 1:T], all_zs[iter, :, 1:T])
-
-        pos_main_filepath = joinpath(folder_name, "lf_positions_main_L$(gt_leader_idx).pdf")
-        savefig(p1a, pos_main_filepath)
-        plot!(p1a, legend=:bottomleft)
 
         # p1b = plot_leadership_filter_measurement_details(num_particles, sgs[t], true_xs[iter, :, 1:T], x̂s[iter, :, 1:T])
         # p1b = plot_leadership_filter_measurement_details(dyn, num_particles, particle_xs, num_iterations, particle_leader_idxs, true_xs, est_xs

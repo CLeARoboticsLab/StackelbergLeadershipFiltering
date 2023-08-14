@@ -113,10 +113,10 @@ anim = @animate for t in iter
     # plot 4 - acceleration inputs
     title4 = "Input accel. (u)"
     p4 = plot(legend=:outertopright, xlabel="t (s)", ylabel="accel. (m/s^2)", title=title4)
-    plot!(p4, times[1:T], us[1][1, 1:T], label="P1 ax")
-    plot!(p4, times[1:T], us[1][2, 1:T], label="P1 ay")
-    plot!(p4, times[1:T], us[2][1, 1:T], label="P2 ax")
-    plot!(p4, times[1:T], us[2][2, 1:T], label="P2 ay")
+    plot!(p4, times[1:T], us[1][1, 1:T], label=L"\mathcal{A}_1 ax")
+    plot!(p4, times[1:T], us[1][2, 1:T], label=L"\mathcal{A}_1 ay")
+    plot!(p4, times[1:T], us[2][1, 1:T], label=L"\mathcal{A}_2 ax")
+    plot!(p4, times[1:T], us[2][2, 1:T], label=L"\mathcal{A}_2 ay")
     plot!(p4, [times[t], times[t]], [-2, 2], label="", color=:black)
 
     # probability plots 5 and 6

@@ -42,7 +42,7 @@ Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 # 
 rng = MersenneTwister(0)
 
-R = 0.01 * Matrix(I, xdim(dyn), xdim(dyn))
+R = 0.02 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
@@ -56,7 +56,7 @@ p_init = 0.5
 # step_size = 2e-2
 
 lf_threshold = 1e-3
-lf_max_iters = 100
+lf_max_iters = 50
 lf_step_size = 1e-2 #1e-2
 
 gt_silq_num_runs=1

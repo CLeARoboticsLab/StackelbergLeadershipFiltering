@@ -22,7 +22,7 @@ q1, q2, q3, q4, q5, q6, q7 = plot_states_and_controls(dyn, times, xs, us; includ
 
 plot(q1, q2, q3, q4, q5, q6, q7, layout = q)
 
-plot!(q1, title="", legend_column=2)
+plot!(q1, title="", legend_column=-1)
 filename = "lqstacksolve_leader$(leader_idx)_1.pdf"
 
 savefig(q1, filename)
