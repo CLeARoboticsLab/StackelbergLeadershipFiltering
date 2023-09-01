@@ -105,6 +105,13 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
     # DEBUGGING: This line provides the future control trajectory to the filter - should not generally be enabled.
     # us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
 
+    ctrl_len = e_idx - s_idx + 1
+    us_prev = [us[ii][:, s_idx] for ii in 1:num_agents(dyn)]
+    default_us_1_from_tt = [repeat(us_prev[ii], 1, ctrl_len) for ii in 1:num_agents(dyn)]
+
+    has_sg_ttm1 = !isnothing(sg_ttm1)
+    # print("[OUT] $(tt) - has the sg obj ($(has_sg_ttm1)) us p1 size $(size(prev_particle_uks[1]))")
+
     # TODO(hamzah) - For now assumes 1 game played; fix this
     @assert num_games_desired == 1
     function h(X; particle_idx=nothing)
@@ -112,24 +119,19 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
         # If we are on the first time step, then we can't get a useful history to play a Stackelberg game.
         # Return the current state. 
         # TODO(revisit): particle_idx being nothing indicates we are being used to compute metrics, so ignore for now.
-        if tt == 1 #|| isnothing(particle_idx)
-            @assert iszero(num_games_playable)# || !isnothing(particle_idx)
+        if tt == 1
+            @assert iszero(num_games_playable)
             return get_current_state(dyn_w_hist, X)
         end
 
-        # if isnothing(particle_idx)
-        #     # @warn "LF: particle_idx is not defined."
-        #     particle_idx = 1
-        # end
-
         # Set the initial control estimate to be the initial control repeated into the future for Ts time steps.
-        if !isnothing(sg_ttm1)
-            ctrl_len = e_idx - s_idx + 1
-            us_prev = [us[ii][:, s_idx] for ii in 1:num_agents(dyn)]
-            us_1_from_tt = [repeat(us_prev[ii], 1, ctrl_len) for ii in 1:num_agents(dyn)]
-        else
+        # print("[IN] $(tt) - has the sg obj ($(has_sg_ttm1)) isnothing uks $(isnothing(prev_particle_uks))")
+        has_particle_idx = !isnothing(particle_idx)
+        if has_sg_ttm1 && has_particle_idx
             # Reuse the previous converged trajectory, which may be from either L1 or L2.
             us_1_from_tt = [sg_ttm1.uks[ii][particle_idx, :, :] for ii in 1:num_players]
+        else
+            us_1_from_tt = default_us_1_from_tt
         end
 
         # Get the state at the previous time tt-1. This will be the initial state in the game.
