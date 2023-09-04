@@ -55,10 +55,14 @@ iter1 = ProgressBar(2:snapshot_freq:T)
 ii = 1
 
 # Only needs to be generated once.
-p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T])
+p1_meas = plot_leadership_filter_measurements(sg_objs[1].dyn, true_xs[:, 1:T], zs[:, 1:T])
 
 pos_main_filepath = joinpath(folder_name, "lf_nonlq_positions_main_L$(leader_idx).pdf")
 savefig(p1a, pos_main_filepath)
+
+pos_meas_filepath = joinpath(folder_name, "lf_nonlq_positions_meas_L$(leader_idx).pdf")
+savefig(p1_meas, pos_meas_filepath)
 
 for t in iter1
     
@@ -66,7 +70,8 @@ for t in iter1
 
     p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s)
 
-    p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx)
+    p5 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=1)
+    p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=2)
     plot!(p5, title="")
     plot!(p6, title="")
 
@@ -86,7 +91,7 @@ end
 
 # This plot need not be in the loop.
 title="x-y plot of agent positions over time"
-p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T])
 plot!(p1a, title=title, legend=:outertopright)
 
 iter = ProgressBar(2:T)
@@ -122,7 +127,8 @@ anim = @animate for t in iter
     # probability plots 5 and 6
     title5 = "Probability over time for P1"
     title6 = "Probability over time for P2"
-    p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx)
+    p5 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=1)
+    p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=2)
     plot!(p5, title=title5)
     plot!(p6, title=title6)
 

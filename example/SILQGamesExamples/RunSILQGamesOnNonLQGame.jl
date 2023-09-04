@@ -18,7 +18,8 @@ check_valid(xs, us, ts) = begin
     return all(xs[5:6, :] .> -bound_val) && all(xs[5:6, :] .< bound_val)
 end
 
-sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs;
+sg_obj = initialize_silq_games_object(num_runs, T, dyn, costs; 
+                                      ignore_xkuk_iters=false,
                                       threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose, check_valid=check_valid)
 xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, x₁, us_1)
 

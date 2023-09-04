@@ -22,7 +22,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
     rotate_particle_state(xs) = rotate_state(dyn, xs)
 
     # Only needs to be generated once.
-    p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
+    p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T])
     plot!(p1a,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
     p1a = add_lane_lines!(p1a, cfg, limits)
 
@@ -35,17 +35,17 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
         plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 
-        p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
-        plot!(p5, title="")
-        plot!(p6, title="")
+        prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
+        plot!(prob_plot, title="")
+        # plot!(p6, title="")
 
         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_positions_detail.pdf")
-        prob1_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs_P1.pdf")
-        prob2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs_P2.pdf")
+        prob_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs.pdf")
+        # prob2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs_P2.pdf")
 
         savefig(p1b, pos2_filepath)
-        savefig(p5, prob1_filepath)
-        savefig(p6, prob2_filepath)
+        savefig(prob_plot, prob_filepath)
+        # savefig(p6, prob2_filepath)
 
         ii += 1
     end
@@ -65,7 +65,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
 
     # This plot need not be in the loop.
     title="x-y plot of agent positions over time"
-    p1a = plot_leadership_filter_positions(dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T], rotated_zs[:, 1:T])
+    p1a = plot_leadership_filter_positions(dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T])
     plot!(p1a, title=title,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
     p1a = add_lane_lines!(p1a, cfg, limits)
 
@@ -104,7 +104,8 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
         # probability plots 5 and 6
         title5 = "Probability over time for P1"
         title6 = "Probability over time for P2"
-        p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
+        p5 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, player_to_plot=1)
+        p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, player_to_plot=2)
         plot!(p5, title=title5)
         plot!(p6, title=title6)
 

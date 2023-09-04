@@ -312,12 +312,14 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     return convergence_plot
 end
 
-function plot_convergence_histogram(num_iterations; num_bins=:auto)
+function plot_convergence_histogram(num_iterations, max_iters; num_bins=:auto)
     num_sims = length(num_iterations)
     if all(num_iterations .== 2)
         return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
     end
-    return histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
+    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
+    vline!(hist, [max_iters], label="Max Iterations", color=:black, linewidth=3)
+    return hist
 end
 
 function plot_distance_to_origin(dyn, times, all_xs; lower_bound=0., upper_bound=Inf)

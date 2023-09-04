@@ -72,7 +72,8 @@ for iter in ProgressBar(1:num_sims)
         # p1b = plot_leadership_filter_measurement_details(dyn, num_particles, particle_xs, num_iterations, particle_leader_idxs, true_xs, est_xs
         p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :])
 
-        p5_jj, p6_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=t, include_gt=gt_leader_idx)
+        p5_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=t, include_gt=gt_leader_idx, player_to_plot=1)
+        p6_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=t, include_gt=gt_leader_idx, player_to_plot=2)
         plot!(p5_jj, title="")
         plot!(p6_jj, title="")
 
@@ -96,7 +97,8 @@ stddev_probs = (size(all_probs, 1) > 1) ? std(all_probs, dims=[1])[1, :] : zeros
 # Make the stddev bounds.
 lower_p1 = min.(mean_probs .- 0, stddev_probs)
 upper_p1 = min.(1 .- mean_probs, stddev_probs)
-p5_unc, p6_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1))
+p5_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=1)
+p6_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=2)
 plot!(p5_unc, title="", legend=:none)
 plot!(p6_unc, title="", legend=:none)
 
