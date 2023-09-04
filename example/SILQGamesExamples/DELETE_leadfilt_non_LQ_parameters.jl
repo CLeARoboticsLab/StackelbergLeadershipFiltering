@@ -2,8 +2,8 @@ using StackelbergControlHypothesesFiltering
 
 using Random
 
-dt = 0.02
-T = 501
+dt = 0.05
+T = 201
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
