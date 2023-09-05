@@ -298,14 +298,14 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     # println(means, lower, upper)
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
+        plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)
         upper_scatter = min.(upper_bound, means .+ stddevs)
         println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
         println("Mean: $means")
-        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit Function", color=:green, elinewidth=3, xticks=[0, 1])
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit", color=:green, elinewidth=3, xticks=[0, 1])
     end
     plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 

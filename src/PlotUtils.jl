@@ -164,9 +164,9 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
-        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green, linewidth=3)
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green, linewidth=3)
     else
-        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
+        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green)
     end
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
@@ -286,7 +286,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p2 = get_standard_plot(;columns=3)
+    p2 = get_standard_plot(;columns=2)
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
     # Remove axis and grid.
