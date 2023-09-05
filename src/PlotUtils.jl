@@ -247,7 +247,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs)
     p1 = get_standard_plot(;columns=3, legendfontsize=10)
     # Remove axis and grid.
     plot!(axis=([], false), grid=false)
-    
+
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:black, linewidth=2, ls=:dash)
     # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
@@ -344,7 +344,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if player_to_plot == 1 || isnothing(player_to_plot)
         plot!(xlabel="t (s)", ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
         if !isnothing(include_gt)
-            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dash, linewidth=2)
+            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=2)
         end
 
         # Bound the stddevs to avoid going above 1 or below 0.
@@ -356,7 +356,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if player_to_plot == 2 || isnothing(player_to_plot)
         plot!(xlabel="t (s)", ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
         if !isnothing(include_gt)
-            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dash, linewidth=2)
+            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=2)
         end
 
         lower_p2, upper_p2 = upper_p1, lower_p1
@@ -366,8 +366,8 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     # Draw the lines of interest.
     if !isnothing(t_idx)
         for idx in t_idx
-            t = times[t_idx]
-            plot!(plot, [t, t], [-0.05, 1.05], label="t=$(t_idx) steps", color=:black, linestyle=:dot, linewidth=3)
+            t = times[idx]
+            plot!(plot, [t, t], [-0.05, 1.05], label="t=$(t_idx) steps", color=:black, linestyle=:dash, linewidth=3)
             # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
         end
     end
