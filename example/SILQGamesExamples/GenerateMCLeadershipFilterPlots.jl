@@ -63,6 +63,13 @@ for iter in ProgressBar(1:num_sims)
     savefig(p1a_ii, pos_meas_filepath)
     # plot!(p1a, legend=:bottomleft)
 
+
+    prob_plot = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[2, 22, 122], include_gt=gt_leader_idx, player_to_plot=nothing)
+    plot!(prob_plot, title="")
+    # plot!(p6_jj, title="")
+    prob_filepath = joinpath(folder_name, "lf_probs_L$(gt_leader_idx).pdf")
+    savefig(prob_plot, prob_filepath)
+
     snapshot_freq = Int((T - 1)/20)
     jj = 0
     for t in 2:snapshot_freq:T
@@ -72,18 +79,18 @@ for iter in ProgressBar(1:num_sims)
         # p1b = plot_leadership_filter_measurement_details(dyn, num_particles, particle_xs, num_iterations, particle_leader_idxs, true_xs, est_xs
         p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :])
 
-        p5_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=t, include_gt=gt_leader_idx, player_to_plot=1)
-        p6_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=t, include_gt=gt_leader_idx, player_to_plot=2)
-        plot!(p5_jj, title="")
-        plot!(p6_jj, title="")
+        # p5_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[t], include_gt=gt_leader_idx, player_to_plot=1)
+        # p6_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[t], include_gt=gt_leader_idx, player_to_plot=2)
+        # plot!(p5_jj, title="")
+        # plot!(p6_jj, title="")
+        # prob1_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P1_L$(gt_leader_idx).pdf")
+        # prob2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P2_L$(gt_leader_idx).pdf")
 
         pos2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_positions_detail_L$(gt_leader_idx).pdf")
-        prob1_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P1_L$(gt_leader_idx).pdf")
-        prob2_filepath = joinpath(folder_name, "0$(jj)_lf_t$(t)_probs_P2_L$(gt_leader_idx).pdf")
         
         savefig(p1b, pos2_filepath)
-        savefig(p5_jj, prob1_filepath)
-        savefig(p6_jj, prob2_filepath)
+        # savefig(p5_jj, prob1_filepath)
+        # savefig(p6_jj, prob2_filepath)
     end
 end
 
@@ -97,14 +104,20 @@ stddev_probs = (size(all_probs, 1) > 1) ? std(all_probs, dims=[1])[1, :] : zeros
 # Make the stddev bounds.
 lower_p1 = min.(mean_probs .- 0, stddev_probs)
 upper_p1 = min.(1 .- mean_probs, stddev_probs)
-p5_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=1)
-p6_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=2)
-plot!(p5_unc, title="", legend=:none)
-plot!(p6_unc, title="", legend=:none)
+# p5_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=1)
+# p6_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), player_idx=2)
+# plot!(p5_unc, title="")
+# plot!(p6_unc, title="")
+# filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P1.pdf"))
+# savefig(p5_unc, filename)
+# filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P2.pdf"))
+# savefig(p6_unc, filename)
 
-filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P1.pdf"))
-savefig(p5_unc, filename)
+plot_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), t_idx=[2, 22, 122])
+plot!(plot_unc, title="")
 
-filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P2.pdf"))
-savefig(p6_unc, filename)
+filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_probs.pdf"))
+savefig(plot_unc, filename)
+
+
 
