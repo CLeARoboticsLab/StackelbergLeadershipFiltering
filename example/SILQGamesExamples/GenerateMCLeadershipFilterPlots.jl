@@ -46,6 +46,10 @@ all_P̂s = data["Pests"]
 all_zs = data["measurements"]
 
 
+
+times_of_note = [2, 22, 122]
+
+
 for iter in ProgressBar(1:num_sims)
     folder_name = joinpath(plots_path, string(iter))
     isdir(folder_name) || mkdir(folder_name)
@@ -72,13 +76,17 @@ for iter in ProgressBar(1:num_sims)
 
     snapshot_freq = Int((T - 1)/20)
     jj = 0
+    letter = 'd'
     for t in 2:snapshot_freq:T
         jj += 1
 
         # p1b = plot_leadership_filter_measurement_details(num_particles, sgs[t], true_xs[iter, :, 1:T], x̂s[iter, :, 1:T])
         # p1b = plot_leadership_filter_measurement_details(dyn, num_particles, particle_xs, num_iterations, particle_leader_idxs, true_xs, est_xs
-        p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :])
 
+        p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :]; t=t, letter=letter)
+        if t in times_of_note
+            letter = letter + 1
+        end
         # p5_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[t], include_gt=gt_leader_idx, player_to_plot=1)
         # p6_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[t], include_gt=gt_leader_idx, player_to_plot=2)
         # plot!(p5_jj, title="")
@@ -113,7 +121,7 @@ upper_p1 = min.(1 .- mean_probs, stddev_probs)
 # filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_prob_P2.pdf"))
 # savefig(p6_unc, filename)
 
-plot_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), t_idx=[2, 22, 122])
+plot_unc = make_probability_plots(times[1:T], mean_probs[1:T]; include_gt=gt_leader_idx, stddevs=(lower_p1, upper_p1), t_idx=times_of_note)
 plot!(plot_unc, title="")
 
 filename = joinpath(plots_path, string("lf_mc$(num_sims)_L$(gt_leader_idx)_probs.pdf"))
