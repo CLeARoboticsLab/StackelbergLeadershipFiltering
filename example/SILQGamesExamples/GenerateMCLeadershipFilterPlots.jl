@@ -46,8 +46,12 @@ all_P̂s = data["Pests"]
 all_zs = data["measurements"]
 
 
+# LQ
+# times_of_note = [2, 22, 122]
+times_of_note = nothing
 
-times_of_note = [2, 22, 122]
+# Non-LQ
+# times_of_note = [2, 22, 122]
 
 
 for iter in ProgressBar(1:num_sims)
@@ -68,7 +72,7 @@ for iter in ProgressBar(1:num_sims)
     # plot!(p1a, legend=:bottomleft)
 
 
-    prob_plot = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[2, 22, 122], include_gt=gt_leader_idx, player_to_plot=nothing)
+    prob_plot = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=times_of_note, include_gt=gt_leader_idx, player_to_plot=nothing)
     plot!(prob_plot, title="")
     # plot!(p6_jj, title="")
     prob_filepath = joinpath(folder_name, "lf_probs_L$(gt_leader_idx).pdf")
