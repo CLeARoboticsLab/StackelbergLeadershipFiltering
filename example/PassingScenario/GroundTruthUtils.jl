@@ -6,7 +6,10 @@ using StackelbergControlHypothesesFiltering
 using JLD
 using Plots
 
-function get_passing_trajectory_scenario_101(cfg, x₁)
+include("MergingScenarioConfig.jl")
+include("PassingScenarioConfig.jl")
+
+function get_passing_trajectory_scenario_101(cfg::PassingScenarioConfig, x₁)
 
     rlb_x = get_right_lane_boundary_x(cfg)
     v_init = 10
@@ -34,7 +37,7 @@ function get_passing_trajectory_scenario_101(cfg, x₁)
     return xs, ws
 end
 
-function get_passing_trajectory_scenario_151(cfg, x₁)
+function get_passing_trajectory_scenario_151(cfg::PassingScenarioConfig, x₁, T)
 
     rlb_x = get_right_lane_boundary_x(cfg)
     v_init = 10
@@ -58,10 +61,55 @@ function get_passing_trajectory_scenario_151(cfg, x₁)
                    -8.7*ones(1, 17),
                    -5  *ones(1, 10)))
 
-    ws = [w1, w2]
+    ws = [w1[:, 1:T], w2[:, 1:T]]
 
     xs = unroll_raw_controls(dyn, times[1:T], ws, x₁)
     return xs, ws
+end
+
+function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig, x₁)
+
+    # rlb_x = get_right_lane_boundary_x(cfg)
+    # v_init = 10
+
+    # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
+
+    # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
+    w1 = vcat(hcat(
+                   zeros(1, 50),
+                  -0.4*ones(1, 8),
+                   0.4*ones(1, 8),
+                   zeros(1, 9),
+                   zeros(1, 16),
+                   zeros(1, 10)), 
+              hcat( 4  *ones(1, 10),
+                    7.7*ones(1, 15),
+                       zeros(1, 49),
+                       zeros(1, 27)
+                   # -8.7*ones(1, 17),
+                   # -5  *ones(1, 10)
+                   )
+              )
+
+    # Agent 2 does a passing maneuver.
+    w2 = vcat(hcat(
+                   zeros(1, 50),
+                   0.4*ones(1, 8),
+                  -0.4*ones(1, 8),
+                   zeros(1, 9),
+                   zeros(1, 16),
+                   zeros(1, 10)), 
+              hcat( 5  *ones(1, 10),
+                    8.7*ones(1, 15),
+                       zeros(1, 49),
+                       zeros(1, 27)
+                   # -8.7*ones(1, 17),
+                   # -5  *ones(1, 10)
+                   )
+              )
+
+    ws = [w1, w2]
+    return ws
 end
 
 
@@ -97,7 +145,7 @@ function generate_gt_from_silqgames(sg_obj, leader_idx::Int, times, x₁, us_1)
     return xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs
 end
 
-function plot_silqgames_gt(dyn, times, xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs)
+function plot_silqgames_gt(dyn, cfg::MergingScenarioConfig, times, xs_k, us_k)
     # PLOTS A: Plot states/controls.
     l = @layout [
         a{0.3h}; [grid(2,3)]
@@ -105,11 +153,24 @@ function plot_silqgames_gt(dyn, times, xs_k, us_k, is_converged, num_iters, conv
 
     # q = @layout [a b; c d ;e f; g h]
     pos_plot, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times, xs_k, us_k)
-    plot(pos_plot, p2, p3, p4, p5, p6, p7, layout = l)
+    # plot(pos_plot, p2, p3, p4, p5, p6, p7, layout = l)
+    plt = plot(pos_plot)
 
+    w = cfg.lane_width_m
+    L₁ = cfg.region1_length_m
+    L₂ = cfg.region2_length_m
+    plot!(pos_plot, [w, w], [0., L₁], label="", color=:black, lw=3)
+    plot!(pos_plot, [0, 0], [0., L₁], label="", color=:black, lw=3)
+    plot!(pos_plot, [-w, -w], [0., L₁], label="", color=:black, lw=3)
+    plot!(pos_plot, [w, w/2], [L₁, L₁+L₂], label="", color=:black, lw=3)
+    plot!(pos_plot, [-w, -w/2], [L₁, L₁+L₂], label="", color=:black, lw=3)
+    plot!(pos_plot, [w/2, w/2], [L₁+L₂, 2*(L₁+L₂)], label="", color=:black, lw=3)
+    plot!(pos_plot, [-w/2, -w/2], [L₁+L₂, 2*(L₁+L₂)], label="", color=:black, lw=3)
+end
 
-    # # PLOTS B: Plot convergence metrics/costs separately.
-    # conv_plot, cost_plot = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
-    # m = @layout [a; b]
-    # plot(conv_plot, cost_plot, layout = m)
+function plot_silqgames_gt_convergence_cost(is_converged, num_iters, conv_metrics, evaluated_costs)
+    # PLOTS B: Plot convergence metrics/costs separately.
+    conv_plot, cost_plot = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
+    m = @layout [a; b]
+    plot(conv_plot, cost_plot, layout = m)
 end

@@ -53,7 +53,7 @@ function regularize_matrix(M, reg_param, ensure_pd)
     reg_M = deepcopy(M)
     if ensure_pd
         eig_min = minimum(eigvals(M))
-        @assert eig_min ≤ 1e-8 string("eigenval: ", eig_min) # some leeway for small positives...
+        @assert eig_min ≤ 1e-8 string("eigenval is positive: ", eig_min, " ", eigvals(M)) # some leeway for small positives...
         reg_M = reg_M + abs(eig_min) * I
     end
 

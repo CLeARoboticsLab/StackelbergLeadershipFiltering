@@ -22,7 +22,7 @@ function combine_cost_funcs(funcs, weights)
     return g
 end
 
-function create_passing_scenario_costs(cfg, si, w_p1, w_p2, goal_p1, goal_p2)
+function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2)
     @assert length(w_p1) == NUM_PASSING_SCENARIO_SUBCOSTS
     @assert length(w_p2) == NUM_PASSING_SCENARIO_SUBCOSTS
 

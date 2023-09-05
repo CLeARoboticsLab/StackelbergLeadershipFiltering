@@ -132,7 +132,7 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
             us_1_from_tt = [sg_ttm1.uks[ii][particle_idx, :, :] for ii in 1:num_players]
         else
             if has_sg_ttm1 && has_particle_idx
-                # println("$(particle_idx) - leadership mismatch $(sg_ttm1.leader_idxs[particle_idx]) --> $(leader_idx)")
+                println("$(particle_idx) - leadership mismatch $(sg_ttm1.leader_idxs[particle_idx]) --> $(leader_idx)")
             end
             us_1_from_tt = default_us_1_from_tt
         end
@@ -149,7 +149,7 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
 
         # Play a stackelberg games starting at this previous state using the times/controls we extracted.
         xs, us, is_converged, num_iters, convergence_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, stack_times[1], stack_times, prev_state, us_1_from_tt)
-        # println(particle_idx, " ", num_iters, " ", convergence_metrics[num_iters+1])
+        println(particle_idx, " ", num_iters, " ", convergence_metrics[num_iters+1])
         # if !is_converged
         #     println("$tt - not converged with metric convergence_metrics in $num_iters => $(convergence_metrics[1, num_iters]) > $(sg_obj.threshold)\n")
         # end
