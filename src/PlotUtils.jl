@@ -160,7 +160,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel="Max Absolute State Difference")
+    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel="Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
@@ -218,17 +218,17 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=3, legendfontsize=18)
+    p1 = get_standard_plot(;columns=2, legendfontsize=18)
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:red, linewidth=2, ls=:dash)
     plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange)
     # scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_1 Measurements")
-    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ Start")
+    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")# L"$\mathcal{A}_1$ Start")
 
     plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Ground Truth", color=:blue, linewidth=2, ls=:dash)
     plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Estimate", color=:turquoise2)
     # scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_2 Measurements")
-    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ Start")
+    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")# L"$\mathcal{A}_2$ Start")
 
     return p1
 end
@@ -250,7 +250,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     if show_meas_annotation
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 0.8, 1.8, text("(c). measurements", 30))
+        annotate!(p1, 1.2, 1.8, text("(c). measurements", 30))
     end
 
     
@@ -295,7 +295,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 0.8, 1.8, text("($(letter)) meas. model\ntime step $(t)", 30))
+        annotate!(p2, 1.2, 1.8, text("($(letter)) meas. model\ntime step $(t)", 30))
 
     end
 
@@ -324,8 +324,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         does_p1_lead = (particle_leader_idxs_t[n] == 1)
 
         color = (does_p1_lead) ? "red" : "blue"
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? "E Meas. (P1 leads)" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? "E Meas. (P2 leads)" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? "Meas. Model" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? "Meas. Model" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
@@ -352,7 +352,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     lower_p1, upper_p1 = (isnothing(stddevs)) ? (zeros(T), zeros(T)) : stddevs
 
     # probability plot for P1 - plot 5
-    plot = get_standard_plot(columns=3)
+    plot = get_standard_plot(columns=4)
     plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
     if player_to_plot == 1 || isnothing(player_to_plot)
         # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
