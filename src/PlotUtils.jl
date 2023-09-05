@@ -244,13 +244,13 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=2, legendfontsize=18)
+    p1 = get_standard_plot(;columns=1, legendfontsize=24)
     
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.4, 1.9, text("($(show_meas_annotation)). measurements", 30))
+        annotate!(p1, 1.2, 1.9, text("($(show_meas_annotation)) observations", 30))
     end
 
     
@@ -286,8 +286,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p2 = get_standard_plot(;columns=2)
-    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
+    p2 = get_standard_plot(;columns=1)
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)", legendfontsize=24)
 
     # Remove axis and grid.
     plot!(axis=([], false), grid=true)
@@ -325,7 +325,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         color = (does_p1_lead) ? "red" : "blue"
         label_1 = (!has_labeled_p1 && does_p1_lead) ? L"Meas. Model ($\mathcal{A}_1$)" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"Meas. Model ($\mathcal{A}_1$)" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"Meas. Model ($\mathcal{A}_2$)" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
