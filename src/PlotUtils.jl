@@ -5,8 +5,8 @@
 using LaTeXStrings
 using Plots
 
-function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=24)
-    return plot(legendfontsize=legendfontsize, tickfontsize=24, fontsize=24, labelfontsize=24, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
+function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=18)
+    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
 end
 export get_standard_plot
 
@@ -218,7 +218,7 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=3, legendfontsize=24)
+    p1 = get_standard_plot(;columns=3, legendfontsize=18)
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:red, linewidth=2, ls=:dash)
     plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange)
@@ -244,7 +244,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=3, legendfontsize=24)
+    p1 = get_standard_plot(;columns=3, legendfontsize=18)
     
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     if show_meas_annotation
@@ -353,8 +353,8 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
 
     # probability plot for P1 - plot 5
     plot = get_standard_plot(columns=3)
+    plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
     if player_to_plot == 1 || isnothing(player_to_plot)
-        plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
         # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
         if !isnothing(include_gt)
             plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=2)
@@ -364,10 +364,10 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         plot!(plot, times, probs, color=:red, label=L"\mathcal{A}_1", ribbon=(lower_p1, upper_p1), fillalpha=0.3)
     end
 
-     # probability plot for P2 - plot 6
+    # probability plot for P2 - plot 6
     # p6 = get_standard_plot()
     if player_to_plot == 2 || isnothing(player_to_plot)
-        plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
+        # plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
         # L"""$\mathbb{P}(H_t=\mathcal{A}_2)$"""
         if !isnothing(include_gt)
             plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=2)
@@ -387,9 +387,9 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     end
 
 
-    if isnothing(player_to_plot)
-        plot!(ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_i)$""", label="")
-    end
+    # if isnothing(player_to_plot)
+    #     plot!(ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_i)$""", label="")
+    # end
 
     return plot
 end
