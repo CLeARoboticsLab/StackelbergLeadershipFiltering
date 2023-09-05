@@ -88,7 +88,7 @@ for iter in ProgressBar(1:num_sims)
         # p1b = plot_leadership_filter_measurement_details(dyn, num_particles, particle_xs, num_iterations, particle_leader_idxs, true_xs, est_xs
 
         p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :]; t=t, letter=letter)
-        if t in times_of_note
+        if !isnothing(times_of_note) && t in times_of_note
             letter = letter + 1
         end
         # p5_jj = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=[t], include_gt=gt_leader_idx, player_to_plot=1)
