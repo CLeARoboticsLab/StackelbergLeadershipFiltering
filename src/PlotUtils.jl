@@ -236,7 +236,7 @@ export plot_leadership_filter_positions
 
 # This function makes an x-y plot containing (1) the ground truth trajectory and
 #                                            (2) simulated measured positions of the trajectory.
-function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_meas_annotation=false)
+function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_meas_annotation=nothing)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -247,10 +247,10 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     p1 = get_standard_plot(;columns=2, legendfontsize=18)
     
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-    if show_meas_annotation
+    if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.1, 1.9, text("(c). measurements", 30))
+        annotate!(p1, 1.1, 1.9, text("($(show_meas_annotation)). measurements", 30))
     end
 
     
