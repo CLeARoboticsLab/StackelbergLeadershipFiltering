@@ -236,7 +236,7 @@ export plot_leadership_filter_positions
 
 # This function makes an x-y plot containing (1) the ground truth trajectory and
 #                                            (2) simulated measured positions of the trajectory.
-function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs)
+function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_meas_annotation=false)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -245,18 +245,22 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs)
     y2_idx = yidx(dyn, 2)
 
     p1 = get_standard_plot(;columns=3, legendfontsize=10)
-    # Remove axis and grid.
-    plot!(axis=([], false), grid=false)
+    
+    if show_meas_annotation
+        # Remove axis and grid.
+        plot!(p1, axis=([], false), grid=false)
+        annotate!(p1, 1.0, 1.8, text("(c). measurements"))
+    end
 
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:black, linewidth=2, ls=:dash)
+    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:black, linewidth=2, ls=:solid)
     # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
-    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_1 Measurements")
+    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_1$ Measurements")
     scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ Start")
 
-    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Ground Truth", color=:black, linewidth=2, ls=:dash)
+    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Ground Truth", color=:black, linewidth=2, ls=:solid)
     # plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"\mathcal{A}_2 Estimate", color=:turquoise2)
-    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_2 Measurements")
+    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_2$ Measurements")
     scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ Start")
 
     return p1
@@ -273,7 +277,7 @@ function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGam
     plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn)
 end
 
-function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs)
+function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs; t=nothing, letter=nothing)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -287,12 +291,19 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # Remove axis and grid.
     plot!(axis=([], false), grid=false)
 
+    # If t is provided, annotate the plot.
+    if !isnothing(t) && !isnothing(letter)
+        plot!(ylabel=nothing, xlabel=nothing)
+        annotate!(p2, 1.0, 1.8, text("($(letter)) meas. model\ntime step $(t)"))
+
+    end
+
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:black, linewidth=3)
-    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange)
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange, label="")
     # scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ Start")
 
     plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Ground Truth", color=:black, linewidth=3)
-    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Estimate", color=:turquoise2)
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Estimate", color=:turquoise2, label="")
     # scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ Start")
 
     # Add particles
@@ -340,7 +351,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     lower_p1, upper_p1 = (isnothing(stddevs)) ? (zeros(T), zeros(T)) : stddevs
 
     # probability plot for P1 - plot 5
-    plot = get_standard_plot()
+    plot = get_standard_plot(columns=3)
     if player_to_plot == 1 || isnothing(player_to_plot)
         plot!(xlabel="t (s)", ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
         if !isnothing(include_gt)
@@ -367,7 +378,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if !isnothing(t_idx)
         for idx in t_idx
             t = times[idx]
-            plot!(plot, [t, t], [-0.05, 1.05], label="t=$(t_idx) steps", color=:black, linestyle=:dash, linewidth=3)
+            plot!(plot, [t, t], [-0.05, 1.05], label="t=$(idx) steps", color=:black, linestyle=:solid, linewidth=3)
             # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
         end
     end
