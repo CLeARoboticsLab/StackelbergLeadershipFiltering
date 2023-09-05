@@ -246,13 +246,14 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
 
     p1 = get_standard_plot(;columns=3, legendfontsize=10)
     
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     if show_meas_annotation
         # Remove axis and grid.
-        plot!(p1, axis=([], false), grid=false)
-        annotate!(p1, 1.0, 1.8, text("(c). measurements"))
+        plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
+        annotate!(p1, 1.4, 2., text("(c). measurements"))
     end
 
-    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
+    
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:black, linewidth=2, ls=:solid)
     # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
     scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_1$ Measurements")
@@ -289,12 +290,12 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
     # Remove axis and grid.
-    plot!(axis=([], false), grid=false)
+    plot!(axis=([], false), grid=true)
 
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
-        plot!(ylabel=nothing, xlabel=nothing)
-        annotate!(p2, 1.0, 1.8, text("($(letter)) meas. model\ntime step $(t)"))
+        plot!(ylabel="", xlabel="")
+        annotate!(p2, 1.4, 2., text("($(letter)) meas. model\ntime step $(t)"))
 
     end
 
