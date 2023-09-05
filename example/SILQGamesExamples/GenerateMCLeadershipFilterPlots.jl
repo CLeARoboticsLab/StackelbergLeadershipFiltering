@@ -59,7 +59,7 @@ for iter in ProgressBar(1:num_sims)
 
     # Only needs to be generated once.
     p1a_i = plot_leadership_filter_positions(dyn, all_xs[iter, :, 1:T], all_x̂s[iter, :, 1:T])
-    p1a_ii = plot_leadership_filter_measurements(dyn, all_xs[iter, :, 1:T], all_zs[iter, :, 1:T])
+    p1a_ii = plot_leadership_filter_measurements(dyn, all_xs[iter, :, 1:T], all_zs[iter, :, 1:T]; show_meas_annotation=true)
 
     pos_main_filepath = joinpath(folder_name, "lf_positions_main_L$(gt_leader_idx).pdf")
     pos_meas_filepath = joinpath(folder_name, "lf_positions_measurements_L$(gt_leader_idx).pdf")
