@@ -56,7 +56,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     ii = 1
     for t in iter1
-        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
+        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state, include_all_labels=true)
         plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 
@@ -139,7 +139,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
         p = @layout [a b; grid(1, 3); e f]
 
         plot_title = string("LF (", t, "/", T, "), Ts=", Ts, ", Ns=", num_particles, ", p(not transition)=", p_transition, ", #games: ", num_games)
-        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T]; transform_particle_fn=rotate_particle_state)
+        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T]; transform_particle_fn=rotate_particle_state, include_all_labels=true)
         plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 

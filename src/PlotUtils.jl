@@ -278,7 +278,7 @@ function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGam
     plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn)
 end
 
-function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs, t=nothing, letter=nothing)
+function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs, t=nothing, letter=nothing, include_all_labels=false)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -286,8 +286,20 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p2 = get_standard_plot(;columns=1)
-    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)", legendfontsize=24)
+    if include_all_labels
+        p2 = get_standard_plot(;columns=3, legendfontsize=12)
+        p1_est_label = L"$\mathcal{A}_1$ Estimate"
+        p1_truth_label = L"$\mathcal{A}_1$ Truth"
+        p2_est_label = L"$\mathcal{A}_2$ Estimate"
+        p2_truth_label = L"$\mathcal{A}_2$ Truth"
+    else
+        p2 = get_standard_plot(;columns=1)
+        p1_est_label = ""
+        p1_truth_label = ""
+        p2_est_label = ""
+        p2_truth_label = ""
+    end
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
     # Remove axis and grid.
     plot!(axis=([], false), grid=true)
@@ -299,13 +311,13 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
     end
 
-    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label="")#L"$\mathcal{A}_1$ Truth")
-    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, label="") #label=L"$\mathcal{A}_1$ Estimate",
-    # scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ Start")
+    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, label=p1_est_label)
+    scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="") # L"$\mathcal{A}_1$ Start")
 
-    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label="")#L"$\mathcal{A}_2$ Truth")
-    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, label="") #label=L"$\mathcal{A}_2$ Estimate",
-    # scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ Start")
+    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, label=p2_est_label)
+    scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
 
     # Add particles
     has_labeled_p1 = false
@@ -313,11 +325,6 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     for n in 1:num_particles
 
         num_iter = particle_num_iterations_t[n]
-
-        # println("particle n thinks leader is: ", n)
-        # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
-        # println("num iters 1, 2: ", sg_t.num_iterations, " ", sg_t.num_iterations[n])
-
         xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
 
         # TODO(hamzah) - change color based on which agent is leader
