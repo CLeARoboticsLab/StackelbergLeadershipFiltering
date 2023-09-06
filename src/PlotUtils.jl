@@ -274,8 +274,8 @@ export plot_leadership_filter_measurements
 #                                     measurement model. The waypoint at the current time is highlighted. Measurement
 #                                     data and particles are colored to match the agent assumed by the particle to be
 #                                     leader.
-function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGamesObject, true_xs, est_xs; transform_particle_fn=(xs)->xs)
-    plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn)
+function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGamesObject, true_xs, est_xs; transform_particle_fn=(xs)->xs, include_all_labels=false)
+    plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn, include_all_labels=include_all_labels)
 end
 
 function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs, t=nothing, letter=nothing, include_all_labels=false)
