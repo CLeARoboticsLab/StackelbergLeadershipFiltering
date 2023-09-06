@@ -55,7 +55,7 @@ iter1 = ProgressBar(2:snapshot_freq:T)
 ii = 1
 
 # Only needs to be generated once.
-p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T], zs[:, 1:T])
+p1a = plot_leadership_filter_positions(sg_objs[1].dyn, true_xs[:, 1:T], x̂s[:, 1:T])
 
 pos_main_filepath = joinpath(folder_name, "lf_lnq_positions_main_L$(leader_idx).pdf")
 savefig(p1a, pos_main_filepath)
@@ -66,7 +66,8 @@ for t in iter1
 
     p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], true_xs[:, 1:T], x̂s)
 
-    p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx)
+    p5 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=1)
+    p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=2)
     plot!(p5, title="")
     plot!(p6, title="")
 
@@ -122,7 +123,8 @@ anim = @animate for t in iter
     # probability plots 5 and 6
     title5 = "Probability over time for P1"
     title6 = "Probability over time for P2"
-    p5, p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx)
+    p5 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=1)
+    p6 = make_probability_plots(times[1:T], probs[1:T]; t_idx=t, include_gt=leader_idx, player_to_plot=2)
     plot!(p5, title=title5)
     plot!(p6, title=title6)
 

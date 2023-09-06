@@ -79,7 +79,7 @@ end
 convergence_plot = plot_convergence(all_convergence_metrics, all_num_iters, mc_max_iters, mc_threshold; lower_bound=1e-6)
 
 # 2. Plot the convergence histogram. For the LQ case, all items should be in first bin.
-convergence_histogram = plot_convergence_histogram(all_num_iters)
+convergence_histogram = plot_convergence_histogram(all_num_iters, mc_max_iters)
 
 # trajectory distance to origin (for each player)
 d1 = plot_distance_to_origin(dyn, times, all_xs)

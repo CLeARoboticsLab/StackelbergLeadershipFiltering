@@ -3,6 +3,7 @@
 # include("RunSILQGamesOnNonquadraticLinearGame.jl")
 include("RunSILQGamesOnNonLQGame.jl")
 
+using LaTeXStrings
 using Plots
 using ProgressBars
 gr()
@@ -21,23 +22,7 @@ anim = @animate for k in iter
 
     p1, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times, xns, [un1s, un2s])
 
-    # Plot convergence.
-    conv_x = cumsum(ones(num_iters)) .- 1
-    r1 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv.", label=L"\mathcal{A}_1", yaxis=:log)
-    plot!(r1, conv_x, conv_metrics[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
-    plot!(r1, [k, k], [minimum(conv_metrics[:, 1:num_iters]), maximum(conv_metrics[:, 1:num_iters])], label="", color=:black, yaxis=:log)
-
-    # r2 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
-    # plot!(r2, conv_x, evaluated_costs[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
-    # plot!(r2, [k, k], [minimum(evaluated_costs[:, 1:num_iters]), maximum(evaluated_costs[:, 1:num_iters])], label="", color=:black, yaxis=:log)
-
-    # Shift the cost to ensure they are positive.
-    costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-8)
-    costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-8)
-
-    q6 = plot(conv_x, costs_1, title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
-    plot!(q6, conv_x, costs_2, label=L"\mathcal{A}_2", yaxis=:log)
-    plot!(q6, [k, k], [minimum(costs_1), maximum(costs_2)], label="", color=:black, yaxis=:log)
+    r1, q6 = plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluated_costs)
 
     plot(p1, p2, p3, p4, p5, p6, p7, r1, q6, layout = p)
 end
