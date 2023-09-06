@@ -244,7 +244,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=1, legendfontsize=24)
+    p1 = get_standard_plot(;columns=1, legendfontsize=18)
     
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     if !isnothing(show_meas_annotation)
@@ -331,8 +331,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         does_p1_lead = (particle_leader_idxs_t[n] == 1)
 
         color = (does_p1_lead) ? "red" : "blue"
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"Meas. Model ($\mathcal{A}_1$)" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"Meas. Model ($\mathcal{A}_2$)" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1$ Meas. Model" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_2$ Meas. Model" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
