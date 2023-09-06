@@ -387,7 +387,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
             # label_str = ""
             # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
         end
-        annotate!(plot, 8.0, 1.1, "times steps", 18)
+        annotate!(plot, 8.5, 1.1, "steps", 18)
     end
 
 
