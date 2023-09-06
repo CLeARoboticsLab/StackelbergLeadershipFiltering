@@ -5,8 +5,8 @@
 using LaTeXStrings
 using Plots
 
-function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=12)
-    return plot(legendfontsize=legendfontsize, tickfontsize=16, fontsize=12, labelfontsize=14, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
+function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=18)
+    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
 end
 export get_standard_plot
 
@@ -51,44 +51,44 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_le
     plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label=L"\mathcal{A}_1", linewidth=3, color=:red, marker=:circle,  markersize=marksize, markerstrokewidth=0)
     plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"\mathcal{A}_2", linewidth=3, color=:blue, marker=:circle,  markersize=marksize, markerstrokewidth=0)
 
-    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"\mathcal{A}_1 start")
-    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"\mathcal{A}_2 start")
+    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ start")
+    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ start")
 
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1 px")
-    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2 px")
+    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1~p_x")
+    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2~p_x")
 
     title2b = "y-pos"
     q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1 py")
-    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2 py")
+    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1~p_y")
+    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2~p_y")
 
     title3 = "x-vel"
     q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[2,:], label=L"\mathcal{A}_1 vx")
-    plot!(times, xs[6,:], label=L"\mathcal{A}_2 vx")
+    plot!(times, xs[2,:], label=L"\mathcal{A}_1~v_x")
+    plot!(times, xs[6,:], label=L"\mathcal{A}_2~v_x")
 
     title4 = "y-vel"
     q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[4,:], label=L"\mathcal{A}_1 vy")
-    plot!(times, xs[8,:], label=L"\mathcal{A}_2 vy")
+    plot!(times, xs[4,:], label=L"\mathcal{A}_1~v_y")
+    plot!(times, xs[8,:], label=L"\mathcal{A}_2~v_y")
 
     title5 = "x-accel"
     q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="accel (mpss)")
-    plot!(times, us[1][1, :], label=L"\mathcal{A}_1 ax")
-    plot!(times, us[2][1, :], label=L"\mathcal{A}_2 ax")
+    plot!(times, us[1][1, :], label=L"\mathcal{A}_1~a_x")
+    plot!(times, us[2][1, :], label=L"\mathcal{A}_2~a_x")
 
     title6 = "y-accel"
     q6 = get_standard_plot(;include_legend)
     plot!(title=title6, xlabel="t (s)", ylabel="accel (mpss)")
-    plot!(times, us[1][2, :], label=L"\mathcal{A}_1 ay")
-    plot!(times, us[2][2, :], label=L"\mathcal{A}_2 ay")
+    plot!(times, us[1][2, :], label=L"\mathcal{A}_1~a_y")
+    plot!(times, us[2][2, :], label=L"\mathcal{A}_2~a_y")
 
     return q1, q2a, q2b, q3, q4, q5, q6
 end
@@ -116,38 +116,38 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1 px")
-    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2 px")
+    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1~p_x")
+    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2~p_x")
 
     title2b = "y-pos"
     q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1 py")
-    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2 py")
+    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1~p_y")
+    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2~p_y")
 
     title3 = "θ"
     q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="θ (rad)")
-    plot!(times, wrap_angle.(xs[3,:]), label=L"\mathcal{A}_1 θ")
-    plot!(times, wrap_angle.(xs[7,:]), label=L"\mathcal{A}_2 θ")
+    plot!(times, wrap_angle.(xs[3,:]), label=L"\mathcal{A}_1~θ")
+    plot!(times, wrap_angle.(xs[7,:]), label=L"\mathcal{A}_2~θ")
 
     title4 = "vel"
     q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[4,:], label=L"\mathcal{A}_1 v")
-    plot!(times, xs[8,:], label=L"\mathcal{A}_2 v")
+    plot!(times, xs[4,:], label=L"\mathcal{A}_1~v")
+    plot!(times, xs[8,:], label=L"\mathcal{A}_2~v")
 
     title5 = "ang vel"
     q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="ang. vel. (rad/s)")
-    plot!(times, us[1][1, :], label=L"\mathcal{A}_1 ω")
-    plot!(times, us[2][1, :], label=L"\mathcal{A}_2 ω")
+    plot!(times, us[1][1, :], label=L"\mathcal{A}_1~ω")
+    plot!(times, us[2][1, :], label=L"\mathcal{A}_2~ω")
 
     title6 = "accel"
     q6 = get_standard_plot(;include_legend)
     plot!(title=title6, xlabel="t (s)", ylabel="accel (mpss)")
-    plot!(times, us[1][2, :], label=L"\mathcal{A}_1 accel")
-    plot!(times, us[2][2, :], label=L"\mathcal{A}_2 accel")
+    plot!(times, us[1][2, :], label=L"$\mathcal{A}_1$ accel")
+    plot!(times, us[2][2, :], label=L"$\mathcal{A}_2$ accel")
 
     return q1, q2a, q2b, q3, q4, q5, q6
 end
@@ -160,13 +160,13 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel="Max Absolute State Difference")
+    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel="Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
-        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green, linewidth=3)
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green, linewidth=3)
     else
-        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit Function", color=:green)
+        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green)
     end
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
@@ -194,13 +194,13 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
         plot!(conv_x, costs_2[1:num_iters], label=L"\mathcal{A}_2", color=:blue, linewidth=2)
 
         cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
-        plot!(conv_x, cost_sum, label="Total", color=:green, linestyle=:dash, linewidth=3)
+        plot!(conv_x, cost_sum, label="Total", color=:purple, linewidth=3)
     else
         scatter!(conv_x, costs_1[1:num_iters], label=L"\mathcal{A}_1", color=:red, marker=:plus, ms=8)
         scatter!(conv_x, costs_2[1:num_iters], label=L"\mathcal{A}_2", color=:blue, marker=:plus, ms=8)
 
         cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
-        scatter!(conv_x, cost_sum, label="Total", color=:green, xaxis=[-0.1, 1.1], xticks=[0, 1])
+        scatter!(conv_x, cost_sum, label="Total", color=:purple, xaxis=[-0.1, 1.1], xticks=[0, 1])
     end
 
     return q8, q9
@@ -218,17 +218,17 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=3, legendfontsize=10)
+    p1 = get_standard_plot(;columns=2, legendfontsize=18)
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"\mathcal{A}_1 Ground Truth", color=:red, linewidth=2, ls=:dash)
-    plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
+    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:red, linewidth=2, ls=:dash)
+    plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange)
     # scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_1 Measurements")
-    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"\mathcal{A}_1 Start")
+    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")# L"$\mathcal{A}_1$ Start")
 
-    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"\mathcal{A}_2 Ground Truth", color=:blue, linewidth=2, ls=:dash)
-    plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"\mathcal{A}_2 Estimate", color=:turquoise2)
+    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Ground Truth", color=:blue, linewidth=2, ls=:dash)
+    plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"$\mathcal{A}_2$ Estimate", color=:turquoise2)
     # scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_2 Measurements")
-    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"\mathcal{A}_2 Start")
+    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")# L"$\mathcal{A}_2$ Start")
 
     return p1
 end
@@ -236,7 +236,7 @@ export plot_leadership_filter_positions
 
 # This function makes an x-y plot containing (1) the ground truth trajectory and
 #                                            (2) simulated measured positions of the trajectory.
-function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs)
+function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_meas_annotation=nothing)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -244,17 +244,25 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=3, legendfontsize=10)
+    p1 = get_standard_plot(;columns=1, legendfontsize=24)
+    
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"\mathcal{A}_1 Ground Truth", color=:black, linewidth=2, ls=:dash)
-    # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
-    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_1 Measurements")
-    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"\mathcal{A}_1 Start")
+    if !isnothing(show_meas_annotation)
+        # Remove axis and grid.
+        plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
+        annotate!(p1, 1.2, 1.9, text("($(show_meas_annotation)) observations", 30))
+    end
 
-    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"\mathcal{A}_2 Ground Truth", color=:black, linewidth=2, ls=:dash)
+    
+    plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=2, ls=:solid, label="")#L"$\mathcal{A}_1$ Ground Truth")
+    # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
+    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_1$ Measurements")
+    scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#L"$\mathcal{A}_1$ Start")
+
+    plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=2, ls=:solid, label="")#L"$\mathcal{A}_2$ Ground Truth")
     # plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"\mathcal{A}_2 Estimate", color=:turquoise2)
-    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"\mathcal{A}_2 Measurements")
-    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"\mathcal{A}_2 Start")
+    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_2$ Measurements")
+    scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")#L"$\mathcal{A}_2$ Start")
 
     return p1
 end
@@ -270,7 +278,7 @@ function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGam
     plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn)
 end
 
-function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs)
+function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs, t=nothing, letter=nothing)
     x₁ = true_xs[:, 1]
 
     x1_idx = xidx(dyn, 1)
@@ -278,15 +286,26 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p2 = get_standard_plot(;columns=3)
-    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"\mathcal{A}_1 Ground Truth", color=:black, linewidth=3)
-    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
-    scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"\mathcal{A}_1 Start")
+    p2 = get_standard_plot(;columns=1)
+    plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)", legendfontsize=24)
 
-    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], label=L"\mathcal{A}_2 Ground Truth", color=:black, linewidth=3)
-    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"\mathcal{A}_2 Estimate", color=:turquoise2)
-    scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"\mathcal{A}_2 Start")
+    # Remove axis and grid.
+    plot!(axis=([], false), grid=true)
+
+    # If t is provided, annotate the plot.
+    if !isnothing(t) && !isnothing(letter)
+        plot!(ylabel="", xlabel="")
+        annotate!(p2, 1.2, 1.8, text("($(letter)) meas. model\ntime step $(t)", 30))
+
+    end
+
+    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label="")#L"$\mathcal{A}_1$ Truth")
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, label="") #label=L"$\mathcal{A}_1$ Estimate",
+    # scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ Start")
+
+    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label="")#L"$\mathcal{A}_2$ Truth")
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, label="") #label=L"$\mathcal{A}_2$ Estimate",
+    # scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ Start")
 
     # Add particles
     has_labeled_p1 = false
@@ -305,8 +324,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         does_p1_lead = (particle_leader_idxs_t[n] == 1)
 
         color = (does_p1_lead) ? "red" : "blue"
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? "E Meas. (P1 leads)" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? "E Meas. (P2 leads)" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"Meas. Model ($\mathcal{A}_1$)" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"Meas. Model ($\mathcal{A}_2$)" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
@@ -315,10 +334,10 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             has_labeled_p2 = true
         end
 
-        scatter!(p2, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
+        scatter!(p2, xks[x1_idx, :], xks[y1_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
         scatter!(p2, [xks[x1_idx, 2]], [xks[y1_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label=label_1)
 
-        scatter!(p2, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=0.5, markerstrokewidth=0, label="")
+        scatter!(p2, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
         scatter!(p2, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label=label_2)
     end
 
@@ -327,38 +346,55 @@ end
 export plot_leadership_filter_measurement_details
 
 # This function generates two probability plots (both lines on one plot is too much to see), one for the probablity of
-# each agent as leader.
-function make_probability_plots(times, probs; t_idx=nothing, include_gt=nothing, stddevs=nothing)
+# each agent as leader. Plot both by default.
+function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=nothing, include_gt=nothing, stddevs=nothing)
     T = length(times)
     lower_p1, upper_p1 = (isnothing(stddevs)) ? (zeros(T), zeros(T)) : stddevs
 
     # probability plot for P1 - plot 5
-    p5 = get_standard_plot()
-    plot!(xlabel="t (s)", ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_1)$""", ylimit=(-0.1, 1.1), label="")
-    if !isnothing(include_gt)
-        plot!(p5, times, (include_gt%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
+    plot = get_standard_plot(columns=4)
+    plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
+    if player_to_plot == 1 || isnothing(player_to_plot)
+        # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
+        if !isnothing(include_gt)
+            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=2)
+        end
+
+        # Bound the stddevs to avoid going above 1 or below 0.
+        plot!(plot, times, probs, color=:red, label=L"\mathcal{A}_1", ribbon=(lower_p1, upper_p1), fillalpha=0.3)
     end
+
+    # probability plot for P2 - plot 6
+    # p6 = get_standard_plot()
+    if player_to_plot == 2 || isnothing(player_to_plot)
+        # plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
+        # L"""$\mathbb{P}(H_t=\mathcal{A}_2)$"""
+        if !isnothing(include_gt)
+            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=2)
+        end
+
+        lower_p2, upper_p2 = upper_p1, lower_p1
+        plot!(plot, times, 1 .- probs, color=:blue, label=L"\mathcal{A}_2", ribbon=(lower_p2, upper_p2), fillalpha=0.3)
+    end
+
+    # Draw the lines of interest.
     if !isnothing(t_idx)
-        t = times[t_idx]
-        plot!(p5, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
+        label_str = join(t_idx, ",")
+        for idx in t_idx
+            t = times[idx]
+            plot!(plot, [t, t], [-0.05, 1.0], color=:black, linestyle=:solid, linewidth=3, label="")#"t=$(label_str)",)
+            annotate!(plot, times[idx], 1.1, idx, 24)
+            # label_str = ""
+            # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
+        end
+        annotate!(plot, 8.5, 1.1, "steps", 18)
     end
 
-    # Bound the stddevs to avoid going above 1 or below 0.
-    plot!(p5, times, probs, color=:red, label=L"\mathcal{A}_1", ribbon=(lower_p1, upper_p1), fillalpha=0.3)
 
-     # probability plot for P2 - plot 6
-    p6 = get_standard_plot()
-    plot!(xlabel="t (s)", ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_2)$""", ylimit=(-0.1, 1.1), label="")
-    if !isnothing(include_gt)
-        plot!(p6, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:green, linestyle=:dash, linewidth=2)
-    end
-    if !isnothing(t_idx)
-        t = times[t_idx]
-        plot!(p6, [t, t], [-0.05, 1.05], label="t=$(round.(t, digits=3)) s", color=:black, linestyle=:dot, linewidth=3)
-    end
-    lower_p2, upper_p2 = upper_p1, lower_p1
-    plot!(p6, times, 1 .- probs, color=:blue, label=L"\mathcal{A}_2", ribbon=(lower_p2, upper_p2), fillalpha=0.3)
+    # if isnothing(player_to_plot)
+    #     plot!(ylabel=L"""$\mathbb{P}(H_t=\mathcal{A}_i)$""", label="")
+    # end
 
-    return p5, p6
+    return plot
 end
 export make_probability_plots

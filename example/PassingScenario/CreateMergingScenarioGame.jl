@@ -1,13 +1,13 @@
 using StackelbergControlHypothesesFiltering
 
-include("PassingScenarioConfig.jl")
+include("MergingScenarioConfig.jl")
 
-function create_passing_scenario_dynamics(num_players, sample_time)
+function create_merging_scenario_dynamics(num_players, sample_time)
     return UnicycleDynamics(num_players, sample_time)
 end
 
 # Specify some constants.
-const NUM_PASSING_SCENARIO_SUBCOSTS = 14
+const NUM_MERGING_SCENARIO_SUBCOSTS = 13
 
 # A helper to combine functions into a weighted sum.
 function combine_cost_funcs(funcs, weights)
@@ -22,9 +22,9 @@ function combine_cost_funcs(funcs, weights)
     return g
 end
 
-function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2)
-    @assert length(w_p1) == NUM_PASSING_SCENARIO_SUBCOSTS
-    @assert length(w_p2) == NUM_PASSING_SCENARIO_SUBCOSTS
+function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6)
+    @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
+    @assert length(w_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
 
     # Passing Scenario cost definition
     # 1. distance to goal (no control cost)
@@ -32,7 +32,7 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
     # TODO(hamzah) - should this be replaced with a tracking trajectory cost?
     const_1 = 1.
     Q1 = zeros(8, 8)
-    Q1[1, 1] = const_1 * 2.
+    Q1[1, 1] = const_1 * 0.
     Q1[2, 2] = const_1 * 0.
     Q1[3, 3] = const_1 * 1.
     Q1[4, 4] = const_1 * 1.
@@ -42,7 +42,7 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
     c1a = QuadraticCostWithOffset(q_cost1, goal_p1)
 
     Q2 = zeros(8, 8)
-    Q2[5, 5] = const_1 * 1.
+    Q2[5, 5] = const_1 * 0.
     Q2[6, 6] = const_1 * 0.
     Q2[7, 7] = const_1 * 1.
     Q2[8, 8] = const_1 * 1.
@@ -51,12 +51,52 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
     add_control_cost!(q_cost2, 2, zeros(udim(si, 2), udim(si, 2)))
     c2a = QuadraticCostWithOffset(q_cost2, goal_p2)
 
+
+    merging_trajectory_position_cost_p1(si, x, us, t) = begin
+        dist_along_lane = x[2]
+        L₁ = cfg.region1_length_m 
+        L₂ = cfg.region2_length_m 
+        w = cfg.lane_width_m
+
+        if dist_along_lane ≤ L₁ # separate lanes
+            goal_pos = -w/2
+        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+            goal_pos = -w/4 - lin_width_at_dist_proportion * w/4
+        else # in final region 
+            goal_pos = 0.
+        end
+
+        return 1//2 * (x[1] - goal_pos)^2
+    end
+
+    merging_trajectory_position_cost_p2(si, x, us, t) = begin
+        dist_along_lane = x[6]
+        L₁ = cfg.region1_length_m 
+        L₂ = cfg.region2_length_m 
+        w = cfg.lane_width_m
+
+        if dist_along_lane ≤ L₁ # separate lanes
+            goal_pos = w/2
+        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+            goal_pos = w/4 + lin_width_at_dist_proportion * w/4
+        else # in final region 
+            goal_pos = 0.
+        end
+
+        return 1//2 * (x[5] - goal_pos)^2
+    end
+
+    c1a_i = PlayerCost(merging_trajectory_position_cost_p1, si)
+    c2a_i = PlayerCost(merging_trajectory_position_cost_p2, si)
+
     # 2. avoid collisions
     avoid_collisions_cost_fn(si, x, us, t) = begin
         # This log barrier avoids agents getting within some configured radius of one another.
         # TODO(hamzah) - this may accidentally be using 1-norm.
         dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
-        return (dist_to_boundary ≤ 0) ? 1e6 : -log(dist_to_boundary)
+        return (dist_to_boundary ≤ 0) ? large_number : -log(dist_to_boundary)
     end
 
     c1b = PlayerCost(avoid_collisions_cost_fn, si)
@@ -80,7 +120,6 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
     add_control_cost!(c1de, 1, R11)
     add_control_cost!(c1de, 2, zeros(udim(si, 2), udim(si, 2)))
 
-
     max_rotvel = cfg.max_rotational_velocity_radps
     max_accel = cfg.max_acceleration_mps
 
@@ -101,17 +140,58 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
 
     # 6. log barriers on the x dimension ensure that the vehicles don't exit the road
     # TODO(hamzah) - remove assumption of straight road
-    c1f_i = AbsoluteLogBarrierCost(1, get_right_lane_boundary_x(cfg), false)
-    c1f_ii = AbsoluteLogBarrierCost(1, get_left_lane_boundary_x(cfg), true)
+    stay_within_lanes_p1(si, x, us, t) = begin
+        dist_along_lane = x[2]
+        L₁ = cfg.region1_length_m 
+        L₂ = cfg.region2_length_m 
+        w = cfg.lane_width_m
 
-    c2f_i = AbsoluteLogBarrierCost(5, get_right_lane_boundary_x(cfg), false)
-    c2f_ii = AbsoluteLogBarrierCost(5, get_left_lane_boundary_x(cfg), true)
+        if dist_along_lane ≤ L₁ # separate lanes
+            upper_bound = 0.
+            lower_bound = -w
+        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+            upper_bound = w/2 + lin_width_at_dist_proportion * w/2
+            lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
+        else # in final region 
+            upper_bound = w/2
+            lower_bound = -w/2
+        end
 
-    # 7. Add a bump in cost for crossing the centerline.
-    c1g = GaussianCost([1], [get_center_line_x(cfg)], ones(1, 1))
-    c2g = GaussianCost([5], [get_center_line_x(cfg)], ones(1, 1))
+        # println(x[1], " ", lower_bound," ", upper_bound)
+        violates_bound = x[1] ≥ upper_bound || x[1] ≤ lower_bound
+        # println(x[1]-lower_bound)
+        # println(upper_bound-x[1])
+        return violates_bound ? large_number : -log(upper_bound-x[1]) -log(x[1]-lower_bound)
+    end
+
+    stay_within_lanes_p2(si, x, us, t) = begin
+        dist_along_lane = x[6]
+        L₁ = cfg.region1_length_m 
+        L₂ = cfg.region2_length_m 
+        w = cfg.lane_width_m
+
+        if dist_along_lane ≤ L₁ # separate lanes
+            upper_bound = w
+            lower_bound = 0.
+        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+            upper_bound = w/2 + lin_width_at_dist_proportion * w/2
+            lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
+        else # in final region 
+            upper_bound = w/2
+            lower_bound = -w/2
+        end
+
+        violates_bound = x[5] ≥ upper_bound || x[5] ≤ lower_bound
+        return violates_bound ? large_number : -log(upper_bound-x[5]) -log(x[5]-lower_bound)
+    end
+
+    c1f = PlayerCost(stay_within_lanes_p1, si)
+    c2f = PlayerCost(stay_within_lanes_p2, si)
 
     costs_p1 = [c1a,
+                c1a_i,
                 c1b,
                 c1c_i,
                 c1c_ii,
@@ -122,13 +202,12 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
                 c1de_ii,
                 c1de_iii,
                 c1de_iv,
-                c1f_i,
-                c1f_ii,
-                c1g]
-    @assert length(costs_p1) == NUM_PASSING_SCENARIO_SUBCOSTS
+                c1f]
+    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
     
 
     costs_p2 = [c2a,
+                c2a_i,
                 c2b,
                 c2c_i,
                 c2c_ii,
@@ -139,10 +218,8 @@ function create_passing_scenario_costs(cfg::PassingScenarioConfig, si, w_p1, w_p
                 c2de_ii,
                 c2de_iii,
                 c2de_iv,
-                c2f_i,
-                c2f_ii,
-                c2g]
-     @assert length(costs_p2) == NUM_PASSING_SCENARIO_SUBCOSTS
+                c2f]
+     @assert length(costs_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
 
     g1 = combine_cost_funcs(get_as_function.(costs_p1), w_p1)
     sum_cost_p1 = PlayerCost(g1, si)

@@ -86,7 +86,7 @@ end
 
 
 function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_idx::Int, num_games_desired::Int,
-                                     Ts::Int, t0, times, dyn_w_hist::DynamicsWithHistory, costs, us)
+                                     Ts::Int, t0, times, dyn_w_hist::DynamicsWithHistory, costs, us; sg_ttm1=nothing)
 
     # Extract the history-less dynamics.
     dyn = get_underlying_dynamics(dyn_w_hist)
@@ -105,20 +105,36 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
     # DEBUGGING: This line provides the future control trajectory to the filter - should not generally be enabled.
     # us_1_from_tt = [us[ii][:, s_idx:e_idx] for ii in 1:num_agents(dyn)]
 
-    # Set the initial control estimate to be the initial control repeated into the future for Ts time steps.
     ctrl_len = e_idx - s_idx + 1
     us_prev = [us[ii][:, s_idx] for ii in 1:num_agents(dyn)]
-    us_1_from_tt = [repeat(us_prev[ii], 1, ctrl_len) for ii in 1:num_agents(dyn)]
+    default_us_1_from_tt = [repeat(us_prev[ii], 1, ctrl_len) for ii in 1:num_agents(dyn)]
+
+    has_sg_ttm1 = !isnothing(sg_ttm1)
+    # print("[OUT] $(tt) - has the sg obj ($(has_sg_ttm1)) us p1 size $(size(prev_particle_uks[1]))")
 
     # TODO(hamzah) - For now assumes 1 game played; fix this
     @assert num_games_desired == 1
-    function h(X)
+    function h(X; particle_idx=nothing)
         # TODO(hamzah) - revisit this if it becomes a problem
         # If we are on the first time step, then we can't get a useful history to play a Stackelberg game.
-        # Return the current state.
+        # Return the current state. 
+        # TODO(revisit): particle_idx being nothing indicates we are being used to compute metrics, so ignore for now.
         if tt == 1
             @assert iszero(num_games_playable)
             return get_current_state(dyn_w_hist, X)
+        end
+
+        # Set the initial control estimate to be the initial control repeated into the future for Ts time steps.
+        # print("[IN] $(tt) - has the sg obj ($(has_sg_ttm1)) isnothing uks $(isnothing(prev_particle_uks))")
+        has_particle_idx = !isnothing(particle_idx)
+        if has_sg_ttm1 && has_particle_idx && sg_ttm1.leader_idxs[particle_idx] == leader_idx
+            # Reuse the previous converged trajectory, which may be from either L1 or L2.
+            us_1_from_tt = [sg_ttm1.uks[ii][particle_idx, :, :] for ii in 1:num_players]
+        else
+            if has_sg_ttm1 && has_particle_idx
+                println("$(particle_idx) - leadership mismatch $(sg_ttm1.leader_idxs[particle_idx]) --> $(leader_idx)")
+            end
+            us_1_from_tt = default_us_1_from_tt
         end
 
         # Get the state at the previous time tt-1. This will be the initial state in the game.
@@ -133,6 +149,7 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
 
         # Play a stackelberg games starting at this previous state using the times/controls we extracted.
         xs, us, is_converged, num_iters, convergence_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, stack_times[1], stack_times, prev_state, us_1_from_tt)
+        println(particle_idx, " ", num_iters, " ", convergence_metrics[num_iters+1])
         # if !is_converged
         #     println("$tt - not converged with metric convergence_metrics in $num_iters => $(convergence_metrics[1, num_iters]) > $(sg_obj.threshold)\n")
         # end
@@ -229,10 +246,11 @@ function leadership_filter(dyn::Dynamics,
                                               threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 
         # Create the measurement models.
+        ttm1 = (tt==1) ? 1 : tt-1
         h₁ = make_stackelberg_meas_model(tt, sg_objs[tt], 1, num_games,
-                                         Ts, t0, times, dyn_w_hist, costs, us)
+                                         Ts, t0, times, dyn_w_hist, costs, us; sg_ttm1=sg_objs[ttm1])
         h₂ = make_stackelberg_meas_model(tt, sg_objs[tt], 2, num_games,
-                                         Ts, t0, times, dyn_w_hist, costs, us)
+                                         Ts, t0, times, dyn_w_hist, costs, us; sg_ttm1=sg_objs[ttm1])
 
         # TODO(hamzah) - update for multiple historical states
         Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)

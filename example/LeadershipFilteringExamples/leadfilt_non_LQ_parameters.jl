@@ -1,9 +1,10 @@
 using StackelbergControlHypothesesFiltering
 
+using LaTeXStrings
 using Random
 
-dt = 0.02
-T = 251
+dt = 0.05
+T = 201
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -35,6 +36,8 @@ P₁ = Diagonal([pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, vel_unc, pos_unc, 
 
 # Process noise uncertainty
 # Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+# Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+# Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
@@ -53,14 +56,14 @@ p_transition = 0.98
 p_init = 0.5
 
 threshold = 1e-3
-max_iters = 50
+max_iters = 200
 step_size = 2e-2
 
 gt_silq_num_runs=1
 
 # config variables
 gt_silq_threshold=1e-3
-gt_silq_max_iters=2000
+gt_silq_max_iters=3000
 gt_silq_step_size=1e-2
 gt_silq_verbose=true
 

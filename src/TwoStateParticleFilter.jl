@@ -184,7 +184,7 @@ function step_pf(pf::ParticleFilter, time_range, f_dynamics, h_measures, discret
         # Resample the state for each particle and extract an index to select the dynamics.
         s_idx = s_prev[:,i][1]
         pf.particles[:,i,k] = f_dynamics[s_idx](time_range, 𝒳_prev[:,i], u_input_k, pf.rng)
-        pf.z_models[:,i,k] = h_measures[s_idx](pf.particles[:,i,k])
+        pf.z_models[:,i,k] = h_measures[s_idx](pf.particles[:,i,k]; particle_idx=i)
 
         distrib = MvNormal(pf.z_models[:,i,k], R)
         p[i] = compute_measurement_lkhd(distrib, z)
@@ -228,7 +228,7 @@ function step_pf(pf::ParticleFilter, time_range, f_dynamics, h_measures, discret
     # 6. [DONE] Ensure that the call to h_meas uses the appropriate measurement likelihoods and weights.
     # ẑ is computed using the expected value of the measurement likelihoods of each dynamics model.
     p = pf.ŝ_probs[k]
-    ẑ = p * h_measures[1](pf.x̂[:,k]) + (1-p) * h_measures[2](pf.x̂[:,k])
+    ẑ = p * h_measures[1](pf.x̂[:,k]; particle_idx=nothing) + (1-p) * h_measures[2](pf.x̂[:,k]; particle_idx=nothing)
     pf.ϵ_hat[k,:] = z - ẑ
 
     # After the update is complete, update the number of iterations thus far.

@@ -2,8 +2,8 @@ using StackelbergControlHypothesesFiltering
 
 using Random
 
-dt = 0.02
-T = 501
+dt = 0.05
+T = 201
 t0 = 0.0
 horizon = T * dt
 # TODO(hamzah) - We do double the times as needed so that there's extra for the Stackelberg history. Make this tight.
@@ -57,8 +57,11 @@ p_init = 0.5
 # max_iters = 50
 # step_size = 2e-2
 
-lf_threshold = 1e-3 #1e-3
-lf_max_iters = 50
+# lf_threshold = 1e-3 #1e-3
+# lf_max_iters = 50
+# lf_step_size = 2e-2
+lf_threshold = 1e-3
+lf_max_iters = 200
 lf_step_size = 2e-2
 
 
@@ -66,7 +69,7 @@ gt_silq_num_runs=1
 
 # config variables
 gt_silq_threshold=1e-3
-gt_silq_max_iters=2000
+gt_silq_max_iters=3000
 gt_silq_step_size=1e-2
 gt_silq_verbose=true
 

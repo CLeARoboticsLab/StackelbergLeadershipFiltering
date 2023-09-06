@@ -7,42 +7,43 @@ using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
 
-include("CreatePassingScenarioGame.jl")
+include("CreateMergingScenarioGame.jl")
 include("GroundTruthUtils.jl")
-include("PassingScenarioConfig.jl")
+include("MergingScenarioConfig.jl")
 include("PassingScenarioPlotUtils.jl")
 
 # Define game and timing related configuration.
 num_players = 2
 
-T = 151
+T = 101
 t₀ = 0.0
 dt = 0.05
 horizon = T * dt
 times = dt * cumsum(ones(2*T)) .- dt
 
 # Get the configuration.
-cfg = PassingScenarioConfig(collision_radius_m=0.2, lane_width_m=2.5)
-                            # max_heading_deviation=pi/6)
+cfg = MergingScenarioConfig(collision_radius_m=0.2, lane_width_m=2.5)
 
 # define limits for plots
 limits = [-5., 120.]
 limits_tuple = tuple(limits...)
 
 # Defined the dynamics of the game.
-dyn = create_passing_scenario_dynamics(num_players, dt)
+dyn = create_merging_scenario_dynamics(num_players, dt)
 si = dyn.sys_info
 
 # Define the starting and goal state.
 v_init = 10.
-rlb_x = get_right_lane_boundary_x(cfg)
-x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/2; 0.; pi/2; v_init]
+lw_m = cfg.lane_width_m
+x₁ = [-lw_m/2; 0.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
 
-p1_goal = vcat([x₁[1]; 60; pi/2; v_init], zeros(4))
-p2_goal = vcat(zeros(4),                [x₁[5]; 50.; pi/2; v_init])
+
+
+p1_goal = vcat([0.; 60; pi/2; v_init], zeros(4))
+p2_goal = vcat(zeros(4),                [0.; 50.; pi/2; v_init])
 
 # Define the costs for the agents.
-num_subcosts = 14
+num_subcosts = 13
 weights_p1 = ones(num_subcosts)
 weights_p2 = ones(num_subcosts)
 
@@ -50,24 +51,16 @@ weights_p2 = ones(num_subcosts)
 weights_p1[1] = 1.
 weights_p2[1] = 1.
 # weights_p1[2] = 1//2
-costs = create_passing_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
+costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
 
 
-# Generate a ground truth trajectory on which to run the leadership filter for a passing trajectory.
-# if T == 151
-x_refs, us_refs = get_passing_trajectory_scenario_151(cfg, x₁, T)
-if T == 101
-    x_refs, us_refs = get_passing_trajectory_scenario_101(cfg, x₁)
-end
-# x_refs, us_refs = get_passing_trajectory_scenario_151(cfg, x₁, T)
-# us_refs = [us_refs[ii][1:T] for ii in 1:num_players]
-# x_refs = x_refs[1:T]
-
+# Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
+us_refs = get_merging_trajectory_p1_first_101(cfg, x₁)
+x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)
 @assert check_valid(x_refs, us_refs, times[1:T])
 
-
-
+# plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
 
 
@@ -80,7 +73,7 @@ vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
+Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-4, 1e-2, 1e-2, 1e-3, 1e-4])
 
 
 # CONFIG: 
@@ -92,7 +85,7 @@ R = zeros(xdim(dyn), xdim(dyn)) + 0.01 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
-num_particles = 100
+num_particles = 200
 
 p_transition = 0.98
 p_init = 0.5
@@ -123,9 +116,9 @@ end
 # plot(pos_plot, p2, p3, p4, p5, p6, p7, layout=l)
 
 
-threshold = 1e-2
+threshold = 5e-3
 max_iters = 200
-step_size = 5e-3
+step_size = 1e-2
 
 x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            T,         # simulation horizon
@@ -151,7 +144,7 @@ using Dates
 gr()
 
 # Create the folder if it doesn't exist
-folder_name = "passing_scenario_2_leadfilt_$(get_date_str())"
+folder_name = "merging_scenario_2_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
 # Generate the plots for the paper.
@@ -159,6 +152,6 @@ snapshot_freq = Int((T - 1)/10)
 make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
 
 # This generates the gif.
-filename = "passing_scenario_2.gif"
+filename = "merging_scenario_2.gif"
 make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
 
