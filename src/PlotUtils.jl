@@ -298,17 +298,15 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         p1_truth_label = ""
         p2_est_label = ""
         p2_truth_label = ""
+        # Remove axis and grid.
+        plot!(axis=([], false), grid=true)
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
-
-    # Remove axis and grid.
-    plot!(axis=([], false), grid=true)
 
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
         annotate!(p2, 1.2, 1.8, text("($(letter)) meas. model\ntime step $(t)", 30))
-
     end
 
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
