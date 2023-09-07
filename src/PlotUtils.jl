@@ -295,7 +295,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         p2_truth_label = ""
     else
-        p2 = get_standard_plot(;columns=1)
+        p2 = get_standard_plot(;columns=2)
         p1_est_label = ""
         p1_truth_label = ""
         p2_est_label = ""
