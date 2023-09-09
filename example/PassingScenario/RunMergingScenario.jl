@@ -35,9 +35,9 @@ si = dyn.sys_info
 # Define the starting and goal state.
 v_init = 10.
 lw_m = cfg.lane_width_m
-x₁ = [-lw_m/2+0.25; 20.; pi/2 - 0.001*pi; 2*v_init; lw_m/2; 0.; pi/2+0.01; v_init]
+# x₁ = [-lw_m/2+0.25; 20.; pi/2 - 0.001*pi; 2*v_init; lw_m/2; 0.; pi/2+0.01; v_init]
 # x₁ = [-lw_m/2; 20.; pi/2 - 0.001*pi; v_init; lw_m/2; 0.; pi/2+0.01; v_init]
-# x₁ = [-lw_m/2; 10.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
+x₁ = [-lw_m/2; 15.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
 
 
 
@@ -82,98 +82,98 @@ plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
 
 
-# Run the leadership filter.
+# # Run the leadership filter.
 
-# Initial condition chosen randomly. Ensure both have relatively low speed.
-pos_unc = 1e-3
-θ_inc = 1e-4
-vel_unc = 1e-3
-P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
+# # Initial condition chosen randomly. Ensure both have relatively low speed.
+# pos_unc = 1e-3
+# θ_inc = 1e-4
+# vel_unc = 1e-3
+# P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
-# Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
-
-
-# CONFIG: 
-# We define an uncertainty for the measurements R arbitrarily - easy for now.
-# 
-rng = MersenneTwister(0)
-
-R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
-zs = zeros(xdim(dyn), T)
-Ts = 20
-num_games = 1
-num_particles = 50
-
-p_transition = 0.98
-p_init = 0.5
-
-discrete_state_transition, state_trans_P = generate_discrete_state_transition(p_transition, p_transition)
-s_init_distrib = Bernoulli(p_init)
-
-process_noise_distribution = MvNormal(zeros(xdim(dyn)), Q)
+# # Process noise uncertainty
+# Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
 
 
-# x_refs = xs_k
-# us_refs = us_k
+# # CONFIG: 
+# # We define an uncertainty for the measurements R arbitrarily - easy for now.
+# # 
+# rng = MersenneTwister(0)
 
-# Augment the remaining states so we have T+Ts-1 of them.
-true_xs = hcat(x_refs, zeros(xdim(dyn), Ts-1))
-true_us = [hcat(us_refs[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
+# R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
+# zs = zeros(xdim(dyn), T)
+# Ts = 20
+# num_games = 1
+# num_particles = 50
 
-# Fill in z as noisy state measurements.
-for tt in 1:T
-    zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
-end
+# p_transition = 0.98
+# p_init = 0.5
 
-# l = @layout [a{0.3h}; grid(2, 3)]
+# discrete_state_transition, state_trans_P = generate_discrete_state_transition(p_transition, p_transition)
+# s_init_distrib = Bernoulli(p_init)
 
-# pos_plot, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times[1:T], rotate_state(dyn, x_refs[:, 1:T]), us_refs)
-
-# plot_zs = rotate_state(dyn, zs)
-# scatter!(pos_plot, plot_zs[1, :], plot_zs[2, :], color=:turquoise, label="", ms=0.5)
-# scatter!(pos_plot, plot_zs[5, :], plot_zs[6, :], color=:orange, label="", ms=0.5)
-
-# plot(pos_plot, p2, p3, p4, p5, p6, p7, layout=l)
+# process_noise_distribution = MvNormal(zeros(xdim(dyn)), Q)
 
 
-threshold = 1e-2
-max_iters = 200
-step_size = 1e-2
+# # x_refs = xs_k
+# # us_refs = us_k
 
-x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
-                           T,         # simulation horizon
-                           Ts,        # horizon over which the stackelberg game should be played,
-                           num_games, # number of stackelberg games played for measurement
-                           x₁,        # initial state at the beginning of simulation
-                           P₁,        # initial covariance at the beginning of simulation
-                           us_refs,   # the control inputs that the actor takes
-                           zs,        # the measurements
-                           5 * R,
-                           process_noise_distribution,
-                           s_init_distrib,
-                           discrete_state_transition;
-                           threshold=threshold,
-                           # check_valid=check_valid,
-                           rng,
-                           max_iters=max_iters,
-                           step_size=step_size,
-                           Ns=num_particles,
-                           verbose=true)
+# # Augment the remaining states so we have T+Ts-1 of them.
+# true_xs = hcat(x_refs, zeros(xdim(dyn), Ts-1))
+# true_us = [hcat(us_refs[ii], zeros(udim(dyn, ii), Ts-1)) for ii in 1:num_players]
 
-using Dates
-gr()
+# # Fill in z as noisy state measurements.
+# for tt in 1:T
+#     zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
+# end
 
-# Create the folder if it doesn't exist
-folder_name = "merging_scenario_2_leadfilt_$(get_date_str())"
-isdir(folder_name) || mkdir(folder_name)
+# # l = @layout [a{0.3h}; grid(2, 3)]
 
-# Generate the plots for the paper.
-snapshot_freq = Int((T - 1)/10)
-make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
-# make_driving_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+# # pos_plot, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times[1:T], rotate_state(dyn, x_refs[:, 1:T]), us_refs)
 
-# This generates the gif.
-filename = "merging_scenario_2.gif"
-make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
+# # plot_zs = rotate_state(dyn, zs)
+# # scatter!(pos_plot, plot_zs[1, :], plot_zs[2, :], color=:turquoise, label="", ms=0.5)
+# # scatter!(pos_plot, plot_zs[5, :], plot_zs[6, :], color=:orange, label="", ms=0.5)
+
+# # plot(pos_plot, p2, p3, p4, p5, p6, p7, layout=l)
+
+
+# threshold = 1e-2
+# max_iters = 200
+# step_size = 1e-2
+
+# x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
+#                            T,         # simulation horizon
+#                            Ts,        # horizon over which the stackelberg game should be played,
+#                            num_games, # number of stackelberg games played for measurement
+#                            x₁,        # initial state at the beginning of simulation
+#                            P₁,        # initial covariance at the beginning of simulation
+#                            us_refs,   # the control inputs that the actor takes
+#                            zs,        # the measurements
+#                            5 * R,
+#                            process_noise_distribution,
+#                            s_init_distrib,
+#                            discrete_state_transition;
+#                            threshold=threshold,
+#                            # check_valid=check_valid,
+#                            rng,
+#                            max_iters=max_iters,
+#                            step_size=step_size,
+#                            Ns=num_particles,
+#                            verbose=true)
+
+# using Dates
+# gr()
+
+# # Create the folder if it doesn't exist
+# folder_name = "merging_scenario_2_leadfilt_$(get_date_str())"
+# isdir(folder_name) || mkdir(folder_name)
+
+# # Generate the plots for the paper.
+# snapshot_freq = Int((T - 1)/10)
+# make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+# # make_driving_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+
+# # This generates the gif.
+# filename = "merging_scenario_2.gif"
+# make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
 
