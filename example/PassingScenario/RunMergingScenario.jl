@@ -6,6 +6,7 @@ using LinearAlgebra: norm, Diagonal, I
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
+gr()
 
 include("CreateMergingScenarioGame.jl")
 include("GroundTruthUtils.jl")
@@ -22,7 +23,7 @@ horizon = T * dt
 times = dt * cumsum(ones(2*T)) .- dt
 
 # Get the configuration.
-cfg = MergingScenarioConfig(collision_radius_m=0.0, lane_width_m=2.5, max_heading_deviation=pi/6)
+cfg = MergingScenarioConfig(collision_radius_m=0.2, lane_width_m=2.5, max_heading_deviation=pi/6)
 
 # define limits for plots
 limits = [-5., 120.]
