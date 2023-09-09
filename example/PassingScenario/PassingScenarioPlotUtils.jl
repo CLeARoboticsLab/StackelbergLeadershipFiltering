@@ -10,23 +10,19 @@ function add_lane_lines!(plt, cfg::PassingScenarioConfig, limits)
     return plt
 end
 
-# function add_lane_lines!(plt, cfg::MergingScenarioConfig, limits)
-#     w = cfg.lane_width_m
-#     L₁ = cfg.region1_length_m
-#     L₂ = cfg.region2_length_m
-#     plot!(plt, [0., L₁], [w, w], label="", color=:black, lw=3)
-#     plot!(plt, [0., L₁], [0, 0], label="", color=:black, lw=3)
-#     plot!(plt, [0., L₁], [-w, -w], label="", color=:black, lw=3)
-#     plot!(plt, [L₁, L₁+L₂], [w, w/2], label="", color=:black, lw=3)
-#     plot!(plt, [L₁, L₁+L₂], [-w, -w/2], label="", color=:black, lw=3)
-#     plot!(plt, [L₁+L₂, 2*(L₁+L₂)], [w/2, w/2], label="", color=:black, lw=3)
-#     plot!(plt, [L₁+L₂, 2*(L₁+L₂)], [-w/2, -w/2], label="", color=:black, lw=3)
-
-#     # plot!(plt, limits, [get_center_line_x(cfg), get_center_line_x(cfg)], ls=:dash, color=:black, label="")
-#     # plot!(plt, limits, [get_right_lane_boundary_x(cfg), get_right_lane_boundary_x(cfg)], color=:black, label="")
-#     # plot!(plt, limits, [get_left_lane_boundary_x(cfg), get_left_lane_boundary_x(cfg)], color=:black, label="")
-#     return plt
-# end
+function add_lane_lines!(plt, cfg::MergingScenarioConfig, limits)
+    w = cfg.lane_width_m
+    L₁ = cfg.region1_length_m
+    L₂ = cfg.region2_length_m
+    plot!(plt, [0., L₁], [w, w], label="", color=:black, lw=3)
+    plot!(plt, [0., L₁], [0, 0], label="", color=:black, lw=3)
+    plot!(plt, [0., L₁], [-w, -w], label="", color=:black, lw=3)
+    plot!(plt, [L₁, L₁+L₂], [w, w/2], label="", color=:black, lw=3)
+    plot!(plt, [L₁, L₁+L₂], [-w, -w/2], label="", color=:black, lw=3)
+    plot!(plt, [L₁+L₂, 2*(L₁+L₂)], [w/2, w/2], label="", color=:black, lw=3)
+    plot!(plt, [L₁+L₂, 2*(L₁+L₂)], [-w/2, -w/2], label="", color=:black, lw=3)
+    return plt
+end
 
 # This generates the plots ready to be placed into the paper.
 function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
@@ -75,48 +71,48 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
     return true
 end
 
-# # This generates the plots ready to be placed into the paper.
-# function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
-#     T = horizon
-#     limits_tuple = tuple(limits...)
-#     iter1 = ProgressBar(2:snapshot_freq:T)
+# This generates the plots ready to be placed into the paper.
+function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+    T = horizon
+    limits_tuple = tuple(limits...)
+    iter1 = ProgressBar(2:snapshot_freq:T)
 
-#     rotated_true_xs = rotate_state(dyn, true_xs)
-#     rotated_zs = rotate_state(dyn, zs)
-#     rotated_x̂s = rotate_state(dyn, x̂s)
-#     rotate_particle_state(xs) = rotate_state(dyn, xs)
+    rotated_true_xs = rotate_state(dyn, true_xs)
+    rotated_zs = rotate_state(dyn, zs)
+    rotated_x̂s = rotate_state(dyn, x̂s)
+    rotate_particle_state(xs) = rotate_state(dyn, xs)
 
-#     # Only needs to be generated once.
-#     p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T])
-#     plot!(p1a,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
-#     p1a = add_lane_lines!(p1a, cfg, limits)
+    # Only needs to be generated once.
+    p1a = plot_leadership_filter_positions(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_x̂s[:, 1:T])
+    plot!(p1a,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+    p1a = add_lane_lines!(p1a, cfg, limits)
 
-#     pos_main_filepath = joinpath(folder_name, "LF_merging_scenario_main.pdf")
-#     savefig(p1a, pos_main_filepath)
+    pos_main_filepath = joinpath(folder_name, "LF_merging_scenario_main.pdf")
+    savefig(p1a, pos_main_filepath)
 
-#     ii = 1
-#     for t in iter1
-#         p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
-#         plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
-#         p1b = add_lane_lines!(p1b, cfg, limits)
+    ii = 1
+    for t in iter1
+        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
+        plot!(p1b,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+        p1b = add_lane_lines!(p1b, cfg, limits)
 
-#         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
-#         plot!(prob_plot, title="")
-#         # plot!(p6, title="")
+        prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
+        plot!(prob_plot, title="")
+        # plot!(p6, title="")
 
-#         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_positions_detail.pdf")
-#         prob_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_probs.pdf")
-#         # prob2_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_probs_P2.pdf")
+        pos2_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_positions_detail.pdf")
+        prob_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_probs.pdf")
+        # prob2_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_probs_P2.pdf")
 
-#         savefig(p1b, pos2_filepath)
-#         savefig(prob_plot, prob_filepath)
-#         # savefig(p6, prob2_filepath)
+        savefig(p1b, pos2_filepath)
+        savefig(prob_plot, prob_filepath)
+        # savefig(p6, prob2_filepath)
 
-#         ii += 1
-#     end
+        ii += 1
+    end
 
-#     return true
-# end
+    return true
+end
 
 # This generates a gif for the passing scenario, for debugging purposes.
 function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
