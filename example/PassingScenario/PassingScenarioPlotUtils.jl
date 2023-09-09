@@ -87,8 +87,15 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
     plot!(p1a,  ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
     p1a = add_lane_lines!(p1a, cfg, limits)
 
+    p1m = plot_leadership_filter_measurements(sg_objs[1].dyn, rotated_true_xs[:, 1:T], rotated_zs[:, 1:T])
+    plot!(p1m, ylabel=L"$-x$ (m)", xlabel=L"$y$ (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
+    p1m = add_lane_lines!(p1m, cfg, limits)
+
     pos_main_filepath = joinpath(folder_name, "LF_merging_scenario_main.pdf")
     savefig(p1a, pos_main_filepath)
+
+    pos_meas_filepath = joinpath(folder_name, "LF_passing_scenario_meas.pdf")
+    savefig(p1m, pos_meas_filepath)
 
     ii = 1
     for t in iter1
