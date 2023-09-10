@@ -189,6 +189,16 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
     c1f = PlayerCost(stay_within_lanes_p1, si)
     c2f = PlayerCost(stay_within_lanes_p2, si)
 
+    # player 1 stays ahead of player 2
+    stay_ahead_cost(si, x, us, t) = begin
+        y1 = x[2]
+        y2 = x[6]
+        dy = y2 - y1
+        return 0.5 * (tanh(dy) + 1) * dy^2
+    end
+    c1g = PlayerCost(stay_ahead_cost, si)
+
+
     costs_p1 = [c1a,
                 c1a_i,
                 c1b,
@@ -201,8 +211,9 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
                 c1de_ii,
                 c1de_iii,
                 c1de_iv,
-                c1f]
-    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
+                c1f,
+                c1g]
+    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS+1
     
 
     costs_p2 = [c2a,
