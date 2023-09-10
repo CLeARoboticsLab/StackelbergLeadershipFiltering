@@ -155,7 +155,7 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            P₁,        # initial covariance at the beginning of simulation
                            us_refs,   # the control inputs that the actor takes
                            zs,        # the measurements
-                           5 * R,
+                           2 * R,
                            process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;
