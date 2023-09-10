@@ -160,8 +160,11 @@ function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig, x₁)
                 ),
               hcat( 4  *ones(1, 10),
                     7.7*ones(1, 15),
-                       zeros(1, 49),
-                       zeros(1, 27)
+                    -7.7*ones(1, 15),
+                    7.7*ones(1, 15),
+                        zeros(1, 46)
+                       # zeros(1, 49),
+                       # zeros(1, 27)
                    # -8.7*ones(1, 17),
                    # -5  *ones(1, 10)
                    )

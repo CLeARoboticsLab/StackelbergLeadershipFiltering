@@ -79,7 +79,7 @@ check_valid = get_validator(si, cfg)
 # xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg, gt_leader, times, x₁, us_refs)
 # x_refs, us_refs = xs_k, us_k
 
-S = 27
+S = 101
 p_ts = times[1:S]
 p_xs = x_refs[:, 1:S]
 p_us = [us_refs[ii][:, 1:S] for ii in 1:2]
