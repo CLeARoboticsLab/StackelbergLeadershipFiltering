@@ -109,7 +109,7 @@ R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
-num_particles = 50
+num_particles = 100
 
 p_transition = 0.98
 p_init = 0.5
