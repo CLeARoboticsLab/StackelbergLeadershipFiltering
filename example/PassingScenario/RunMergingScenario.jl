@@ -97,7 +97,7 @@ vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
+Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
 
 
 # CONFIG: 
@@ -155,7 +155,7 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            P₁,        # initial covariance at the beginning of simulation
                            us_refs,   # the control inputs that the actor takes
                            zs,        # the measurements
-                           R,
+                           1.1 * R,
                            process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;
