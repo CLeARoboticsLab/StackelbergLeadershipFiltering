@@ -107,7 +107,7 @@ rng = MersenneTwister(0)
 
 R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
 zs = zeros(xdim(dyn), T)
-Ts = 20
+Ts = 25
 num_games = 1
 num_particles = 100
 
