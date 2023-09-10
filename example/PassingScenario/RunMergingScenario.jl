@@ -3,6 +3,7 @@ using StackelbergControlHypothesesFiltering
 using Dates
 using LaTeXStrings
 using LinearAlgebra: norm, Diagonal, I
+using Plots
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
