@@ -48,7 +48,7 @@ p2_goal = vcat(zeros(4),                [0.; 80.; pi/2; v_goal])
 
 # Define the costs for the agents.
 num_subcosts = 13
-weights_p1 = ones(num_subcosts+1)
+weights_p1 = ones(num_subcosts)
 weights_p2 = ones(num_subcosts)
 
 # Adjust goal tracking weights.

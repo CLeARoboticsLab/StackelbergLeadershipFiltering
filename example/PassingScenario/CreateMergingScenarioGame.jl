@@ -23,7 +23,7 @@ function combine_cost_funcs(funcs, weights)
 end
 
 function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6)
-    @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS + 1
+    @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
     @assert length(w_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
 
     # Passing Scenario cost definition
@@ -211,9 +211,8 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
                 c1de_ii,
                 c1de_iii,
                 c1de_iv,
-                c1f,
-                c1g]
-    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS+1
+                c1f]
+    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
     
 
     costs_p2 = [c2a,
