@@ -22,7 +22,7 @@ function combine_cost_funcs(funcs, weights)
     return g
 end
 
-function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6)
+function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6, p1_on_left=true)
     @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
     @assert length(w_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
 
@@ -59,7 +59,7 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         w = cfg.lane_width_m
 
         if dist_along_lane ≤ L₁ # separate lanes
-            goal_pos = -w/2
+            goal_pos = (p1_on_left) ? -w/2 : w/2
         # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
         #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
         #     goal_pos = -w/4 - lin_width_at_dist_proportion * w/4
@@ -77,7 +77,8 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         w = cfg.lane_width_m
 
         if dist_along_lane ≤ L₁ # separate lanes
-            goal_pos = w/2
+            goal_pos = (p1_on_left) ? w/2 : -w/2
+            # goal_pos = w/2
         # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
         #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
         #     goal_pos = w/4 + lin_width_at_dist_proportion * w/4
@@ -148,8 +149,8 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         w = cfg.lane_width_m
 
         if dist_along_lane ≤ L₁ # separate lanes
-            upper_bound = 0.
-            lower_bound = -w
+            upper_bound = (p1_on_left) ? 0. : w
+            lower_bound = (p1_on_left) ? -w : 0.
         elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
             lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
             upper_bound = w/2 + lin_width_at_dist_proportion * w/2
@@ -171,8 +172,8 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         w = cfg.lane_width_m
 
         if dist_along_lane ≤ L₁ # separate lanes
-            upper_bound = w
-            lower_bound = 0.
+            upper_bound = (p1_on_left) ? w : 0.
+            lower_bound = (p1_on_left) ? 0. : -w
         elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
             lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
             upper_bound = w/2 + lin_width_at_dist_proportion * w/2

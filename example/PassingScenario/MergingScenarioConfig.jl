@@ -52,7 +52,7 @@ end
 # end
 
 function get_validator(si, cfg::MergingScenarioConfig)
-    function check_valid(xs, us, ts)
+    function check_valid(xs, us, ts; p1_on_left)
         T = length(ts)
         for tt in 1:T
             x = xs[:, tt]
@@ -67,8 +67,8 @@ function get_validator(si, cfg::MergingScenarioConfig)
             w = cfg.lane_width_m
 
             if dist_along_lane ≤ L₁ # separate lanes
-                upper_bound = 0.
-                lower_bound = -w
+                upper_bound = (p1_on_left) ? 0. : w
+                lower_bound = (p1_on_left) ? -w : 0.
             elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
                 lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
                 upper_bound = w/2 + lin_width_at_dist_proportion * w/2

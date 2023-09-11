@@ -44,6 +44,13 @@ lw_m = cfg.lane_width_m
 # Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
 us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
 us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
+us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_flipped_101(cfg)
+
+p1_on_left = (x₁[1] < 0 && x₁[5] > 0)
+@assert xor(x₁[1] < 0 && x₁[5] > 0, x₁[1] > 0 && x₁[5] < 0)
+
+println(p1_on_left)
+
 # us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
 # us_refs = [zeros(2, T) for ii in 1:2]
 
@@ -55,12 +62,12 @@ weights_p2 = ones(num_subcosts)
 # Adjust goal tracking weights.
 weights_p1[2] = 1.
 weights_p2[2] = 1.
-costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
+costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal; p1_on_left)
 
 
 x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)
-@assert check_valid(x_refs, us_refs, times[1:T])
+@assert check_valid(x_refs, us_refs, times[1:T]; p1_on_left)
 plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
 # gt_threshold = 1e-2
@@ -80,7 +87,7 @@ plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 # p_ts = times[1:S]
 # p_xs = x_refs[:, 1:S]
 # p_us = [us_refs[ii][:, 1:S] for ii in 1:2]
-# check_valid(p_xs, p_us, p_ts)
+# check_valid(p_xs, p_us, p_ts; p1_on_left)
 # plot_silqgames_gt(dyn, cfg, p_ts, p_xs, p_us)
 
 
