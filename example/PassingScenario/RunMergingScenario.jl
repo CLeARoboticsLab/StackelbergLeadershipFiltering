@@ -42,8 +42,8 @@ lw_m = cfg.lane_width_m
 # x₁ = [-lw_m/2; 15.; pi/2; v_goal; lw_m/2; 0.; pi/2; v_goal]
 
 # Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
-us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
-us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
+# us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
+# us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
 us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_flipped_101(cfg)
 
 p1_on_left = (x₁[1] < 0 && x₁[5] > 0)
