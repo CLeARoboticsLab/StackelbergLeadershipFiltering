@@ -68,25 +68,25 @@ check_valid = get_validator(si, cfg)
 # @assert check_valid(x_refs, us_refs, times[1:T])
 # plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
-gt_threshold = 1e-2
-gt_max_iters = 1000
-gt_step_size = 1e-2
-gt_verbose = true
-gt_leader = 1
-sg = initialize_silq_games_object(1, T, dyn, costs;
-                                      # state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
-                                      threshold = gt_threshold, max_iters = gt_max_iters, step_size=gt_step_size, verbose=gt_verbose)
-                                      # ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
-                                      # check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true, ignore_xkuk_iters=true)
-xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg, gt_leader, times, x₁, us_refs)
-x_refs, us_refs = xs_k, us_k
+# gt_threshold = 1e-2
+# gt_max_iters = 1000
+# gt_step_size = 1e-2
+# gt_verbose = true
+# gt_leader = 1
+# sg = initialize_silq_games_object(1, T, dyn, costs;
+#                                       # state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
+#                                       threshold = gt_threshold, max_iters = gt_max_iters, step_size=gt_step_size, verbose=gt_verbose)
+#                                       # ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
+#                                       # check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true, ignore_xkuk_iters=true)
+# xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg, gt_leader, times, x₁, us_refs)
+# x_refs, us_refs = xs_k, us_k
 
-S = 101
-p_ts = times[1:S]
-p_xs = x_refs[:, 1:S]
-p_us = [us_refs[ii][:, 1:S] for ii in 1:2]
-check_valid(p_xs, p_us, p_ts)
-plot_silqgames_gt(dyn, cfg, p_ts, p_xs, p_us)
+# S = 101
+# p_ts = times[1:S]
+# p_xs = x_refs[:, 1:S]
+# p_us = [us_refs[ii][:, 1:S] for ii in 1:2]
+# check_valid(p_xs, p_us, p_ts)
+# plot_silqgames_gt(dyn, cfg, p_ts, p_xs, p_us)
 
 
 
