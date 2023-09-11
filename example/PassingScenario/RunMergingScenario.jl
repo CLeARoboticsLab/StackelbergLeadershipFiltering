@@ -60,13 +60,14 @@ costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, 
 
 # Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
 us_refs, x₁ = get_merging_trajectory_p1_first_101(cfg)
+us_refs, x₁ = get_merging_trajectory_p2_reverse_101(cfg)
 # us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
 # us_refs = [zeros(2, T) for ii in 1:2]
 
 x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)
-# @assert check_valid(x_refs, us_refs, times[1:T])
-# plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
+@assert check_valid(x_refs, us_refs, times[1:T])
+plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
 # gt_threshold = 1e-2
 # gt_max_iters = 1000
