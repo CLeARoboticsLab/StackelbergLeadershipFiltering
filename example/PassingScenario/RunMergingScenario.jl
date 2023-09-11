@@ -70,6 +70,8 @@ check_valid = get_validator(si, cfg)
 @assert check_valid(x_refs, us_refs, times[1:T]; p1_on_left)
 plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
+plot(x_refs[4, :])
+
 # gt_threshold = 1e-2
 # gt_max_iters = 1000
 # gt_step_size = 1e-2
@@ -101,7 +103,7 @@ vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
+Q = 1e-1 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
 
 
 # CONFIG: 

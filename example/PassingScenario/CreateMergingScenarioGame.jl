@@ -22,6 +22,81 @@ function combine_cost_funcs(funcs, weights)
     return g
 end
 
+function make_piecewise_horizontal_pos_goal_cost_fn(cfg, p1_on_left, player_idx)
+
+    base_idx = 4 * (player_idx - 1)
+    player_xidx = base_idx + 1
+    player_yidx = base_idx + 2
+
+    L₁ = cfg.region1_length_m
+    L₂ = cfg.region2_length_m
+    w = cfg.lane_width_m
+
+    merging_trajectory_position_cost(si, x, us, t) = begin
+        dist_along_lane = x[player_yidx]
+
+        if dist_along_lane ≤ L₁ # separate lanes
+            goal_pos = (p1_on_left) ? -w/2 : w/2
+        # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+        #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+        #     goal_pos = -w/4 - lin_width_at_dist_proportion * w/4
+        else # in second or final region
+            goal_pos = 0.
+        end
+
+        return 1//2 * (x[player_xidx] - goal_pos)^2
+    end
+
+    return merging_trajectory_position_cost
+end
+
+function make_collision_cost(cfg)
+    avoid_collisions_cost_fn(si, x, us, t) = begin
+        # This log barrier avoids agents getting within some configured radius of one another.
+        dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
+        # TODO(hamzah) - add term to drag trajectory back to valid zone
+        return (dist_to_boundary ≤ 0) ? large_number : -log(dist_to_boundary)
+    end
+
+    return avoid_collisions_cost_fn
+end
+
+function make_piecewise_lane_boundary_cost(cfg, p1_on_left, player_idx; large_number)
+    base_idx = 4 * (player_idx - 1)
+    player_xidx = base_idx + 1
+    player_yidx = base_idx + 2
+
+    L₁ = cfg.region1_length_m
+    L₂ = cfg.region2_length_m
+    w = cfg.lane_width_m
+
+    # This player is on the left if it's P1 on left or P2 where P1 not on left.
+    player_on_left = (p1_on_left && player_idx == 1) || !p1_on_left && player_idx == 2
+
+    stay_within_lanes(si, x, us, t) = begin
+        dist_along_lane = x[player_yidx]
+
+        if dist_along_lane ≤ L₁ # separate lanes
+            upper_bound = (player_on_left) ? 0. : w
+            lower_bound = (player_on_left) ? -w : 0.
+        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+            upper_bound = w/2 + lin_width_at_dist_proportion * w/2
+            lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
+        else # in final region
+            upper_bound = w/2
+            lower_bound = -w/2
+        end
+
+        # println(x[1], " ", lower_bound," ", upper_bound)
+        violates_bound = x[player_xidx] ≥ upper_bound || x[player_xidx] ≤ lower_bound
+        return violates_bound ? large_number : -log(upper_bound-x[player_xidx]) -log(x[player_xidx]-lower_bound)
+    end
+
+    return stay_within_lanes
+end
+
+
 function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6, p1_on_left=true)
     @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
     @assert length(w_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
@@ -52,56 +127,49 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
     c2a = QuadraticCostWithOffset(q_cost2, goal_p2)
 
 
-    merging_trajectory_position_cost_p1(si, x, us, t) = begin
-        dist_along_lane = x[2]
-        L₁ = cfg.region1_length_m 
-        L₂ = cfg.region2_length_m 
-        w = cfg.lane_width_m
+    # merging_trajectory_position_cost_p1(si, x, us, t) = begin
+    #     dist_along_lane = x[2]
+    #     L₁ = cfg.region1_length_m
+    #     L₂ = cfg.region2_length_m
+    #     w = cfg.lane_width_m
 
-        if dist_along_lane ≤ L₁ # separate lanes
-            goal_pos = (p1_on_left) ? -w/2 : w/2
-        # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-        #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-        #     goal_pos = -w/4 - lin_width_at_dist_proportion * w/4
-        else # in final region 
-            goal_pos = 0.
-        end
+    #     if dist_along_lane ≤ L₁ # separate lanes
+    #         goal_pos = (p1_on_left) ? -w/2 : w/2
+    #     # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+    #     #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+    #     #     goal_pos = -w/4 - lin_width_at_dist_proportion * w/4
+    #     else # in second or final region 
+    #         goal_pos = 0.
+    #     end
 
-        return 1//2 * (x[1] - goal_pos)^2
-    end
+    #     return 1//2 * (x[1] - goal_pos)^2
+    # end
 
-    merging_trajectory_position_cost_p2(si, x, us, t) = begin
-        dist_along_lane = x[6]
-        L₁ = cfg.region1_length_m 
-        L₂ = cfg.region2_length_m 
-        w = cfg.lane_width_m
+    # merging_trajectory_position_cost_p2(si, x, us, t) = begin
+    #     dist_along_lane = x[6]
+    #     L₁ = cfg.region1_length_m
+    #     L₂ = cfg.region2_length_m
+    #     w = cfg.lane_width_m
 
-        if dist_along_lane ≤ L₁ # separate lanes
-            goal_pos = (p1_on_left) ? w/2 : -w/2
-            # goal_pos = w/2
-        # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-        #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-        #     goal_pos = w/4 + lin_width_at_dist_proportion * w/4
-        else # in final region 
-            goal_pos = 0.
-        end
+    #     if dist_along_lane ≤ L₁ # separate lanes
+    #         goal_pos = (p1_on_left) ? w/2 : -w/2
+    #         # goal_pos = w/2
+    #     # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+    #     #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+    #     #     goal_pos = w/4 + lin_width_at_dist_proportion * w/4
+    #     else # in second or final region 
+    #         goal_pos = 0.
+    #     end
 
-        return 1//2 * (x[5] - goal_pos)^2
-    end
+    #     return 1//2 * (x[5] - goal_pos)^2
+    # end
 
-    c1a_i = PlayerCost(merging_trajectory_position_cost_p1, si)
-    c2a_i = PlayerCost(merging_trajectory_position_cost_p2, si)
+    c1a_i = PlayerCost(make_piecewise_horizontal_pos_goal_cost_fn(cfg, p1_on_left, 1), si)
+    c2a_i = PlayerCost(make_piecewise_horizontal_pos_goal_cost_fn(cfg, p1_on_left, 2), si)
 
     # 2. avoid collisions
-    avoid_collisions_cost_fn(si, x, us, t) = begin
-        # This log barrier avoids agents getting within some configured radius of one another.
-        # TODO(hamzah) - this may accidentally be using 1-norm.
-        dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
-        return (dist_to_boundary ≤ 0) ? large_number : -log(dist_to_boundary)
-    end
-
-    c1b = PlayerCost(avoid_collisions_cost_fn, si)
-    c2b = PlayerCost(avoid_collisions_cost_fn, si)
+    c1b = PlayerCost(make_collision_cost(cfg), si)
+    c2b = PlayerCost(make_collision_cost(cfg), si)
 
     # 3. enforce speed limit and turning limit
     c1c_i = AbsoluteLogBarrierCost(4, cfg.speed_limit_mps, false)
@@ -142,53 +210,53 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
 
     # 6. log barriers on the x dimension ensure that the vehicles don't exit the road
     # TODO(hamzah) - remove assumption of straight road
-    stay_within_lanes_p1(si, x, us, t) = begin
-        dist_along_lane = x[2]
-        L₁ = cfg.region1_length_m 
-        L₂ = cfg.region2_length_m 
-        w = cfg.lane_width_m
+    # stay_within_lanes_p1(si, x, us, t) = begin
+    #     dist_along_lane = x[2]
+    #     L₁ = cfg.region1_length_m
+    #     L₂ = cfg.region2_length_m
+    #     w = cfg.lane_width_m
 
-        if dist_along_lane ≤ L₁ # separate lanes
-            upper_bound = (p1_on_left) ? 0. : w
-            lower_bound = (p1_on_left) ? -w : 0.
-        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-            upper_bound = w/2 + lin_width_at_dist_proportion * w/2
-            lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
-        else # in final region 
-            upper_bound = w/2
-            lower_bound = -w/2
-        end
+    #     if dist_along_lane ≤ L₁ # separate lanes
+    #         upper_bound = (p1_on_left) ? 0. : w
+    #         lower_bound = (p1_on_left) ? -w : 0.
+    #     elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+    #         lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+    #         upper_bound = w/2 + lin_width_at_dist_proportion * w/2
+    #         lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
+    #     else # in final region 
+    #         upper_bound = w/2
+    #         lower_bound = -w/2
+    #     end
 
-        # println(x[1], " ", lower_bound," ", upper_bound)
-        violates_bound = x[1] ≥ upper_bound || x[1] ≤ lower_bound
-        return violates_bound ? large_number : -log(upper_bound-x[1]) -log(x[1]-lower_bound)
-    end
+    #     # println(x[1], " ", lower_bound," ", upper_bound)
+    #     violates_bound = x[1] ≥ upper_bound || x[1] ≤ lower_bound
+    #     return violates_bound ? large_number : -log(upper_bound-x[1]) -log(x[1]-lower_bound)
+    # end
 
-    stay_within_lanes_p2(si, x, us, t) = begin
-        dist_along_lane = x[6]
-        L₁ = cfg.region1_length_m 
-        L₂ = cfg.region2_length_m 
-        w = cfg.lane_width_m
+    # stay_within_lanes_p2(si, x, us, t) = begin
+    #     dist_along_lane = x[6]
+    #     L₁ = cfg.region1_length_m
+    #     L₂ = cfg.region2_length_m
+    #     w = cfg.lane_width_m
 
-        if dist_along_lane ≤ L₁ # separate lanes
-            upper_bound = (p1_on_left) ? w : 0.
-            lower_bound = (p1_on_left) ? 0. : -w
-        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-            upper_bound = w/2 + lin_width_at_dist_proportion * w/2
-            lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
-        else # in final region 
-            upper_bound = w/2
-            lower_bound = -w/2
-        end
+    #     if dist_along_lane ≤ L₁ # separate lanes
+    #         upper_bound = (p1_on_left) ? w : 0.
+    #         lower_bound = (p1_on_left) ? 0. : -w
+    #     elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+    #         lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+    #         upper_bound = w/2 + lin_width_at_dist_proportion * w/2
+    #         lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
+    #     else # in final region 
+    #         upper_bound = w/2
+    #         lower_bound = -w/2
+    #     end
 
-        violates_bound = x[5] ≥ upper_bound || x[5] ≤ lower_bound
-        return violates_bound ? large_number : -log(upper_bound-x[5]) -log(x[5]-lower_bound)
-    end
+    #     violates_bound = x[5] ≥ upper_bound || x[5] ≤ lower_bound
+    #     return violates_bound ? large_number : -log(upper_bound-x[5]) -log(x[5]-lower_bound)
+    # end
 
-    c1f = PlayerCost(stay_within_lanes_p1, si)
-    c2f = PlayerCost(stay_within_lanes_p2, si)
+    c1f = PlayerCost(make_piecewise_lane_boundary_cost(cfg, p1_on_left, 1; large_number), si)
+    c2f = PlayerCost(make_piecewise_lane_boundary_cost(cfg, p1_on_left, 2; large_number), si)
 
     # player 1 stays ahead of player 2
     stay_ahead_cost(si, x, us, t) = begin
