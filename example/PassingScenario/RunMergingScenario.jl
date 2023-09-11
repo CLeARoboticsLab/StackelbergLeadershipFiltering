@@ -39,12 +39,13 @@ v_goal = 10.
 lw_m = cfg.lane_width_m
 # x₁ = [-lw_m/2+0.25; 20.; pi/2 - 0.001*pi; 2*v_init; lw_m/2; 0.; pi/2+0.01; v_init]
 # x₁ = [-lw_m/2; 20.; pi/2 - 0.001*pi; v_init; lw_m/2; 0.; pi/2+0.01; v_init]
-x₁ = [-lw_m/2; 15.; pi/2; v_goal; lw_m/2; 0.; pi/2; v_goal]
+# x₁ = [-lw_m/2; 15.; pi/2; v_goal; lw_m/2; 0.; pi/2; v_goal]
 
-
-
-p1_goal = vcat([0.; 90; pi/2; v_goal], zeros(4))
-p2_goal = vcat(zeros(4),                [0.; 80.; pi/2; v_goal])
+# Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
+us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
+us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
+# us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
+# us_refs = [zeros(2, T) for ii in 1:2]
 
 # Define the costs for the agents.
 num_subcosts = 13
@@ -54,15 +55,8 @@ weights_p2 = ones(num_subcosts)
 # Adjust goal tracking weights.
 weights_p1[2] = 1.
 weights_p2[2] = 1.
-# weights_p1[2] = 1//2
 costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal)
 
-
-# Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
-us_refs, x₁ = get_merging_trajectory_p1_first_101(cfg)
-us_refs, x₁ = get_merging_trajectory_p2_reverse_101(cfg)
-# us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
-# us_refs = [zeros(2, T) for ii in 1:2]
 
 x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)

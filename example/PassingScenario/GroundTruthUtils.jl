@@ -126,13 +126,14 @@ end
 
 function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig)
     v_init = 10.
+    v_goal = 10.
     lw_m = cfg.lane_width_m
 
     # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
     x₁ = [-lw_m/2; 15.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
 
-    p1_goal = vcat([0.; 80; pi/2; v_goal], zeros(4))
-    p2_goal = vcat(zeros(4),               [0.; 95.; pi/2; v_goal])
+    p1_goal = vcat([0.; 95; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 80.; pi/2; v_goal])
 
     # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
     w1 = vcat(hcat(zeros(1, 30),
@@ -190,7 +191,7 @@ function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig)
     #           )
 
     ws = [w1, w2]
-    return ws, x₁
+    return ws, x₁, p1_goal, p2_goal
 end
 
 # This one causes p2 to go first.
@@ -200,6 +201,9 @@ function get_merging_trajectory_p2_reverse_101(cfg::MergingScenarioConfig)
 
     # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
     x₁ = [-lw_m/2; 0.; pi/2; v_init; lw_m/2; 15.; pi/2; v_init]
+
+    p1_goal = vcat([0.; 80; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 95.; pi/2; v_goal])
 
     # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
     w1 = vcat(hcat(zeros(1, 40),
@@ -257,9 +261,10 @@ function get_merging_trajectory_p2_reverse_101(cfg::MergingScenarioConfig)
     #           )
 
     ws = [w1, w2]
-    return ws, x₁
+    return ws, x₁, p1_goal, p2_goal
 end
 
+# Start at the same y-position
 function get_merging_trajectory_p1_same_start_101(cfg::MergingScenarioConfig)
     v_init = 10.
     lw_m = cfg.lane_width_m
