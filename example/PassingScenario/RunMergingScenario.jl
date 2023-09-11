@@ -39,7 +39,7 @@ v_goal = 10.
 lw_m = cfg.lane_width_m
 # x₁ = [-lw_m/2+0.25; 20.; pi/2 - 0.001*pi; 2*v_init; lw_m/2; 0.; pi/2+0.01; v_init]
 # x₁ = [-lw_m/2; 20.; pi/2 - 0.001*pi; v_init; lw_m/2; 0.; pi/2+0.01; v_init]
-# x₁ = [-lw_m/2; 15.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
+x₁ = [-lw_m/2; 15.; pi/2; v_goal; lw_m/2; 0.; pi/2; v_goal]
 
 
 
@@ -48,7 +48,7 @@ p2_goal = vcat(zeros(4),                [0.; 80.; pi/2; v_goal])
 
 # Define the costs for the agents.
 num_subcosts = 13
-weights_p1 = ones(num_subcosts)
+weights_p1 = ones(num_subcosts+1)
 weights_p2 = ones(num_subcosts)
 
 # Adjust goal tracking weights.
@@ -60,25 +60,26 @@ costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, 
 
 # Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
 us_refs, x₁ = get_merging_trajectory_p1_first_101(cfg)
-us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
+# us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
+# us_refs = [zeros(2, T) for ii in 1:2]
 
 x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)
 # @assert check_valid(x_refs, us_refs, times[1:T])
 # plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 
-# gt_threshold = 1e-2
-# gt_max_iters = 1000
-# gt_step_size = 1e-2
-# gt_verbose = true
-# gt_leader = 1
-# sg = initialize_silq_games_object(1, T, dyn, costs;
-#                                       # state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
-#                                       threshold = gt_threshold, max_iters = gt_max_iters, step_size=gt_step_size, verbose=gt_verbose)
-#                                       # ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
-#                                       # check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true, ignore_xkuk_iters=true)
-# xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg, gt_leader, times, x₁, us_refs)
-# x_refs, us_refs = xs_k, us_k
+gt_threshold = 1e-2
+gt_max_iters = 1000
+gt_step_size = 1e-2
+gt_verbose = true
+gt_leader = 1
+sg = initialize_silq_games_object(1, T, dyn, costs;
+                                      # state_reg_param=1e-2, control_reg_param=1e-2, ensure_pd=true,
+                                      threshold = gt_threshold, max_iters = gt_max_iters, step_size=gt_step_size, verbose=gt_verbose)
+                                      # ss_reduce=1e-2, α_min=1e-2, max_linesearch_iters=10,
+                                      # check_valid=(xs, us, ts)->true, verbose=false, ignore_Kks=true, ignore_xkuk_iters=true)
+xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = generate_gt_from_silqgames(sg, gt_leader, times, x₁, us_refs)
+x_refs, us_refs = xs_k, us_k
 
 S = 101
 p_ts = times[1:S]

@@ -23,7 +23,7 @@ function combine_cost_funcs(funcs, weights)
 end
 
 function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p2, goal_p1, goal_p2; large_number=1e6)
-    @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
+    @assert length(w_p1) == NUM_MERGING_SCENARIO_SUBCOSTS + 1
     @assert length(w_p2) == NUM_MERGING_SCENARIO_SUBCOSTS
 
     # Passing Scenario cost definition
@@ -148,7 +148,7 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         w = cfg.lane_width_m
 
         if dist_along_lane ≤ L₁ # separate lanes
-            upper_bound = w #0.
+            upper_bound = 0.
             lower_bound = -w
         elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
             lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
@@ -172,7 +172,7 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
 
         if dist_along_lane ≤ L₁ # separate lanes
             upper_bound = w
-            lower_bound = -w #0.
+            lower_bound = 0.
         elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
             lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
             upper_bound = w/2 + lin_width_at_dist_proportion * w/2
@@ -211,8 +211,9 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
                 c1de_ii,
                 c1de_iii,
                 c1de_iv,
-                c1f]
-    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS
+                c1f,
+                c1g]
+    @assert length(costs_p1) == NUM_MERGING_SCENARIO_SUBCOSTS+1
     
 
     costs_p2 = [c2a,
