@@ -131,6 +131,9 @@ function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig)
     # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
     x₁ = [-lw_m/2; 15.; pi/2; v_init; lw_m/2; 0.; pi/2; v_init]
 
+    p1_goal = vcat([0.; 80; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 95.; pi/2; v_goal])
+
     # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
     w1 = vcat(hcat(zeros(1, 30),
                   -0.2*ones(1, 8),

@@ -33,7 +33,7 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
     const_1 = 1.
     Q1 = zeros(8, 8)
     Q1[1, 1] = const_1 * 0.
-    Q1[2, 2] = const_1 * 0 #0.5#2.
+    Q1[2, 2] = const_1 * 0.5#2.
     Q1[3, 3] = const_1 * 1.
     Q1[4, 4] = const_1 * 1.
     q_cost1 = QuadraticCost(Q1)
@@ -43,7 +43,7 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
 
     Q2 = zeros(8, 8)
     Q2[5, 5] = const_1 * 0.
-    Q2[6, 6] = const_1 * 0#.5
+    Q2[6, 6] = const_1 * 0.5
     Q2[7, 7] = const_1 * 1.
     Q2[8, 8] = const_1 * 1.
     q_cost2 = QuadraticCost(Q2)
