@@ -190,7 +190,7 @@ function get_merging_trajectory_p1_first_101(cfg::MergingScenarioConfig)
     return ws, x₁
 end
 
-function get_merging_trajectory_p1_same_start_101(cfg::MergingScenarioConfig, x₁)
+function get_merging_trajectory_p1_same_start_101(cfg::MergingScenarioConfig)
     v_init = 10.
     lw_m = cfg.lane_width_m
 
