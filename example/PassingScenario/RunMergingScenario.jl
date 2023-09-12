@@ -61,7 +61,7 @@ weights_p1 = ones(num_subcosts)
 weights_p2 = ones(num_subcosts)
 
 # Adjust goal tracking weights.
-weights_p1[2] = 2.
+weights_p1[2] = 1.
 weights_p2[2] = 1.
 costs = create_merging_scenario_costs(cfg, si, weights_p1, weights_p2, p1_goal, p2_goal; p1_on_left)
 
