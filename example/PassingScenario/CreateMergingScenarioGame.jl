@@ -211,51 +211,6 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
 
     # 6. log barriers on the x dimension ensure that the vehicles don't exit the road
     # TODO(hamzah) - remove assumption of straight road
-    # stay_within_lanes_p1(si, x, us, t) = begin
-    #     dist_along_lane = x[2]
-    #     L₁ = cfg.region1_length_m
-    #     L₂ = cfg.region2_length_m
-    #     w = cfg.lane_width_m
-
-    #     if dist_along_lane ≤ L₁ # separate lanes
-    #         upper_bound = (p1_on_left) ? 0. : w
-    #         lower_bound = (p1_on_left) ? -w : 0.
-    #     elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-    #         lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-    #         upper_bound = w/2 + lin_width_at_dist_proportion * w/2
-    #         lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
-    #     else # in final region 
-    #         upper_bound = w/2
-    #         lower_bound = -w/2
-    #     end
-
-    #     # println(x[1], " ", lower_bound," ", upper_bound)
-    #     violates_bound = x[1] ≥ upper_bound || x[1] ≤ lower_bound
-    #     return violates_bound ? large_number : -log(upper_bound-x[1]) -log(x[1]-lower_bound)
-    # end
-
-    # stay_within_lanes_p2(si, x, us, t) = begin
-    #     dist_along_lane = x[6]
-    #     L₁ = cfg.region1_length_m
-    #     L₂ = cfg.region2_length_m
-    #     w = cfg.lane_width_m
-
-    #     if dist_along_lane ≤ L₁ # separate lanes
-    #         upper_bound = (p1_on_left) ? w : 0.
-    #         lower_bound = (p1_on_left) ? 0. : -w
-    #     elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-    #         lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-    #         upper_bound = w/2 + lin_width_at_dist_proportion * w/2
-    #         lower_bound = -w/2 - lin_width_at_dist_proportion * w/2
-    #     else # in final region 
-    #         upper_bound = w/2
-    #         lower_bound = -w/2
-    #     end
-
-    #     violates_bound = x[5] ≥ upper_bound || x[5] ≤ lower_bound
-    #     return violates_bound ? large_number : -log(upper_bound-x[5]) -log(x[5]-lower_bound)
-    # end
-
     c1f = PlayerCost(make_piecewise_lane_boundary_cost(cfg, p1_on_left, 1; large_number), si)
     c2f = PlayerCost(make_piecewise_lane_boundary_cost(cfg, p1_on_left, 2; large_number), si)
 
@@ -267,7 +222,6 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
         return 0.5 * (tanh(dy) + 1) * dy^2
     end
     c1g = PlayerCost(stay_ahead_cost, si)
-
 
     costs_p1 = [c1a,
                 c1a_i,
