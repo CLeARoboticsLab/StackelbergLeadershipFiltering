@@ -45,7 +45,7 @@ lw_m = cfg.lane_width_m
 # us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
 # us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
 # us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_flipped_101(cfg)
-us_refs, x₁, p1_goal, p2_goal = get_merging_debug(cfg, 1)
+us_refs, x₁, p1_goal, p2_goal = get_merging_debug(cfg, 2)
 
 p1_on_left = (x₁[1] < 0 && x₁[5] > 0)
 @assert xor(x₁[1] < 0 && x₁[5] > 0, x₁[1] > 0 && x₁[5] < 0)
