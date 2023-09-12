@@ -394,7 +394,7 @@ function get_merging_debug(cfg::MergingScenarioConfig)
     lw_m = cfg.lane_width_m
 
     # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
-    x₁ = [0.; 80.; pi/2; v_init; 0.; 70.; pi/2; v_init]
+    x₁ = [-0.01; 80.; pi/2; v_init; 0.01.; 70.; pi/2; v_init]
 
     p1_goal = vcat([0.; 150; pi/2; v_goal], zeros(4))
     p2_goal = vcat(zeros(4),               [0.; 140.; pi/2; v_goal])
