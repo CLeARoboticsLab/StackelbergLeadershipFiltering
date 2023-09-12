@@ -48,7 +48,7 @@ R = 0.02 * Matrix(I, xdim(dyn), xdim(dyn))
 zs = zeros(xdim(dyn), T)
 Ts = 30
 num_games = 1
-num_particles = 200
+num_particles = 100
 
 p_transition = 0.98
 p_init = 0.5
@@ -57,9 +57,9 @@ p_init = 0.5
 # max_iters = 50
 # step_size = 2e-2
 
-lf_threshold = 1e-3 #1e-3
-lf_max_iters = 50
-lf_step_size = 2e-2
+lf_threshold = 1e-2 #1e-3
+lf_max_iters = 200
+lf_step_size = 1e-2
 
 
 gt_silq_num_runs=1

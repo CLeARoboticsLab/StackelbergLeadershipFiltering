@@ -186,13 +186,20 @@ function step_pf(pf::ParticleFilter, time_range, f_dynamics, h_measures, discret
         pf.particles[:,i,k] = f_dynamics[s_idx](time_range, 𝒳_prev[:,i], u_input_k, pf.rng)
         pf.z_models[:,i,k] = h_measures[s_idx](pf.particles[:,i,k])
 
+        rz = round.(z, sigdigits=6)
+        rzhat = round.(pf.z_models[:,i,k])
+        # println("L$(pf.s[1,i,k]) particle $i - x meas $(rz[1]) $(rz[5]) p1 ($(rzhat[1])) p2 ($(rzhat[5]))")
+        # println("L$(pf.s[1,i,k]) particle $i - y meas $(rz[2]) $(rz[6]) p1 ($(rzhat[2])) p2 ($(rzhat[6]))")
+        # println("L$(pf.s[1,i,k]) particle $i - θ meas $(rz[3]) $(rz[7]) p1 ($(rzhat[3])) p2 ($(rzhat[7]))")
+        # println("L$(pf.s[1,i,k]) particle $i - v meas $(rz[4]) $(rz[8]) p1 ($(rzhat[4])) p2 ($(rzhat[8]))")
+
         z_hat = pf.z_models[:,i,k]
         # println("||z - ẑ|| = $(norm(z - z_hat))")
         # println("true z: $z, z hat: $(z_hat)")
 
         distrib = MvNormal(pf.z_models[:,i,k], R)
         p[i] = compute_measurement_lkhd(distrib, z)
-        println("meas. lkhd = $(p[i])")
+        # println("meas. lkhd = $(p[i])")
     end
     c_inv = weights_prev' * p
 
