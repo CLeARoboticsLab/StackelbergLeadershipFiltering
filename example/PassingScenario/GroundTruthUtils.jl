@@ -393,11 +393,10 @@ function get_merging_debug(cfg::MergingScenarioConfig)
     v_goal = 10.
     lw_m = cfg.lane_width_m
 
-    # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
-    x₁ = [-0.01; 70.; pi/2; v_init; 0.01; 80.; pi/2; v_init]
+    x₁ = [-0.01; 50.; pi/2; v_init; 0.01; 40.; pi/2; v_init]
 
-    p1_goal = vcat([0.; 140; pi/2; v_goal], zeros(4))
-    p2_goal = vcat(zeros(4),               [0.; 150.; pi/2; v_goal])
+    p1_goal = vcat([0.; 150; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 130.; pi/2; v_goal])
 
     # # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
     # w1 = vcat(hcat(zeros(1, 40),
