@@ -352,6 +352,7 @@ function get_merging_trajectory_p2_flipped_101(cfg::MergingScenarioConfig)
                     7.7*ones(1, 15),
                         zeros(1, 46)
                 )
+            )
 
     ws = [w2, w1]
     return ws, x₁, p1_goal, p2_goal
