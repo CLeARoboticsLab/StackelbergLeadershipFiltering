@@ -37,10 +37,10 @@ function make_piecewise_horizontal_pos_goal_cost_fn(cfg, p1_on_left, player_idx)
 
         if dist_along_lane ≤ L₁ # separate lanes
             goal_pos = (p1_on_left) ? -w/2 : w/2
-        elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
-            lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
-            mult = (p1_on_left) ? -1 : 1
-            goal_pos = mult * (w/4 + lin_width_at_dist_proportion * w/4)
+        # elseif dist_along_lane ≤ L₁ + L₂ # linear progression to smaller lane
+        #     lin_width_at_dist_proportion = 1 - (dist_along_lane - L₁)/L₂
+        #     mult = (p1_on_left) ? -1 : 1
+        #     goal_pos = mult * (w/4 + lin_width_at_dist_proportion * w/4)
         else # in second or final region
             goal_pos = 0.
         end
