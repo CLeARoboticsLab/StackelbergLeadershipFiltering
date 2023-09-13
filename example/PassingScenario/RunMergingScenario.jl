@@ -113,8 +113,8 @@ Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
 rng = MersenneTwister(0)
 
 R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
-# lf_R = 1.1 * R
-lf_R = Diagonal([5e-3, 5e-3, 1e-3, 1e-1, 5e-3, 5e-3, 1e-3, 1e-1])
+lf_R = 1.1 * R
+# lf_R = Diagonal([5e-3, 5e-3, 1e-3, 1e-1, 5e-3, 5e-3, 1e-3, 1e-1])
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
