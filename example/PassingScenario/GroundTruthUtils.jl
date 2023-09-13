@@ -37,7 +37,7 @@ function get_passing_trajectory_scenario_101(cfg::PassingScenarioConfig, x₁)
     return xs, ws
 end
 
-function get_passing_trajectory_scenario_151(cfg::PassingScenarioConfig, x₁, T)
+function get_passing_trajectory_scenario_151(cfg::PassingScenarioConfig, x₁; T=151)
 
     rlb_x = get_right_lane_boundary_x(cfg)
     v_init = 10
