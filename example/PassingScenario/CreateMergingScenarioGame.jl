@@ -51,7 +51,7 @@ function make_piecewise_horizontal_pos_goal_cost_fn(cfg, p1_on_left, player_idx)
     return merging_trajectory_position_cost
 end
 
-function make_collision_cost(cfg)
+function make_collision_cost(cfg; large_number)
     avoid_collisions_cost_fn(si, x, us, t) = begin
         # This log barrier avoids agents getting within some configured radius of one another.
         dist_to_boundary = norm([1 1 0 0 -1 -1 0 0] * x, cfg.dist_norm_order) - cfg.collision_radius_m
