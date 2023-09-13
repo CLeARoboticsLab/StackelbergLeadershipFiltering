@@ -2,6 +2,8 @@ using Parameters
 
 # This file contains configuration variables related to the road and constraints.
 
+const LARGE_NUMBER = 1e6
+
 # The configuration defines a straight two-way lane that defines a right-hand coordinate system where y points in the
 # direction of the lane, and x points to the right side of the road.
 DEFAULT_LANE_WIDTH = 2.3

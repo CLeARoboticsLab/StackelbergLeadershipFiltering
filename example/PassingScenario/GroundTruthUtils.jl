@@ -302,8 +302,6 @@ function get_merging_trajectory_p1_same_start_101(cfg::MergingScenarioConfig)
                     7.7*ones(1, 15),
                        zeros(1, 49),
                        zeros(1, 27)
-                   # -8.7*ones(1, 17),
-                   # -5  *ones(1, 10)
                    )
               )
 
@@ -314,10 +312,14 @@ end
 # p1 on right and p2 on left
 function get_merging_trajectory_p2_flipped_101(cfg::MergingScenarioConfig)
     v_init = 10.
+    v_goal = v_init
     lw_m = cfg.lane_width_m
 
     # x₁ = [rlb_x/2; 10.; pi/2; v_init; rlb_x/1.5; 0.; pi/2; v_init]
     x₁ = [lw_m/2; 0.; pi/2; v_init; -lw_m/2; 15.; pi/2; v_init]
+
+    p1_goal = vcat([0.; 80; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 95.; pi/2; v_goal])
 
     # w1 = zeros(2, 101) # Agent 1 keeps going in straight line
     w1 = vcat(hcat(zeros(1, 40),
@@ -332,13 +334,6 @@ function get_merging_trajectory_p2_flipped_101(cfg::MergingScenarioConfig)
                     7.7*ones(1, 15),
                        zeros(1, 49),
                        zeros(1, 27)
-                    # -7.7*ones(1, 15),
-                    # 7.7*ones(1, 15),
-                    #     zeros(1, 46)
-                       # zeros(1, 49),
-                       # zeros(1, 27)
-                   # -8.7*ones(1, 17),
-                   # -5  *ones(1, 10)
                    )
               )
 
@@ -356,30 +351,31 @@ function get_merging_trajectory_p2_flipped_101(cfg::MergingScenarioConfig)
                     -7.7*ones(1, 15),
                     7.7*ones(1, 15),
                         zeros(1, 46)
-                       # zeros(1, 49),
-                       # zeros(1, 27)
-                   # -8.7*ones(1, 17),
-                   # -5  *ones(1, 10)
-                   )
-              )
-
-    # vcat(hcat(
-    #                zeros(1, 50),
-    #                0.4*ones(1, 8),
-    #               -0.4*ones(1, 8),
-    #                zeros(1, 9),
-    #                zeros(1, 16),
-    #                zeros(1, 10)), 
-    #           hcat( 5  *ones(1, 10),
-    #                 8.7*ones(1, 15),
-    #                    zeros(1, 49),
-    #                    zeros(1, 27)
-    #                # -8.7*ones(1, 17),
-    #                # -5  *ones(1, 10)
-    #                )
-    #           )
+                )
+            )
 
     ws = [w2, w1]
+    return ws, x₁, p1_goal, p2_goal
+end
+
+# p1 on right and p2 on left
+function get_merging_debug(cfg::MergingScenarioConfig, player_in_front=2)
+    v_init = 10.
+    v_goal = 10.
+    lw_m = cfg.lane_width_m
+
+    x₁ = [-0.01; 50.; pi/2; v_init; 0.01; 40.; pi/2; v_init]
+    
+
+    p1_goal = vcat([0.; 150; pi/2; v_goal], zeros(4))
+    p2_goal = vcat(zeros(4),               [0.; 130.; pi/2; v_goal])
+
+    if player_in_front == 2
+        x₁[2], x₁[6] = x₁[6], x₁[2]
+        p1_goal[2], p2_goal[6] = p2_goal[6], p1_goal[2]
+    end
+
+    ws = [zeros(2, 101), zeros(2, 101)]
     return ws, x₁, p1_goal, p2_goal
 end
 

@@ -42,14 +42,15 @@ lw_m = cfg.lane_width_m
 # x₁ = [-lw_m/2; 15.; pi/2; v_goal; lw_m/2; 0.; pi/2; v_goal]
 
 # Generate a ground truth trajectory on which to run the leadership filter for a merging trajectory.
-us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
-us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
+# us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p1_first_101(cfg)
+# us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_reverse_101(cfg)
 us_refs, x₁, p1_goal, p2_goal = get_merging_trajectory_p2_flipped_101(cfg)
+# us_refs, x₁, p1_goal, p2_goal = get_merging_debug(cfg, 1)
 
 p1_on_left = (x₁[1] < 0 && x₁[5] > 0)
 @assert xor(x₁[1] < 0 && x₁[5] > 0, x₁[1] > 0 && x₁[5] < 0)
 
-println(p1_on_left)
+println("P1 on left: ", p1_on_left)
 
 # us_refs, x₁ = get_merging_trajectory_p1_same_start_101(cfg)
 # us_refs = [zeros(2, T) for ii in 1:2]
@@ -69,6 +70,8 @@ x_refs = unroll_raw_controls(dyn, times[1:T], us_refs, x₁)
 check_valid = get_validator(si, cfg)
 @assert check_valid(x_refs, us_refs, times[1:T]; p1_on_left)
 plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
+
+plot(x_refs[4, :])
 
 # gt_threshold = 1e-2
 # gt_max_iters = 1000
@@ -110,6 +113,8 @@ Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
 rng = MersenneTwister(0)
 
 R = zeros(xdim(dyn), xdim(dyn)) + 1e-2 * I
+lf_R = 1.1 * R
+# lf_R = Diagonal([5e-3, 5e-3, 1e-3, 1e-1, 5e-3, 5e-3, 1e-3, 1e-1])
 zs = zeros(xdim(dyn), T)
 Ts = 20
 num_games = 1
@@ -159,7 +164,7 @@ x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
                            P₁,        # initial covariance at the beginning of simulation
                            us_refs,   # the control inputs that the actor takes
                            zs,        # the measurements
-                           1.1 * R,
+                           lf_R,
                            process_noise_distribution,
                            s_init_distrib,
                            discrete_state_transition;

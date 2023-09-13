@@ -138,7 +138,7 @@ function make_stackelberg_meas_model(tt::Int, sg_obj::SILQGamesObject, leader_id
         meas = extract_measurements_from_stack_trajectory(xs, tt-1, tt)
         # println(meas)
         if !is_converged
-            println("$(sg_obj.current_idx)/$(sg_obj.num_runs) @ $tt - $num_iters => $(convergence_metrics[1, num_iters]) > $(sg_obj.threshold)")
+#            println("$(sg_obj.current_idx)/$(sg_obj.num_runs) @ $tt - $num_iters => $(convergence_metrics[1, num_iters]) > $(sg_obj.threshold)")
         end
         return meas
     end
