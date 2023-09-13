@@ -1,5 +1,7 @@
 # Implements the Stackelberg ILQGames algorithm.
 
+using BenchmarkTools
+
 # A particle filter that can run iteratively on command, with new arguments (below) each round:
 # - Particle Filter object
 # - measurement + uncertainty z, R
@@ -50,6 +52,9 @@ mutable struct SILQGamesObject
     convergence_metrics # num_runs x num_players x max_iters
     num_iterations      # num_runs
     evaluated_costs     # num_runs x num_players x max_iters+1
+
+    # timing information
+    timings # num_runs x max_iters
 end
 
 THRESHOLD = 1e-2
@@ -85,6 +90,8 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
     evaluated_costs = zeros(num_runs, num_players, max_iters+1)
     convergence_metrics = zeros(num_runs, num_players, max_iters+1)
 
+    timings = zeros(num_runs, max_iters)
+
     current_idx = 0
     return SILQGamesObject(num_runs, current_idx,
                            horizon, dyn, costs,
@@ -94,7 +101,8 @@ function initialize_silq_games_object(num_runs, horizon, dyn::Dynamics, costs::A
                            state_reg_param, control_reg_param, ensure_pd,
                            leader_idxs,
                            xks, uks,
-                           Kks, kks, convergence_metrics, num_iterations, evaluated_costs)
+                           Kks, kks, convergence_metrics, num_iterations, evaluated_costs,
+                           timings)
 end
 export initialize_silq_games_object
 
@@ -257,76 +265,79 @@ function stackelberg_ilqgames(sg::SILQGamesObject,
     is_converged = false
 
     while !is_converged && num_iters < sg.max_iters
+        # Save timing information for the iteration.
+        time_val = @elapsed begin
+            ###########################
+            #### I. Backwards pass ####
+            ###########################
+            # 1. Extract linear dynamics and quadratic costs wrt to the current guess for the state and controls.
+                # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
 
-        ###########################
-        #### I. Backwards pass ####
-        ###########################
-        # 1. Extract linear dynamics and quadratic costs wrt to the current guess for the state and controls.
-            # 2. Solve the optimal control problem wrt δx to produce the homogeneous feedback and cost matrices.
+            ctrl_strats = backward_pass(sg, leader_idx, t0, times, xs_km1, us_km1)
+            Ks = get_linear_feedback_gains(ctrl_strats)
+            ks = get_constant_feedback_gains(ctrl_strats)
 
-        ctrl_strats = backward_pass(sg, leader_idx, t0, times, xs_km1, us_km1)
-        Ks = get_linear_feedback_gains(ctrl_strats)
-        ks = get_constant_feedback_gains(ctrl_strats)
+            ##########################
+            #### II. Forward pass ####
+            ##########################
 
-        ##########################
-        #### II. Forward pass ####
-        ##########################
+            # On the first iteration, choose a step size of 1.
+            step_size_override = iszero(num_iters) ? 1. : nothing
+            # xs_k, us_k = forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
+            xs_k, us_k = validating_line_search(sg, t0, times, xs_km1, us_km1, Ks, ks; step_size_override)
 
-        # On the first iteration, choose a step size of 1.
-        step_size_override = iszero(num_iters) ? 1. : nothing
-        # xs_k, us_k = forward_pass(sg, t0, times, step_size, xs_km1, us_km1, Ks, ks)
-        xs_k, us_k = validating_line_search(sg, t0, times, xs_km1, us_km1, Ks, ks; step_size_override)
+            #############################################
+            #### III. Compute convergence and costs. ####
+            #############################################
 
-        #############################################
-        #### III. Compute convergence and costs. ####
-        #############################################
-
-        # Compute the convergence metric to understand whether we are converged.
-        for ii in 1:num_players
-            convergence_metrics[ii, num_iters+1] = norm(ks[ii])^2
-        end
-        # New convergence metric: maximum infinite norm difference between current and previous trajectory iteration.
-        convergence_metrics[:, num_iters+1] .= 1e-8
-        max_inf_norm_conv_metric = maximum(abs.(xs_k - xs_km1))
-        convergence_metrics[1, num_iters+1] = max_inf_norm_conv_metric
-
-        is_converged = sum(convergence_metrics[:, num_iters+1]) < sg.threshold
-
-        # Evaluate and store the costs.
-        evaluated_costs[:, num_iters+2] = [evaluate(sg.costs[ii], xs_k, us_k) for ii in 1:num_players]
-        # is_converged = abs(sum(evaluated_costs[:, num_iters+1] - evaluated_costs[:, num_iters+2])) < sg.threshold
-
-        if sg.verbose
-            old_metric = (num_iters == 0) ? 0. : sum(convergence_metrics[:, num_iters])
-            new_metric = sum(convergence_metrics[:, num_iters+1])
-            println("iter ", num_iters, ": convergence metric (diff, new, old): ", round(new_metric - old_metric, digits=8), " ", round(new_metric, digits=8), " ", round(old_metric, digits=8))
-        end
-
-        # Fill in debug data, either with the most recent iteration or every.
-        if !ignore_xkuk_iters
-            sg.xks[current_idx, num_iters+2, :, :] = xs_k
+            # Compute the convergence metric to understand whether we are converged.
             for ii in 1:num_players
-                sg.uks[ii][current_idx, num_iters+2, :, :] = us_k[ii]
-                if should_store_feedback
-                    sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
-                    sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
+                convergence_metrics[ii, num_iters+1] = norm(ks[ii])^2
+            end
+            # New convergence metric: maximum infinite norm difference between current and previous trajectory iteration.
+            convergence_metrics[:, num_iters+1] .= 1e-8
+            max_inf_norm_conv_metric = maximum(abs.(xs_k - xs_km1))
+            convergence_metrics[1, num_iters+1] = max_inf_norm_conv_metric
+
+            is_converged = sum(convergence_metrics[:, num_iters+1]) < sg.threshold
+
+            # Evaluate and store the costs.
+            evaluated_costs[:, num_iters+2] = [evaluate(sg.costs[ii], xs_k, us_k) for ii in 1:num_players]
+            # is_converged = abs(sum(evaluated_costs[:, num_iters+1] - evaluated_costs[:, num_iters+2])) < sg.threshold
+
+            if sg.verbose
+                old_metric = (num_iters == 0) ? 0. : sum(convergence_metrics[:, num_iters])
+                new_metric = sum(convergence_metrics[:, num_iters+1])
+                println("iter ", num_iters, ": convergence metric (diff, new, old): ", round(new_metric - old_metric, digits=8), " ", round(new_metric, digits=8), " ", round(old_metric, digits=8))
+            end
+
+            # Fill in debug data, either with the most recent iteration or every.
+            if !ignore_xkuk_iters
+                sg.xks[current_idx, num_iters+2, :, :] = xs_k
+                for ii in 1:num_players
+                    sg.uks[ii][current_idx, num_iters+2, :, :] = us_k[ii]
+                    if should_store_feedback
+                        sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
+                        sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
+                    end
+                end
+            else
+                sg.xks[current_idx, :, :] = xs_k
+                for ii in 1:num_players
+                    sg.uks[ii][current_idx, :, :] = us_k[ii]
+                    if should_store_feedback
+                        sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
+                        sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
+                    end
                 end
             end
-        else
-            sg.xks[current_idx, :, :] = xs_k
-            for ii in 1:num_players
-                sg.uks[ii][current_idx, :, :] = us_k[ii]
-                if should_store_feedback
-                    sg.Kks[ii][current_idx, num_iters+1, :, :, :] = Ks[ii]
-                    sg.kks[ii][current_idx, num_iters+1, :, :] = ks[ii]
-                end
-            end
+
+            xs_km1 = xs_k
+            us_km1 = us_k
+
+            num_iters += 1
         end
-
-        xs_km1 = xs_k
-        us_km1 = us_k
-
-        num_iters += 1
+        sg.timings[current_idx, num_iters] = time_val
     end
 
     # Update debug data.

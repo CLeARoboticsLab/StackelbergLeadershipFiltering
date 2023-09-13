@@ -27,7 +27,7 @@ costs = [QuadraticCostWithOffset(ss_costs[1]), QuadraticCostWithOffset(ss_costs[
 # For player cost
 # costs = [pc_cost_1, pc_cost_2]
 
-num_sims = 20
+num_sims = 100
 
 data_folder = "mc_data"
 

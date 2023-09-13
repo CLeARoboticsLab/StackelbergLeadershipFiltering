@@ -1,3 +1,4 @@
+using BenchmarkTools
 using Distributions
 using ProgressBars
 using Random
@@ -175,6 +176,8 @@ function leadership_filter(dyn::Dynamics,
     num_states = xdim(dyn)
     num_states_w_hist = xdim(dyn_w_hist)
 
+    iteration_timings = zeros(num_times)
+
     # Store the results of the SILQGames runs for the leader and follower at each time in the simulation.
     # This is important because it exposes the debug data.
     sg_objs = Array{SILQGamesObject}(undef, num_times)
@@ -216,51 +219,53 @@ function leadership_filter(dyn::Dynamics,
             println("leadership_filter tt ", tt)
         end
 
-        # Get inputs at time tt.
-        us_at_tt = [us[ii][:, tt] for ii in 1:num_players]
+        iteration_timings[tt] = @elapsed begin
+            # Get inputs at time tt.
+            us_at_tt = [us[ii][:, tt] for ii in 1:num_players]
 
-        # Define Stackelberg measurement models that stack the state results.
-        # TODO(hamzah) - get the other things out too
-        num_runs_per_game = Ns + 2 # two extra runs for metadata
+            # Define Stackelberg measurement models that stack the state results.
+            # TODO(hamzah) - get the other things out too
+            num_runs_per_game = Ns + 2 # two extra runs for metadata
 
-        # Initialize an SILQ Games Object for this set of runs.
-        sg_objs[tt] = initialize_silq_games_object(num_runs_per_game, Ts+1, dyn, costs;
-                                              ensure_pd=ensure_pd, check_valid,
-                                              threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
+            # Initialize an SILQ Games Object for this set of runs.
+            sg_objs[tt] = initialize_silq_games_object(num_runs_per_game, Ts+1, dyn, costs;
+                                                  ensure_pd=ensure_pd, check_valid,
+                                                  threshold=threshold, max_iters=max_iters, step_size=step_size, verbose=verbose)
 
-        # Create the measurement models.
-        h₁ = make_stackelberg_meas_model(tt, sg_objs[tt], 1, num_games,
-                                         Ts, t0, times, dyn_w_hist, costs, us)
-        h₂ = make_stackelberg_meas_model(tt, sg_objs[tt], 2, num_games,
-                                         Ts, t0, times, dyn_w_hist, costs, us)
+            # Create the measurement models.
+            h₁ = make_stackelberg_meas_model(tt, sg_objs[tt], 1, num_games,
+                                             Ts, t0, times, dyn_w_hist, costs, us)
+            h₂ = make_stackelberg_meas_model(tt, sg_objs[tt], 2, num_games,
+                                             Ts, t0, times, dyn_w_hist, costs, us)
 
-        # TODO(hamzah) - update for multiple historical states
-        Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
+            # TODO(hamzah) - update for multiple historical states
+            Zₜ, Rₜ = process_measurements_opt2(tt, zs, R, num_games, Ts)
 
-        f_dynamics(time_range, X, us, rng) = begin
-            return propagate_dynamics(dyn_w_hist, time_range, X, us) + vcat(zeros(xdim(dyn_w_hist) - xdim(dyn)), rand(rng, process_noise_distribution))
+            f_dynamics(time_range, X, us, rng) = begin
+                return propagate_dynamics(dyn_w_hist, time_range, X, us) + vcat(zeros(xdim(dyn_w_hist) - xdim(dyn)), rand(rng, process_noise_distribution))
+            end
+
+            ttm1 = (tt == 1) ? 1 : tt-1
+            time_range = (times[ttm1], times[tt])
+            step_pf(pf, time_range, [f_dynamics, f_dynamics], [h₁, h₂], discrete_state_transition, us_at_tt, Zₜ, Rₜ)
+
+            # Update the variables.
+            X = pf.x̂[:, tt]
+            big_P = pf.P[:, :, tt]
+
+            # Store relevant information.
+            # TODO(hamzah) - update for multiple states
+            x̂s[:, tt] = get_current_state(dyn_w_hist, X)
+            s_idx = (dyn_w_hist.num_hist-1) * num_states+1
+            e_idx = xdim(dyn_w_hist)
+            P̂s[:, :, tt] = big_P[s_idx:e_idx, s_idx:e_idx]
+
+            lead_probs[tt] = pf.ŝ_probs[tt]
         end
-
-        ttm1 = (tt == 1) ? 1 : tt-1
-        time_range = (times[ttm1], times[tt])
-        step_pf(pf, time_range, [f_dynamics, f_dynamics], [h₁, h₂], discrete_state_transition, us_at_tt, Zₜ, Rₜ)
-
-        # Update the variables.
-        X = pf.x̂[:, tt]
-        big_P = pf.P[:, :, tt]
-
-        # Store relevant information.
-        # TODO(hamzah) - update for multiple states
-        x̂s[:, tt] = get_current_state(dyn_w_hist, X)
-        s_idx = (dyn_w_hist.num_hist-1) * num_states+1
-        e_idx = xdim(dyn_w_hist)
-        P̂s[:, :, tt] = big_P[s_idx:e_idx, s_idx:e_idx]
-
-        lead_probs[tt] = pf.ŝ_probs[tt]
     end
     
     # outputs: (1) state estimates, uncertainty estimates, leadership_probabilities over time, debug data
-    return x̂s, P̂s, lead_probs, pf, sg_objs
+    return x̂s, P̂s, lead_probs, pf, sg_objs, iteration_timings
 end
 
 export leadership_filter
