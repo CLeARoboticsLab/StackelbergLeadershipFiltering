@@ -30,8 +30,8 @@ topfolder_name = joinpath(data_folder, "nonlq_mc$(num_sims)_L$(leader_idx)_$(get
 isdir(topfolder_name) || mkdir(topfolder_name)
 
 # config variables
-mc_threshold=1e-3
-mc_max_iters=3000
+mc_threshold=2e-3
+mc_max_iters=3500
 mc_step_size=1e-2
 mc_verbose=false
 
