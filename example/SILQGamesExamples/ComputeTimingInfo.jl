@@ -1,3 +1,6 @@
+using JLD
+using Statistics
+
 include("MCFileLocations.jl")
 
 
@@ -17,7 +20,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
 
     # Per-iteration times - isolate all the iterations and compute
     num_iterations = silq_data["num_iterations"]
-    @assert all(!iszero.(num_iterations))
+    @assert all(not.(iszero.(num_iterations)))
 
     mean_num_iters = mean(num_iterations)
     std_num_iters = std(num_iterations)
@@ -44,7 +47,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
     # All particles per time step.
     timings = lf_data["all_lf_iter_timings"]
     @assert length(lf_data["times"]) == size(timings, 2)
-    @assert all(!iszero.(timings))
+    @assert all(not.(iszero.(timings)))
 
     mean_times_per_step = mean.(timings; dims=[1])
     std_times_per_step = std.(timings; dims=[1])
@@ -72,10 +75,12 @@ lq1_lf_m, lq1_lf_s, lq1_silq_m, lq1_silq_s = compute_overall_timing_info(lqp1_da
 println("LQ SILQGames (P1), 201 timesteps @ 0.05s: $(lq1_silq_m) ± $(lq1_silq_s)")
 println("LQ LF (P1), 201 timesteps @ 0.05s, Ts=30, Ns=50: $(lq1_lf_m) ± $(lq1_lf_s)")
 
-# LQ P1
-nonlq2_lf_m, nonlq2_lf_s, nonlq2_silq_m, nonlq2_silq_s = compute_overall_timing_info(nonlqp2_data_folder, nonlqp2_lf_path)
-println("NonLQ SILQGames (P2), 251 timesteps @ 0.02s: $(nonlq2_silq_m) ± $(nonlq2_silq_s)")
-println("NonLQ LF (P2), 251 timesteps @ 0.02s, Ts=30, Ns=100: $(nonlq2_lf_m) ± $(nonlq2_lf_s)")
+# # LQ P1
+# nonlq2_lf_m, nonlq2_lf_s, nonlq2_silq_m, nonlq2_silq_s = compute_overall_timing_info(nonlqp2_data_folder, nonlqp2_lf_path)
+# println("NonLQ SILQGames (P2), 251 timesteps @ 0.02s: $(nonlq2_silq_m) ± $(nonlq2_silq_s)")
+# println("NonLQ LF (P2), 251 timesteps @ 0.02s, Ts=30, Ns=100: $(nonlq2_lf_m) ± $(nonlq2_lf_s)")
 
 
+lq_iters_mean, lq_iters_std, lq_iter_time_mean,lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
+lq_lf_iters_means, lq_lf_iters_stds = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
 
