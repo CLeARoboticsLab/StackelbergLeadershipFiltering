@@ -52,8 +52,8 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
     @assert !any(iszero.(timings))
     println(size(timings))
 
-    mean_times_per_step = mean.(timings; dims=[1])
-    std_times_per_step = std.(timings; dims=[1])
+    mean_times_per_step = mean(timings; dims=[1])
+    std_times_per_step = std(timings; dims=[1])
 
     return mean_times_per_step, std_times_per_step
 end
