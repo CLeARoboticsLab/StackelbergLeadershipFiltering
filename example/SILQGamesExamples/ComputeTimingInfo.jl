@@ -1,3 +1,5 @@
+using Dates
+using LinearAlgebra
 using JLD
 using Statistics
 
@@ -20,7 +22,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
 
     # Per-iteration times - isolate all the iterations and compute
     num_iterations = silq_data["num_iterations"]
-    @assert all(not.(iszero.(num_iterations)))
+    @assert !any(iszero.(num_iterations))
 
     mean_num_iters = mean(num_iterations)
     std_num_iters = std(num_iterations)
@@ -47,7 +49,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
     # All particles per time step.
     timings = lf_data["all_lf_iter_timings"]
     @assert length(lf_data["times"]) == size(timings, 2)
-    @assert all(not.(iszero.(timings)))
+    @assert !any(iszero.(timings))
 
     mean_times_per_step = mean.(timings; dims=[1])
     std_times_per_step = std.(timings; dims=[1])
