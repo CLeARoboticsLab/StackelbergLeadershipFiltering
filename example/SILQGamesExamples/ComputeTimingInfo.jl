@@ -29,7 +29,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
 
     iteration_times = silq_data["elapsed_iteration_times"]
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
-    @assert length(iters_of_interest) == length(num_iterations)
+    @assert length(iters_of_interest) == length(num_iterations), "length 1: $(length(iters_of_interest)), length 2: $(length(num_iterations))"
 
     mean_iter_time = mean(iters_of_interest)
     std_iter_time = std(iters_of_interest)
@@ -48,7 +48,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
 
     # All particles per time step.
     timings = lf_data["all_lf_iter_timings"]
-    @assert length(lf_data["times"]) == size(timings, 2)
+    @assert length(lf_data["times"]) == size(timings, 2), "length 1: $(length(lf_data["times"])), length 2: $(size(timings, 2))"
     @assert !any(iszero.(timings))
 
     mean_times_per_step = mean.(timings; dims=[1])
