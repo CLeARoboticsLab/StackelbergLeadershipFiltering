@@ -69,7 +69,7 @@ vel_unc = 1e-4
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
+Q = 1e-2/2.5 * Diagonal([1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4, 1e-2, 1e-4])
 
 # CONFIG: 
 # We define an uncertainty for the measurements R arbitrarily - easy for now.

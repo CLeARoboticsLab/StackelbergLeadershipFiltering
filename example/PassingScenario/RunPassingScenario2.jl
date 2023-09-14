@@ -120,7 +120,7 @@ end
 
 
 threshold = 1e-2
-max_iters = 50
+max_iters = 200
 step_size = 1e-2
 
 x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
@@ -152,7 +152,7 @@ isdir(folder_name) || mkdir(folder_name)
 
 # Generate the plots for the paper.
 snapshot_freq = Int((T - 1)/10)
-make_driving_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
 
 # This generates the gif.
 filename = "passing_scenario_2.gif"
