@@ -55,7 +55,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
     mean_times_per_step = mean(timings; dims=[1])
     std_times_per_step = std(timings; dims=[1])
 
-    return mean_times_per_step, std_times_per_step
+    return mean_times_per_step, std_times_per_step, mean(timings), std(timings)
 end
 
 function compute_overall_timing_info(data_folder, lf_filename)
@@ -85,6 +85,6 @@ println("LQ LF (P1), 201 timesteps @ 0.05s, Ts=30, Ns=50: $(lq1_lf_m) ± $(lq1_l
 
 
 lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
-lq_lf_iters_means, lq_lf_iters_stds = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
+lq_lf_iters_means, lq_lf_iters_stds, lq_lf_total_mean, lq_lf_total_std = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
 
 nonlq_iters_mean, nonlq_iters_std, nonlq_iter_time_mean, nonlq_iter_time_std = compute_silqgames_timing_info(nonlqp2_data_folder, nonlqp2_silq_path)
