@@ -192,7 +192,7 @@ function step_pf(pf::ParticleFilter, time_range, f_dynamics, h_measures, discret
 
         distrib = MvNormal(pf.z_models[:,i,k], R)
         p[i] = compute_measurement_lkhd(distrib, z)
-        println("meas. lkhd = $(p[i])")
+        #println("meas. lkhd = $(p[i])")
     end
     c_inv = weights_prev' * p
 
