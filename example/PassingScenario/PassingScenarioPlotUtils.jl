@@ -50,6 +50,11 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
     pos_meas_filepath = joinpath(folder_name, "LF_passing_scenario_meas.pdf")
     savefig(p1m, pos_meas_filepath)
 
+    # Generate a probability plot no timings.
+    prob_plot = make_probability_plots(times[1:T], probs[1:T])
+    plot!(prob_plot, title="")
+    prob_filepath = joinpath(folder_name, "LF_passing_scenario_probs.pdf")
+
     ii = 1
     for t in iter1
         p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state, include_all_labels=true)
@@ -96,6 +101,11 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     pos_meas_filepath = joinpath(folder_name, "LF_passing_scenario_meas.pdf")
     savefig(p1m, pos_meas_filepath)
+
+    # Generate a probability plot no timings.
+    prob_plot = make_probability_plots(times[1:T], probs[1:T])
+    plot!(prob_plot, title="")
+    prob_filepath = joinpath(folder_name, "LF_merging_scenario_probs.pdf")
 
     ii = 1
     for t in iter1

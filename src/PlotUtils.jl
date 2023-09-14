@@ -308,7 +308,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 1.2, 1.8, text("($(letter)) meas. model\ntime step $(t)", 30))
+        annotate!(p2, 1.1, 1.8, text("($(letter)) measurement model\ntime step $(t)", 30))
     end
 
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
@@ -331,8 +331,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         does_p1_lead = (particle_leader_idxs_t[n] == 1)
 
         color = (does_p1_lead) ? "red" : "blue"
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1$ Meas. Model" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_2$ Meas. Model" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1$ Measurement Model" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_2$ Measurement Model" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
