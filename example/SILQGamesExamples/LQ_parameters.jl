@@ -5,8 +5,8 @@ using Random
 seed = 1
 rng = MersenneTwister(seed)
 
-dt = 0.05
-T = 201
+dt = 0.02
+T = 501
 horizon = T * dt
 times = dt * (cumsum(ones(T)) .- 1)
 

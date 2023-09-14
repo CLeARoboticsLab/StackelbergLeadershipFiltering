@@ -117,7 +117,7 @@ for tt in 1:T
     zs[:, tt] = rand(rng, MvNormal(true_xs[:, tt], R))
 end
 
-x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
+x̂s, P̂s, probs, pf, sg_objs, iter_timings = leadership_filter(dyn, costs, t₀, times,
                            T,         # simulation horizon
                            Ts,        # horizon over which the stackelberg game should be played,
                            num_games, # number of stackelberg games played for measurement

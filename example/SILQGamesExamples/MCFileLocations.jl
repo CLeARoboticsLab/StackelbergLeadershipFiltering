@@ -19,6 +19,10 @@ function get_final_lq_paths_p1()
 
     # data_folder = ""
 
+    data_folder = "lq_mc100_L1_9_13_4_22"
+    lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"
+    silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"
+
     return data_folder, silq_data_file, lf_data_file
 end
 
@@ -78,6 +82,10 @@ function get_final_nonlq_paths_p2()
     data_folder="nonlq_mc20_L2_8_31_9_40"
     silq_data_file="nonlq_silq_mc20_L2_th0.001_ss0.01_M3000.jld"
     lf_data_file="nonlq_lf_mc20_L2_th0.001_ss0.02_M50.jld"
+
+    data_folder="nonlq_mc100_L2_9_13_14_54"
+    silq_data_file="nonlq_silq_mc100_L2_th0.001_ss0.01_M3500.jld"
+    lf_data_file=""
 
     return data_folder, silq_data_file, lf_data_file
 end

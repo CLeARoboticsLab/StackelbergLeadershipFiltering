@@ -1,4 +1,5 @@
 using Base.Threads
+using BenchmarkTools
 using Dates
 using LaTeXStrings
 using LinearAlgebra
@@ -105,6 +106,7 @@ function generate_silq_jld_data(sg, leader_idx, times, dt, horizon, x1s, u1s, el
                 "convergence_metrics" => sg.convergence_metrics,
                 "evaluated_costs" => sg.evaluated_costs,
                 "elapsed_times" => elapsed_times,
+                "elapsed_iteration_times" => sg.timings
                 )
     return silq_data
 end
@@ -130,6 +132,8 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
     all_particle_xs = zeros(num_sims, T, num_particles+2, xdim(dyn), Ts+1)
     all_particle_leader_idxs = zeros(num_sims, T, num_particles+2)
     all_particle_num_iterations = zeros(num_sims, T, num_particles+2)
+
+    all_lf_iter_timings = zeros(num_sims, T)
 
     is_completed = [false for _ in 1:num_sims]
 
@@ -158,7 +162,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
 
         elapsed_times[ss] = @elapsed begin
             try 
-                all_x̂s[ss, :, :], all_P̂s[ss, :, :, :], all_probs[ss, :], pf, sgs = leadership_filter(dyn, costs, t0, lf_times,
+                all_x̂s[ss, :, :], all_P̂s[ss, :, :, :], all_probs[ss, :], pf, sgs, all_lf_iter_timings[ss, :] = leadership_filter(dyn, costs, t0, lf_times,
                                    T,         # simulation horizon
                                    Ts,        # horizon over which the stackelberg game should be played,
                                    num_games, # number of stackelberg games played for measurement
@@ -249,6 +253,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
                 "lf_step_size" => lf_step_size,
 
                 "elapsed_times" => elapsed_times,
+                "all_lf_iter_timings" => all_lf_iter_timings
                 )
 
     # return all_probs, all_x̂s, all_P̂s, all_zs, all_particle_leader_idxs, all_particle_num_iterations, all_particle_xs

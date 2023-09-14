@@ -123,7 +123,7 @@ threshold = 1e-2
 max_iters = 200
 step_size = 1e-2
 
-x̂s, P̂s, probs, pf, sg_objs = leadership_filter(dyn, costs, t₀, times,
+x̂s, P̂s, probs, pf, sg_objs, iter_timings = leadership_filter(dyn, costs, t₀, times,
                            T,         # simulation horizon
                            Ts,        # horizon over which the stackelberg game should be played,
                            num_games, # number of stackelberg games played for measurement
