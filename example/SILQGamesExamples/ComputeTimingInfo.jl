@@ -28,7 +28,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
     std_num_iters = std(num_iterations)
 
     iteration_times = silq_data["elapsed_iteration_times"]
-    iters_of_interest = iteration_times[iteration_times[:] != 0]
+    iters_of_interest = iteration_times[iteration_times[:] .!= 0]
     @assert length(iters_of_interest) == length(num_iterations)
 
     mean_iter_time = mean(iters_of_interest)
