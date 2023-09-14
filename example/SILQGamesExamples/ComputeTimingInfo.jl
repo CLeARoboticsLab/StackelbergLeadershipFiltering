@@ -48,7 +48,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
 
     # All particles per time step.
     timings = lf_data["all_lf_iter_timings"]
-    @assert lf_data["silq_data"]["T"] == size(timings, 2) "length 1: $(lf_data["silq_data"]["T"]), length 2: $(size(timings, 2))"
+    @assert lf_data["silq"]["T"] == size(timings, 2) "length 1: $(lf_data["silq_data"]["T"]), length 2: $(size(timings, 2))"
     @assert !any(iszero.(timings))
 
     mean_times_per_step = mean.(timings; dims=[1])
