@@ -6,7 +6,7 @@ using Statistics
 include("MCFileLocations.jl")
 
 
-lqp1_data_folder, lqp1_silq_path, lqp1_lf_path = get_final_lq_paths_p1()
+lqp1_data_folder, s, lqp1_lf_path = get_final_lq_paths_p1()
 # lqp2_data_folder, _, lqp2_lf_path = get_final_lq_paths_p2()
 # uqp1_data_folder, _, uqp1_lf_path = get_final_uq_paths_p1()
 nonlqp2_data_folder, nonlqp2_silq_path, nonlqp2_lf_path = get_final_nonlq_paths_p2()
@@ -48,7 +48,7 @@ function compute_leadership_filter_timing_info(data_folder, lf_filename)
 
     # All particles per time step.
     timings = lf_data["all_lf_iter_timings"]
-    @assert length(lf_data["times"]) == size(timings, 2) "length 1: $(length(lf_data["times"])), length 2: $(size(timings, 2))"
+    @assert lf_data["silq_data"]["T"] == size(timings, 2) "length 1: $(lf_data["silq_data"]["T"]), length 2: $(size(timings, 2))"
     @assert !any(iszero.(timings))
 
     mean_times_per_step = mean.(timings; dims=[1])
@@ -83,6 +83,7 @@ println("LQ LF (P1), 201 timesteps @ 0.05s, Ts=30, Ns=50: $(lq1_lf_m) ± $(lq1_l
 # println("NonLQ LF (P2), 251 timesteps @ 0.02s, Ts=30, Ns=100: $(nonlq2_lf_m) ± $(nonlq2_lf_s)")
 
 
-lq_iters_mean, lq_iters_std, lq_iter_time_mean,lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
+lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
 lq_lf_iters_means, lq_lf_iters_stds = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
 
+nonlq_iters_mean, nonlq_iters_std, nonlq_iter_time_mean, nonlq_iter_time_std = compute_silqgames_timing_info(nonlqp2_data_folder, nonlqp2_silq_path)
