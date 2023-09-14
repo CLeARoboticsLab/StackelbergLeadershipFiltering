@@ -253,6 +253,7 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
                 "lf_step_size" => lf_step_size,
 
                 "elapsed_times" => elapsed_times,
+                "all_lf_iter_timings" => all_lf_iter_timings
                 )
 
     # return all_probs, all_x̂s, all_P̂s, all_zs, all_particle_leader_idxs, all_particle_num_iterations, all_particle_xs
