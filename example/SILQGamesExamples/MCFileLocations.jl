@@ -83,6 +83,10 @@ function get_final_nonlq_paths_p2()
     silq_data_file="nonlq_silq_mc20_L2_th0.001_ss0.01_M3000.jld"
     lf_data_file="nonlq_lf_mc20_L2_th0.001_ss0.02_M50.jld"
 
+    data_folder="nonlq_mc100_L2_9_13_14_54"
+    silq_data_file="nonlq_silq_mc100_L2_th0.001_ss0.01_M3500.jld"
+    lf_data_file=""
+
     return data_folder, silq_data_file, lf_data_file
 end
 
