@@ -186,8 +186,13 @@ function step_pf(pf::ParticleFilter, time_range, f_dynamics, h_measures, discret
         pf.particles[:,i,k] = f_dynamics[s_idx](time_range, 𝒳_prev[:,i], u_input_k, pf.rng)
         pf.z_models[:,i,k] = h_measures[s_idx](pf.particles[:,i,k])
 
+        z_hat = pf.z_models[:,i,k]
+        # println("||z - ẑ|| = $(norm(z - z_hat))")
+        # println("true z: $z, z hat: $(z_hat)")
+
         distrib = MvNormal(pf.z_models[:,i,k], R)
         p[i] = compute_measurement_lkhd(distrib, z)
+        #println("meas. lkhd = $(p[i])")
     end
     c_inv = weights_prev' * p
 
