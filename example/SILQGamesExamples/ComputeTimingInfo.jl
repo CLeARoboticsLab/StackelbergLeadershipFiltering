@@ -24,12 +24,12 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
     num_iterations = silq_data["num_iterations"]
     @assert !any(iszero.(num_iterations))
 
-    mean_num_iters = mean(num_iterations)
-    std_num_iters = std(num_iterations)
+    mean_num_iters = mean(num_iterations .- 1)
+    std_num_iters = std(num_iterations .- 1)
 
     iteration_times = silq_data["elapsed_iteration_times"]
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
-    @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations))"
+    @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations.-1) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations.-1))"
 
     mean_iter_time = mean(iters_of_interest)
     std_iter_time = std(iters_of_interest)
