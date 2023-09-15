@@ -392,8 +392,8 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         label_str = join(t_idx, ",")
         for idx in t_idx
             t = times[idx]
-            plot!(plot, [t, t], [-0.05, 1.0], color=:black, linestyle=:solid, linewidth=3, label="")#"t=$(label_str)",)
-            annotate!(plot, times[idx], 1.1, idx, 24)
+            plot!(plot, [t, t], [-0.05, 1.05], color=:black, linestyle=:solid, linewidth=3, label="")#"t=$(label_str)",)
+            # annotate!(plot, times[idx], 1.1, idx, 24)
             # label_str = ""
             # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
         end
