@@ -6,7 +6,7 @@ using LaTeXStrings
 using Plots
 
 function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=18)
-    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent)
+    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600))
 end
 export get_standard_plot
 
