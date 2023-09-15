@@ -6,7 +6,8 @@ using LaTeXStrings
 using Plots
 
 function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=18)
-    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600), margin=25Plots.mm)
+    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600),
+                leftmargin=25Plots.mm, bottommargin=15Plots.mm)
 end
 export get_standard_plot
 
@@ -394,7 +395,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
             # label_str = ""
             # vline!(plot, [t], label="Max Iterations", color=:black, linewidth=3)
         end
-        annotate!(plot, 8.5, 1.1, "steps", 18)
+        # annotate!(plot, 8.5, 1.1, "steps", 18)
     end
 
 
