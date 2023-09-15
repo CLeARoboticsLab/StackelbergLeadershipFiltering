@@ -112,7 +112,7 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     ii = 1
     for t in iter1
-        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state)
+        p1b = plot_leadership_filter_measurement_details(num_particles, sg_objs[t], rotated_true_xs[:, 1:T], rotated_x̂s; transform_particle_fn=rotate_particle_state, include_all_labels=true)
         plot!(p1b, ylabel="Transverse Position (m)", xlabel="Along-Road Position (m)", ylimit=(-(cfg.lane_width_m+1), cfg.lane_width_m+1), xlimit=limits_tuple)
         p1b = add_lane_lines!(p1b, cfg, limits)
 
