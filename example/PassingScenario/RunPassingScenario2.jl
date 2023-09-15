@@ -154,7 +154,7 @@ isdir(folder_name) || mkdir(folder_name)
 snapshot_freq = Int((T - 1)/10)
 make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
 
-# This generates the gif.
-filename = "passing_scenario_2.gif"
-make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
+# # This generates the gif.
+# filename = "passing_scenario_2.gif"
+# make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
 
