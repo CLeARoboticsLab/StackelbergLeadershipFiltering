@@ -47,7 +47,8 @@ all_zs = data["measurements"]
 
 
 # LQ
-times_of_note = [2, 22, 122]
+# times_of_note = [2, 22, 122]
+times_of_note = [27, 102, 352]
 
 # Non-LQ
 # times_of_note = [2, 22, 122]

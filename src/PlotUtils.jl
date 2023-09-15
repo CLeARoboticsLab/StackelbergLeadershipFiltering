@@ -257,12 +257,14 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=2, ls=:solid, label="")#L"$\mathcal{A}_1$ Ground Truth")
     # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
-    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_1$ Measurements")
+    label_p1 = (show_meas_annotation) ? "" : L"$\mathcal{A}_1$ Measurements"
+    label_p2 = (show_meas_annotation) ? "" : L"$\mathcal{A}_2$ Measurements"
+    scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=label_p1)
     scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#L"$\mathcal{A}_1$ Start")
 
     plot!(p1, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=2, ls=:solid, label="")#L"$\mathcal{A}_2$ Ground Truth")
     # plot!(p1, est_xs[x2_idx, :], est_xs[y2_idx, :], label=L"\mathcal{A}_2 Estimate", color=:turquoise2)
-    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=L"$\mathcal{A}_2$ Measurements")
+    scatter!(p1, zs[x2_idx, :], zs[y2_idx, :], color=:blue, marker=:plus, ms=6, markerstrokewidth=0, label=label_p2)
     scatter!(p1, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")#L"$\mathcal{A}_2$ Start")
 
     return p1
@@ -309,7 +311,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 1.1, 1.8, text("($(letter)) measurement model\ntime step $(t)", 30))
+        annotate!(p2, 0.9, 1.7, text("($(letter)) measurement model\ntime step $(t)", 30))
     end
 
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
