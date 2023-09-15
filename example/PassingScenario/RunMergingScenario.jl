@@ -148,7 +148,7 @@ end
 
 
 threshold = 1e-2
-max_iters = 200
+max_iters = 150
 step_size = 1e-2
 
 x̂s, P̂s, probs, pf, sg_objs, iter_timings = leadership_filter(dyn, costs, t₀, times,
