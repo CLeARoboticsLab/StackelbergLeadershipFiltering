@@ -257,8 +257,8 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=2, ls=:solid, label="")#L"$\mathcal{A}_1$ Ground Truth")
     # plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"\mathcal{A}_1 Estimate", color=:orange)
-    label_p1 = (show_meas_annotation) ? "" : L"$\mathcal{A}_1$ Measurements"
-    label_p2 = (show_meas_annotation) ? "" : L"$\mathcal{A}_2$ Measurements"
+    label_p1 = (isnothing(show_meas_annotation)) ? L"$\mathcal{A}_1$ Measurements" : ""
+    label_p2 = (isnothing(show_meas_annotation)) ? L"$\mathcal{A}_2$ Measurements" : ""
     scatter!(p1, zs[x1_idx, :], zs[y1_idx, :], color=:red, marker=:plus, ms=6, markerstrokewidth=0, label=label_p1)
     scatter!(p1, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#L"$\mathcal{A}_1$ Start")
 
