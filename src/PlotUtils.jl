@@ -161,7 +161,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"$\parallel x_{1:T}^{k+1} - x_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
+    plot!(title=title8, yaxis=:log, xlabel=L"\mathrm{#/;Iterations}", ylabel=L"$\parallel \mathbf{x}_{1:T}^{k+1} - \mathbf{x}_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
@@ -188,7 +188,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 
     title9 = "evaluated costs"
     q9 = get_standard_plot()
-    plot!(title=title9, yaxis=:log, xlabel=L"/mathrm{#/;Iterations}", ylabel="Cost")
+    plot!(title=title9, yaxis=:log, xlabel=L"\mathrm{#/;Iterations}", ylabel="Cost")
 
     if num_iters > 2
         plot!(conv_x, costs_1[1:num_iters], label=L"\mathcal{A}_1", color=:red, linewidth=2)
