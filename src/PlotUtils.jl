@@ -58,38 +58,38 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_le
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1~p_x")
-    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2~p_x")
+    plot!(times, xs[x1_idx,:], label=L"$\mathcal{A}_1~p_x$")
+    plot!(times, xs[x2_idx,:], label=L"$\mathcal{A}_2~p_x$")
 
     title2b = "y-pos"
     q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1~p_y")
-    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2~p_y")
+    plot!(times, xs[y1_idx,:], label=L"$\mathcal{A}_1~p_y$")
+    plot!(times, xs[y2_idx,:], label=L"$\mathcal{A}_2~p_y$")
 
     title3 = "x-vel"
     q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[2,:], label=L"\mathcal{A}_1~v_x")
-    plot!(times, xs[6,:], label=L"\mathcal{A}_2~v_x")
+    plot!(times, xs[2,:], label=L"$\mathcal{A}_1~v_x$")
+    plot!(times, xs[6,:], label=L"$\mathcal{A}_2~v_x$")
 
     title4 = "y-vel"
     q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[4,:], label=L"\mathcal{A}_1~v_y")
-    plot!(times, xs[8,:], label=L"\mathcal{A}_2~v_y")
+    plot!(times, xs[4,:], label=L"$\mathcal{A}_1~v_y$")
+    plot!(times, xs[8,:], label=L"$\mathcal{A}_2~v_y$")
 
     title5 = "x-accel"
     q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="accel (mpss)")
-    plot!(times, us[1][1, :], label=L"\mathcal{A}_1~a_x")
-    plot!(times, us[2][1, :], label=L"\mathcal{A}_2~a_x")
+    plot!(times, us[1][1, :], label=L"$\mathcal{A}_1~a_x$")
+    plot!(times, us[2][1, :], label=L"$\mathcal{A}_2~a_x$")
 
     title6 = "y-accel"
     q6 = get_standard_plot(;include_legend)
     plot!(title=title6, xlabel="t (s)", ylabel="accel (mpss)")
-    plot!(times, us[1][2, :], label=L"\mathcal{A}_1~a_y")
-    plot!(times, us[2][2, :], label=L"\mathcal{A}_2~a_y")
+    plot!(times, us[1][2, :], label=L"$\mathcal{A}_1~a_y$")
+    plot!(times, us[2][2, :], label=L"$\mathcal{A}_2~a_y$")
 
     return q1, q2a, q2b, q3, q4, q5, q6
 end
@@ -108,8 +108,8 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     title1 = "pos. traj."
     q1 = get_standard_plot(;include_legend)
     plot!(title=title1, xlabel="Horizontal Position (m)", ylabel="Vertical Position (m)")
-    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label=L"\mathcal{A}_1", color=:red)
-    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"\mathcal{A}_2", color=:blue)
+    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label=L"$\mathcal{A}_1", color=:re$d)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"$\mathcal{A}_2", color=:blu$e)
 
     q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="start P1")
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="start P2")
@@ -117,32 +117,32 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
     plot!(title=title2a, xlabel="t (s)", ylabel="x (m)")
-    plot!(times, xs[x1_idx,:], label=L"\mathcal{A}_1~p_x")
-    plot!(times, xs[x2_idx,:], label=L"\mathcal{A}_2~p_x")
+    plot!(times, xs[x1_idx,:], label=L"$\mathcal{A}_1~p_x$")
+    plot!(times, xs[x2_idx,:], label=L"$\mathcal{A}_2~p_x$")
 
     title2b = "y-pos"
     q2b = get_standard_plot(;include_legend)
     plot!(title=title2b, xlabel="t (s)", ylabel="y (m)")
-    plot!(times, xs[y1_idx,:], label=L"\mathcal{A}_1~p_y")
-    plot!(times, xs[y2_idx,:], label=L"\mathcal{A}_2~p_y")
+    plot!(times, xs[y1_idx,:], label=L"$\mathcal{A}_1~p_y$")
+    plot!(times, xs[y2_idx,:], label=L"$\mathcal{A}_2~p_y$")
 
     title3 = "θ"
     q3 = get_standard_plot(;include_legend)
     plot!(title=title3, xlabel="t (s)", ylabel="θ (rad)")
-    plot!(times, wrap_angle.(xs[3,:]), label=L"\mathcal{A}_1~θ")
-    plot!(times, wrap_angle.(xs[7,:]), label=L"\mathcal{A}_2~θ")
+    plot!(times, wrap_angle.(xs[3,:]), label=L"$\mathcal{A}_1~θ$")
+    plot!(times, wrap_angle.(xs[7,:]), label=L"$\mathcal{A}_2~θ$")
 
     title4 = "vel"
     q4 = get_standard_plot(;include_legend)
     plot!(title=title4, xlabel="t (s)", ylabel="vel. (mps)")
-    plot!(times, xs[4,:], label=L"\mathcal{A}_1~v")
-    plot!(times, xs[8,:], label=L"\mathcal{A}_2~v")
+    plot!(times, xs[4,:], label=L"$\mathcal{A}_1~v$")
+    plot!(times, xs[8,:], label=L"$\mathcal{A}_2~v$")
 
     title5 = "ang vel"
     q5 = get_standard_plot(;include_legend)
     plot!(title=title5, xlabel="t (s)", ylabel="ang. vel. (rad/s)")
-    plot!(times, us[1][1, :], label=L"\mathcal{A}_1~ω")
-    plot!(times, us[2][1, :], label=L"\mathcal{A}_2~ω")
+    plot!(times, us[1][1, :], label=L"$\mathcal{A}_1~ω$")
+    plot!(times, us[2][1, :], label=L"$\mathcal{A}_2~ω$")
 
     title6 = "accel"
     q6 = get_standard_plot(;include_legend)
@@ -161,13 +161,13 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel=L"\mathrm{#/;Iterations}", ylabel=L"$\parallel \mathbf{x}_{1:T}^{k+1} - \mathbf{x}_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
+    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"$\parallel \mathbf{x}_{1:T}^{k+1} - \mathbf{x}_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
-        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green, linewidth=3)
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit $~$", color=:green, linewidth=3)
     else
-        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit", color=:green)
+        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit $~$", color=:green)
     end
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
@@ -188,7 +188,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 
     title9 = "evaluated costs"
     q9 = get_standard_plot()
-    plot!(title=title9, yaxis=:log, xlabel=L"\mathrm{#/;Iterations}", ylabel="Cost")
+    plot!(title=title9, yaxis=:log, xlabel="# Iterations", ylabel="Cost")
 
     if num_iters > 2
         plot!(conv_x, costs_1[1:num_iters], label=L"\mathcal{A}_1", color=:red, linewidth=2)
