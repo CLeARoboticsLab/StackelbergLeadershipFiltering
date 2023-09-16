@@ -26,54 +26,6 @@ function get_final_lq_paths_p1()
     return data_folder, silq_data_file, lf_data_file
 end
 
-function get_final_lq_paths_p2()
-    data_folder="lq_mc20_L2_8_8_15_6"
-    silq_data_file="lq_silq_mc20_L2_th0.015_ss0.01_M50.jld"
-    lf_data_file="lq_lf_mc20_L2_th0.015_ss0.01_M50.jld"
-    return data_folder, silq_data_file, lf_data_file
-end
-
-# function get_final_uq_paths_p1()
-#     data_folder = "uq_mc20_L1_8_8_17_4"
-#     silq_data_file="uq_silq_mc20_L1_th0.003_ss0.01_M1000.jld"
-#     lf_data_file="uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
-
-
-#     # data_folder="uq_mc20_L1_8_8_23_10"
-#     # silq_data_file="uq_silq_mc20_L1_th0.003_ss0.01_M1500.jld"
-#     # lf_data_file=""
-
-#     data_folder="uq_mc50_L1_8_9_16_5"
-#     silq_data_file="uq_silq_mc50_L1_th0.003_ss0.01_M1500.jld"
-#     lf_data_file = "uq_lf_mc50_L1_th0.001_ss0.01_M50.jld"
-
-#     return data_folder, silq_data_file, lf_data_file
-# end
-
-function get_final_uq_paths_p1()
-    data_folder = "uq_mc20_L1_8_7_13_56"
-    silq_data_file = "uq_silq_mc20_L1_th0.003_ss0.01_M1000.jld"
-    lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
-
-    data_folder = "uq_mc20_L1_8_9_2_39"
-    silq_data_file = "uq_silq_mc20_L1_th0.003_ss0.01_M1500.jld"
-    lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
-
-    # data_folder="uq_mc50_L1_8_9_16_5"
-    # silq_data_file="uq_silq_mc50_L1_th0.003_ss0.01_M1500.jld"
-    # lf_data_file = "uq_lf_mc50_L1_th0.001_ss0.01_M50.jld"
-
-    return data_folder, silq_data_file, lf_data_file
-end
-
-function get_final_lnq_paths_p2()
-    data_folder="lnq_mc10_L2_8_8_23_39"
-    silq_data_file="lnq_silq_mc10_L2_th0.0015_ss0.01_M2500.jld"
-    lf_data_file=""
-
-    return data_folder, silq_data_file, lf_data_file
-end
-
 function get_final_nonlq_paths_p2()
     data_folder="nonlq_mc10_L2_8_9_2_39"
     silq_data_file="nonlq_silq_mc10_L2_th0.001_ss0.01_M3000.jld"
@@ -87,9 +39,32 @@ function get_final_nonlq_paths_p2()
     silq_data_file="nonlq_silq_mc100_L2_th0.001_ss0.01_M3500.jld"
     lf_data_file=""
 
+    data_folder="nonlq_mc100_L2_9_13_19_41"
+    silq_data_file="nonlq_silq_mc100_L2_th0.001_ss0.01_M3500.jld"
+    lf_data_file=""
+
     return data_folder, silq_data_file, lf_data_file
 end
 
+
+
+
+# x20 UQ simulations
+data_folder = "uq_mc20_L1_8_5_12_4"
+lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
+silq_data_file = "uq_silq_mc20_L1_th0.004_ss0.01_M1000.jld"
+
+mc_folder = mc_local_folder
+data_folder, silq_data_file, lf_data_file = get_lq_paths()
+
+#mc_folder = mc_server_folder
+data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2() 
+# data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
+
+
+
+
+## OLD
 function get_lq_paths()
     data_folder = "lq_mc2_L2_8_3_17_41"
     silq_data_file = "lq_silq_mc2_L2_th0.015_ss0.01_M50.jld"
@@ -144,15 +119,50 @@ function get_lnq_paths()
     return data_folder, silq_data_file, lf_data_file
 end
 
+function get_final_lq_paths_p2()
+    data_folder="lq_mc20_L2_8_8_15_6"
+    silq_data_file="lq_silq_mc20_L2_th0.015_ss0.01_M50.jld"
+    lf_data_file="lq_lf_mc20_L2_th0.015_ss0.01_M50.jld"
+    return data_folder, silq_data_file, lf_data_file
+end
 
-# x20 UQ simulations
-data_folder = "uq_mc20_L1_8_5_12_4"
-lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
-silq_data_file = "uq_silq_mc20_L1_th0.004_ss0.01_M1000.jld"
+# function get_final_uq_paths_p1()
+#     data_folder = "uq_mc20_L1_8_8_17_4"
+#     silq_data_file="uq_silq_mc20_L1_th0.003_ss0.01_M1000.jld"
+#     lf_data_file="uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
 
-mc_folder = mc_local_folder
-data_folder, silq_data_file, lf_data_file = get_lq_paths()
 
-#mc_folder = mc_server_folder
-data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2() 
-# data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
+#     # data_folder="uq_mc20_L1_8_8_23_10"
+#     # silq_data_file="uq_silq_mc20_L1_th0.003_ss0.01_M1500.jld"
+#     # lf_data_file=""
+
+#     data_folder="uq_mc50_L1_8_9_16_5"
+#     silq_data_file="uq_silq_mc50_L1_th0.003_ss0.01_M1500.jld"
+#     lf_data_file = "uq_lf_mc50_L1_th0.001_ss0.01_M50.jld"
+
+#     return data_folder, silq_data_file, lf_data_file
+# end
+
+function get_final_uq_paths_p1()
+    data_folder = "uq_mc20_L1_8_7_13_56"
+    silq_data_file = "uq_silq_mc20_L1_th0.003_ss0.01_M1000.jld"
+    lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
+
+    data_folder = "uq_mc20_L1_8_9_2_39"
+    silq_data_file = "uq_silq_mc20_L1_th0.003_ss0.01_M1500.jld"
+    lf_data_file = "uq_lf_mc20_L1_th0.001_ss0.01_M50.jld"
+
+    # data_folder="uq_mc50_L1_8_9_16_5"
+    # silq_data_file="uq_silq_mc50_L1_th0.003_ss0.01_M1500.jld"
+    # lf_data_file = "uq_lf_mc50_L1_th0.001_ss0.01_M50.jld"
+
+    return data_folder, silq_data_file, lf_data_file
+end
+
+function get_final_lnq_paths_p2()
+    data_folder="lnq_mc10_L2_8_8_23_39"
+    silq_data_file="lnq_silq_mc10_L2_th0.0015_ss0.01_M2500.jld"
+    lf_data_file=""
+
+    return data_folder, silq_data_file, lf_data_file
+end
