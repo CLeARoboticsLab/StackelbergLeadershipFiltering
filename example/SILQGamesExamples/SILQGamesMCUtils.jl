@@ -322,8 +322,7 @@ function plot_convergence_histogram(num_iterations, max_iters; num_bins=:auto)
     if all(num_iterations .== 2)
         return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
     end
-    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
-    xlimits!(hist, [0, 2500])
+    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500])
     vline!(hist, [max_iters], label="Max Iterations", color=:black, linewidth=3)
     return hist
 end
