@@ -288,7 +288,7 @@ end
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf)
     convergence_plot = get_standard_plot()
-    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"$\left\|\|x_{1:T}^{k+1} - x_{1:T}^{k}\right\|\|_\infty$")#Max Abs. State Difference")
+    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"$\|\bm{x}_{1:T}^{k+1} - \bm{x}_{1:T}^{k}\|_\infty$")#Max Abs. State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
