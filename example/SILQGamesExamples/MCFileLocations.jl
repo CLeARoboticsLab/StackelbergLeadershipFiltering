@@ -23,6 +23,10 @@ function get_final_lq_paths_p1()
     lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"
     silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"
 
+    data_folder = "lq_mc100_L1_9_15_17_31"
+    lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"
+    silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"
+
     return data_folder, silq_data_file, lf_data_file
 end
 
