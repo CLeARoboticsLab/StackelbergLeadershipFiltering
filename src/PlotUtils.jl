@@ -7,7 +7,7 @@ using Plots
 
 function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=24)
     return plot(legendfontsize=legendfontsize, tickfontsize=24, fontsize=24, labelfontsize=24, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600),
-                leftmargin=5Plots.mm, bottommargin=5Plots.mm)
+                leftmargin=5Plots.mm, bottommargin=5Plots.mm, rightmargin=5Plots.mm)
 end
 export get_standard_plot
 
@@ -111,8 +111,8 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label=L"$\mathcal{A}_1", color=:re$d)
     plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"$\mathcal{A}_2", color=:blu$e)
 
-    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="start P1")
-    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="start P2")
+    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#"start P1")
+    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")#start P2")
 
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
@@ -161,7 +161,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"Conv$(\xi_{1:\horizon}^{k}, \state{1:\horizon}^{k-1})$")#Max Abs. State Difference")
+    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"Conv$(\xi_^{k}, x^{k-1})$")#Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
@@ -251,7 +251,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.2, 1.9, text("($(show_meas_annotation)) observations", 36))
+        annotate!(p1, 1.2, 2.2, text("($(show_meas_annotation)) observations", 36))
     end
 
     
@@ -367,7 +367,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if player_to_plot == 1 || isnothing(player_to_plot)
         # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
         if !isnothing(include_gt)
-            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=4)
+            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=8)
         end
 
         # Bound the stddevs to avoid going above 1 or below 0.
@@ -380,7 +380,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         # plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
         # L"""$\mathbb{P}(H_t=\mathcal{A}_2)$"""
         if !isnothing(include_gt)
-            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=4)
+            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=8)
         end
 
         lower_p2, upper_p2 = upper_p1, lower_p1

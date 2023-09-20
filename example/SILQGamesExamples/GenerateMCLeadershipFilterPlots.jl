@@ -78,7 +78,7 @@ for iter in ProgressBar(1:num_sims)
     snapshot_freq = Int((T - 1)/20)
     jj = 0
     letter = 'e'
-    for t in 2:snapshot_freq:T
+    for t in times_of_note#2:snapshot_freq:T
         jj += 1
 
         p1b = plot_leadership_filter_measurement_details(dyn, all_leader_idxs[iter, t, :], num_particles, all_particle_num_iterations[iter, t, :], all_particle_xs[iter, t, :, :, :], true_xs, all_x̂s[iter, :, :]; t=t, letter=letter)
