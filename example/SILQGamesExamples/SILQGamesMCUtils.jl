@@ -288,7 +288,7 @@ end
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf)
     convergence_plot = get_standard_plot()
-    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"$\text{Conv}(\xi^{k}, x^{k-1})$")#Max Abs. State Difference")
+    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"Conv$(\xi^{k}, x^{k-1})$")#Max Abs. State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
