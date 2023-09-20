@@ -52,8 +52,8 @@ function plot_states_and_controls(dyn::LinearDynamics, times, xs, us; include_le
     plot!(q1, xs[x1_idx, :], xs[y1_idx,:], label=L"\mathcal{A}_1", linewidth=3, color=:red, marker=:circle,  markersize=marksize, markerstrokewidth=0)
     plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"\mathcal{A}_2", linewidth=3, color=:blue, marker=:circle,  markersize=marksize, markerstrokewidth=0)
 
-    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label=L"$\mathcal{A}_1$ start")
-    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label=L"$\mathcal{A}_2$ start")
+    q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#L"$\mathcal{A}_1$ start")
+    q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")#L"$\mathcal{A}_2$ start")
 
     title2a = "x-pos"
     q2a = get_standard_plot(;include_legend)
@@ -251,7 +251,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.2, 2.2, text("($(show_meas_annotation)) observations", 36))
+        annotate!(p1, 1.2, 2.0, text("($(show_meas_annotation)) observations", 36))
     end
 
     
@@ -311,7 +311,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 0.9, 1.7, text("($(letter)) measurement model\ntime step $(t)", 36))
+        annotate!(p2, 0.9, 2., text("($(letter)) measurement model\ntime step $(t)", 36))
     end
 
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
