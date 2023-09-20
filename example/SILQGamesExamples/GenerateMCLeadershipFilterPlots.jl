@@ -70,7 +70,7 @@ for iter in ProgressBar(1:num_sims)
     savefig(p1a_i, pos_main_filepath)
     savefig(p1a_ii, pos_meas_filepath)
 
-    prob_plot = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=times_of_note, include_gt=gt_leader_idx, player_to_plot=nothing)
+    prob_plot = make_probability_plots(times[1:T], all_probs[iter, 1:T]; t_idx=nothing, include_gt=gt_leader_idx, player_to_plot=nothing)
     plot!(prob_plot, title="")
     prob_filepath = joinpath(folder_name, "lf_probs_L$(gt_leader_idx).pdf")
     savefig(prob_plot, prob_filepath)

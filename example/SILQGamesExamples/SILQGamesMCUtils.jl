@@ -288,7 +288,7 @@ end
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf)
     convergence_plot = get_standard_plot()
-    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"$\parallel\mathbf{x}_{1:T}^{k+1} - \mathbf{x}_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
+    plot!(yaxis=:log, xlabel="# Iterations", ylabel=L"$\text{Conv}(\xi_{1:\horizon}^{k}, \state{1:\horizon}^{k-1})$")#Max Abs. State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
@@ -303,7 +303,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     # println(means, lower, upper)
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
+        plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Convergence", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)

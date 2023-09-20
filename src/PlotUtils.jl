@@ -5,8 +5,8 @@
 using LaTeXStrings
 using Plots
 
-function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=18)
-    return plot(legendfontsize=legendfontsize, tickfontsize=18, fontsize=18, labelfontsize=18, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600),
+function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=24)
+    return plot(legendfontsize=legendfontsize, tickfontsize=24, fontsize=24, labelfontsize=24, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600),
                 leftmargin=5Plots.mm, bottommargin=5Plots.mm)
 end
 export get_standard_plot
@@ -161,13 +161,13 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"$\parallel \mathbf{x}_{1:T}^{k+1} - \mathbf{x}_{1:T}^{k}\parallel_\infty$")#Max Abs. State Difference")
+    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"Conv$(\xi_{1:\horizon}^{k}, \state{1:\horizon}^{k-1})$")#Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
-        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit $~$", color=:green, linewidth=3)
+        plot!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Convergence $~$", color=:green, linewidth=3)
     else
-        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Merit $~$", color=:green)
+        scatter!(q8, conv_x, conv_sum, label=L"$\ell_{\infty}$ Convergence $~$", color=:green)
     end
     plot!(q8, [0, num_iters-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 
@@ -195,13 +195,13 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
         plot!(conv_x, costs_2[1:num_iters], label=L"\mathcal{A}_2", color=:blue, linewidth=2)
 
         cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
-        plot!(conv_x, cost_sum, label="Total", color=:purple, linewidth=3)
+        # plot!(conv_x, cost_sum, label="Total", color=:purple, linewidth=3)
     else
         scatter!(conv_x, costs_1[1:num_iters], label=L"\mathcal{A}_1", color=:red, marker=:plus, ms=8)
         scatter!(conv_x, costs_2[1:num_iters], label=L"\mathcal{A}_2", color=:blue, marker=:plus, ms=8)
 
         cost_sum = costs_1[1:num_iters] + costs_2[1:num_iters]
-        scatter!(conv_x, cost_sum, label="Total", color=:purple, xaxis=[-0.1, 1.1], xticks=[0, 1])
+        # scatter!(conv_x, cost_sum, label="Total", color=:purple, xaxis=[-0.1, 1.1], xticks=[0, 1])
     end
 
     return q8, q9
@@ -219,7 +219,7 @@ function plot_leadership_filter_positions(dyn::Dynamics, true_xs, est_xs)
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=2, legendfontsize=18)
+    p1 = get_standard_plot(;columns=2, legendfontsize=24)
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     plot!(p1, true_xs[x1_idx, :], true_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Ground Truth", color=:red, linewidth=2, ls=:dash)
     plot!(p1, est_xs[x1_idx, :], est_xs[y1_idx, :], label=L"$\mathcal{A}_1$ Estimate", color=:orange)
@@ -245,13 +245,13 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     x2_idx = xidx(dyn, 2)
     y2_idx = yidx(dyn, 2)
 
-    p1 = get_standard_plot(;columns=2, legendfontsize=18)
+    p1 = get_standard_plot(;columns=2, legendfontsize=24)
     
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
     if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.2, 1.9, text("($(show_meas_annotation)) observations", 30))
+        annotate!(p1, 1.2, 1.9, text("($(show_meas_annotation)) observations", 36))
     end
 
     
@@ -311,7 +311,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 0.9, 1.7, text("($(letter)) measurement model\ntime step $(t)", 30))
+        annotate!(p2, 0.9, 1.7, text("($(letter)) measurement model\ntime step $(t)", 36))
     end
 
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
@@ -367,7 +367,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if player_to_plot == 1 || isnothing(player_to_plot)
         # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
         if !isnothing(include_gt)
-            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=2)
+            plot!(plot, times, (include_gt%2) * ones(T), label="Truth", color=:red, linestyle=:dot, linewidth=4)
         end
 
         # Bound the stddevs to avoid going above 1 or below 0.
@@ -380,7 +380,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         # plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
         # L"""$\mathbb{P}(H_t=\mathcal{A}_2)$"""
         if !isnothing(include_gt)
-            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=2)
+            plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=4)
         end
 
         lower_p2, upper_p2 = upper_p1, lower_p1
