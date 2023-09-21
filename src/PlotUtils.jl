@@ -462,7 +462,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             #       leftmargin=5Plots.mm, bottommargin=5Plots.mm, rightmargin=5Plots.mm))
             plot!(
                 # inset = (1, bbox(0.025, 0.45, 0.3, 0.3, :top, :left)),
-                inset = (1, bbox(0.6, 0.0, 0.3, 0.3, :top, :left)),
+                inset = (1, bbox(0.7, 0.0, 0.3, 0.3, :top, :left)),
                 ticks = nothing,
                 subplot=subplot_idx,
                 bg_inside = :lightgrey,
