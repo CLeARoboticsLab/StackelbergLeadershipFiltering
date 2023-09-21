@@ -368,28 +368,28 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         if !isnothing(meas_xs)
             # Add plus and dot for ground truth and measurements at t in legend
-            scatter!([0.7], [0.15], color=:black, ms=10, label=L"Truth at $t$")
+            scatter!([1.8], [1.85], color=:black, ms=10, label=L"Truth at $t$")
             # scatter!( [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
-            scatter!([0.7], [0.15], marker=:star, color=:yellow, ms=10, label=L"Measurement at $t$")
+            scatter!([1.8], [1.85], marker=:star, color=:yellow, ms=10, label=L"Measurement at $t$")
 
 
             # inset boxes and lines - P1
             plot!([true_xs[x1_idx, t]-boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]-boxsize], 
                   [true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]+boxsize, true_xs[y1_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
-            plot!([true_xs[x1_idx, t]-boxsize, 2.1-0.84],
-                  [true_xs[y1_idx, t]+boxsize, 1.5])
-            plot!([true_xs[x1_idx, t]+boxsize, 2.1],
-                  [true_xs[y1_idx, t]+boxsize, 1.5])
+            plot!([true_xs[x1_idx, t]-boxsize, 2.2-0.84],
+                  [true_xs[y1_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
+            plot!([true_xs[x1_idx, t]+boxsize, 2.2],
+                  [true_xs[y1_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
 
             # P2
             plot!([true_xs[x2_idx, t]-boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]-boxsize], 
                   [true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]+boxsize, true_xs[y2_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
-            # plot!([true_xs[x2_idx, t]-boxsize, 2.1-0.84-0.84-0.14], 
-            #       [true_xs[y2_idx, t]+boxsize-0.84-0.14, 1.5], color=:black)
-            # plot!([true_xs[x2_idx, t]+boxsize, 2.1-0.84-0.14],
-            #       [true_xs[y2_idx, t]+boxsize, 1.5], color=:black)
+            plot!([true_xs[x2_idx, t]-boxsize, 0.2], 
+                  [true_xs[y2_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
+            plot!([true_xs[x2_idx, t]+boxsize, 1.05],
+                  [true_xs[y2_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
 
             # TODO: add lines.
             # Make inset border thicker
