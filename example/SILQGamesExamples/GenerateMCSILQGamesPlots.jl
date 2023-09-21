@@ -95,7 +95,7 @@ d2 = plot_distance_to_agents(dyn, times, all_xs)
 ###########################
 # plot!(joint_plot, )
 q = @layout [a; b]
-plot(convergence_plot, convergence_histogram, layout = q, title="")
+joint_plot = plot(convergence_plot, convergence_histogram, layout = q, title="")
 filename = joinpath(plots_path, string("silq_mc$(num_sims)_convergence_all_L$(leader_idx).pdf"))
 savefig(joint_plot, filename)
 
