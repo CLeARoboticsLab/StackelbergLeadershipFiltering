@@ -313,7 +313,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
         scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), color=:green, elinewidth=3, xticks=[0, 1], label="")#L"Mean $\ell_{\infty}$ Convergence $~$")
     end
     plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
-         [threshold, threshold], color=:purple, linestyle=:dot, linewidth=3, size=(800, 300), bottommargin=8Plots.mm, label="")#"Threshold")
+         [threshold, threshold], color=:purple, linestyle=:dot, linewidth=3, size=(800, 300), bottommargin=8Plots.mm, topmargin=8Plots.mm, label="")#"Threshold")
 
     # num_sims = length(num_iterations)
     # if all(num_iterations .== 2)
