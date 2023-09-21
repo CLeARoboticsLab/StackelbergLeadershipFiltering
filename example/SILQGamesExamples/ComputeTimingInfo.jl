@@ -6,7 +6,7 @@ using Statistics
 include("MCFileLocations.jl")
 
 
-lqp1_data_folder, s, lqp1_lf_path = get_final_lq_paths_p1()
+lqp1_data_folder, lqp1_silq_path, lqp1_lf_path = get_final_lq_paths_p1()
 # lqp2_data_folder, _, lqp2_lf_path = get_final_lq_paths_p2()
 # uqp1_data_folder, _, uqp1_lf_path = get_final_uq_paths_p1()
 nonlqp2_data_folder, nonlqp2_silq_path, nonlqp2_lf_path = get_final_nonlq_paths_p2()
