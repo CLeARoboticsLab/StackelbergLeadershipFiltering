@@ -251,7 +251,7 @@ function plot_leadership_filter_measurements(dyn::Dynamics, true_xs, zs; show_me
     if !isnothing(show_meas_annotation)
         # Remove axis and grid.
         plot!(p1, axis=([], false), grid=true, xlabel="", ylabel="")
-        annotate!(p1, 1.2, 2.0, text("($(show_meas_annotation)) observations", 36))
+        # annotate!(p1, 1.2, 2.0, text("($(show_meas_annotation)) observations", 36))
     end
 
     
@@ -352,7 +352,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
         plot!(ylabel="", xlabel="")
-        annotate!(p2, 0.9, 2., text("($(letter)) measurement\n model t = $(t*0.02)s", 36))
+        # ($(letter)) measurement\n model 
+        annotate!(p2, 0.9, 2., text("t = $(t*0.02)s", 36))
 
         boxsize = 0.1
 
