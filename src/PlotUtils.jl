@@ -316,6 +316,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         p2_truth_label = ""
         # Remove axis and grid.
         # plot!(axis=([], true), grid=true)
+        plot!(legend=false)
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
@@ -382,7 +383,6 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
             # TODO: add lines.
             # Make inset border thicker
-            plot!()
 
             # PLAYER 1 INSET
             subplot_idx = 2
