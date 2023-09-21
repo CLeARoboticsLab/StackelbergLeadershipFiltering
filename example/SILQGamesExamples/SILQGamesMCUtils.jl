@@ -317,11 +317,12 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
 
     num_sims = length(num_iterations)
     if all(num_iterations .== 2)
-        histogram!(num_iterations .- 1, inset = (1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left)), bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="# Iterations", fontsize=24) #xlabel="Iterations to Convergence"
+        histogram!(num_iterations .- 1, subplot=2, inset=(1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left)), bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="# Iterations", fontsize=24) #xlabel="Iterations to Convergence"
+    else
+        hist = histogram!(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500], leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 300))
+        vline!(subplot=2, inset=(1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left)), [max_iters], label="Max Iterations", color=:black, linewidth=3)
     end
-    hist = histogram!(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500], leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 300))
-    vline!(hist, inset = (1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left), [max_iters], label="Max Iterations", color=:black, linewidth=3)
-    return hist
+    # return hist
 
     return convergence_plot
 end
