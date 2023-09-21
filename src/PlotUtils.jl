@@ -302,12 +302,12 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         p2_truth_label = ""
     else
-        p2 = get_standard_plot(;columns=3)
+        p2 = get_standard_plot(;columns=3, legendfontsize=24)
         # p1_est_label = ""
         # p1_truth_label = ""
         # p2_est_label = ""
         # p2_truth_label = ""
-        p2 = get_standard_plot(;columns=2, legendfontsize=12)
+        # p2 = get_standard_plot(;columns=, legendfontsize=12)
         p1_est_label = L"$\mathcal{A}_1$ Estimate"
         # p1_truth_label = L"$\mathcal{A}_1$ Truth"
         p1_truth_label = "Truth"
@@ -315,7 +315,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         p2_truth_label = ""
         # Remove axis and grid.
-        plot!(axis=([], true), grid=true)
+        # plot!(axis=([], true), grid=true)
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
@@ -339,8 +339,9 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         does_p1_lead = (particle_leader_idxs_t[n] == 1)
 
         color = (does_p1_lead) ? "red" : "blue"
-        label_1 = (!has_labeled_p1 && does_p1_lead && include_all_labels) ? L"$\mathcal{A}_1$ Measurement Model" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead && include_all_labels) ? L"$\mathcal{A}_2$ Measurement Model" : ""
+        # && include_all_labels
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1$ Measurement Model" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_2$ Measurement Model" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
@@ -365,6 +366,12 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         boxsize = 0.1
 
         if !isnothing(meas_xs)
+            # Add plus and dot for ground truth and measurements at t in legend
+            scatter!(subplot=subplot_idx, [0.2], [0.7], color=:black, ms=10, label=L"Truth at $t$")
+            # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
+            scatter!(subplot=subplot_idx, [0.2], [0.7], marker=:plus, color=:black, ms=10, label=L"Measurement at $t$")
+
+
             # inset boxes
             plot!([true_xs[x1_idx, t]-boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]-boxsize], 
                   [true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]+boxsize, true_xs[y1_idx, t]+boxsize],
@@ -443,7 +450,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             #       legend=:outertop, legend_columns=3, fg_legend = :transparent, size=(800,600),
             #       leftmargin=5Plots.mm, bottommargin=5Plots.mm, rightmargin=5Plots.mm))
             plot!(
-                inset = (1, bbox(0.0, 0.5, 0.3, 0.3, :top, :left)),
+                inset = (1, bbox(0.05, 0.6, 0.3, 0.3, :top, :left)),
                 ticks = nothing,
                 subplot=subplot_idx,
                 bg_inside = :lightgrey,
