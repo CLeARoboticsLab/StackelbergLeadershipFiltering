@@ -389,7 +389,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             x_idx = x1_idx
             y_idx = y1_idx
             plot!(
-                inset = (1, bbox(0.55, 0.25, 0.3, 0.3, :top, :left)),
+                inset = (1, bbox(0.55, 0.45, 0.3, 0.3, :top, :left)),
                 ticks = nothing,
                 subplot=subplot_idx,
                 bg_inside = :lightgrey,
@@ -436,7 +436,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             end
             scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
             # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
-            scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:plus, color=:black, ms = 10)
+            scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:star, color=:yellow, ms = 10)
 
             # PLAYER 2 INSET
             subplot_idx = 3
@@ -497,7 +497,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             end
             scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
             # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
-            scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:plus, color=:black, ms=10)
+            scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:star, color=:yellow, ms=10)
         end
     end
 
