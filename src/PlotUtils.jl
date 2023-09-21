@@ -294,7 +294,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     y2_idx = yidx(dyn, 2)
 
     if include_all_labels
-        p2 = get_standard_plot(;columns=2, legendfontsize=12)
+        p2 = get_standard_plot(;columns=2, legendfontsize=24)
         p1_est_label = L"$\mathcal{A}_1$ Estimate"
         # p1_truth_label = L"$\mathcal{A}_1$ Truth"
         p1_truth_label = "Truth"
@@ -302,10 +302,17 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         p2_truth_label = ""
     else
-        p2 = get_standard_plot(;columns=2)
+        p2 = get_standard_plot(;columns=3)
         # p1_est_label = ""
         # p1_truth_label = ""
         # p2_est_label = ""
+        # p2_truth_label = ""
+        p2 = get_standard_plot(;columns=2, legendfontsize=12)
+        p1_est_label = L"$\mathcal{A}_1$ Estimate"
+        # p1_truth_label = L"$\mathcal{A}_1$ Truth"
+        p1_truth_label = "Truth"
+        p2_est_label = L"$\mathcal{A}_2$ Estimate"
+        # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         # p2_truth_label = ""
         # Remove axis and grid.
         plot!(axis=([], true), grid=true)
