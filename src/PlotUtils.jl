@@ -367,9 +367,9 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         if !isnothing(meas_xs)
             # Add plus and dot for ground truth and measurements at t in legend
-            scatter!(subplot=subplot_idx, [0.2], [0.7], color=:black, ms=10, label=L"Truth at $t$")
-            # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
-            scatter!(subplot=subplot_idx, [0.2], [0.7], marker=:plus, color=:black, ms=10, label=L"Measurement at $t$")
+            scatter!([0.2], [0.7], color=:black, ms=10, label=L"Truth at $t$")
+            # scatter!( [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
+            scatter!([0.2], [0.7], marker=:plus, color=:black, ms=10, label=L"Measurement at $t$")
 
 
             # inset boxes
