@@ -288,7 +288,7 @@ end
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
     convergence_plot = get_standard_plot(include_legend=:outertopright)
-    plot!(yaxis=:log, ylabel=L"Conv$(\xi^{k}, x^{k-1})$", xlabel="")#"# Iterations"#Max Abs. State Difference")
+    plot!(yaxis=:log, ylabel=L"Conv$(\xi^{k}, x^{k-1})$", xlabel="", axis=([], true))#"# Iterations"#Max Abs. State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
@@ -332,7 +332,7 @@ function plot_convergence_histogram(num_iterations, max_iters; num_bins=:auto)
     if all(num_iterations .== 2)
         return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="# Iterations", fontsize=24) #xlabel="Iterations to Convergence"
     end
-    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="# Iterations", xlimits=[0, 2500], leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 300), bottommargin=8Plots.mm, fontsize=24)
+    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="# Iterations", xlimits=[0, 2500], leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 300), bottommargin=8Plots.mm, labelfontsize=24)
     vline!(hist, [max_iters], label="Max Iterations", color=:black, linewidth=3)
     return hist
 end
