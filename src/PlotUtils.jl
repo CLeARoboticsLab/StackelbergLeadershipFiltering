@@ -390,9 +390,9 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
             if true_xs[y2_idx, t] > 1.5
                 plot!([true_xs[x2_idx, t]+boxsize, 0.1], 
-                      [true_xs[y2_idx, t]+boxsize, 2.2], color=:black, linestyle=:dot)
+                      [true_xs[y2_idx, t]+boxsize, 2.3], color=:black, linestyle=:dot)
                 plot!([true_xs[x2_idx, t]+boxsize, 0.1],
-                      [true_xs[y2_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
+                      [true_xs[y2_idx, t]-boxsize, 1.55], color=:black, linestyle=:dot)
             else
                 plot!([true_xs[x2_idx, t]-boxsize, 0.1], 
                       [true_xs[y2_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
