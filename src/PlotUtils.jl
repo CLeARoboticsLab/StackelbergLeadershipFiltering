@@ -108,8 +108,8 @@ function plot_states_and_controls(dyn::UnicycleDynamics, times, xs, us; include_
     title1 = "pos. traj."
     q1 = get_standard_plot(;include_legend)
     plot!(title=title1, xlabel="Horizontal Position (m)", ylabel="Vertical Position (m)")
-    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label=L"$\mathcal{A}_1", color=:re$d)
-    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"$\mathcal{A}_2", color=:blu$e)
+    plot!(q1, xs[x1_idx, :], xs[y1_idx, :], label=L"$\mathcal{A}_1$", color=:red)
+    plot!(q1, xs[x2_idx,:], xs[y2_idx, :], label=L"$\mathcal{A}_2$", color=:blue)
 
     q1 = scatter!([x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="")#"start P1")
     q1 = scatter!([x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="")#start P2")
