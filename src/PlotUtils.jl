@@ -351,9 +351,9 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
     # If t is provided, annotate the plot.
     if !isnothing(t) && !isnothing(letter)
-        plot!(ylabel="", xlabel="")
+        # plot!(ylabel="", xlabel="")
         # ($(letter)) measurement\n model 
-        annotate!(p2, 0.9, 2., text("t = $(t*0.02)s", 36))
+        # annotate!(p2, 0.9, 2., text("t = $(t*0.02)s", 36))
 
         boxsize = 0.1
 
@@ -365,6 +365,10 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             plot!([true_xs[x2_idx, t]-boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]-boxsize], 
                   [true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]+boxsize, true_xs[y2_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
+
+            # TODO: add lines.
+            # Make inset border thicker
+            plot!()
 
             # PLAYER 1 INSET
             subplot_idx = 2
@@ -378,9 +382,9 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                 axis=false,
                 grid=false,
                 legend=false,
-                # framestyle=:box,
-                # bordercolor=:blue,
-                # borderwidth=3,
+                framestyle=:box,
+                bordercolor=:black,
+                borderwidth=3,
                 xlimits=[true_xs[x_idx, t]-boxsize, true_xs[x_idx, t]+boxsize],
                 ylimits=[true_xs[y_idx, t]-boxsize, true_xs[y_idx, t]+boxsize]
             )
@@ -424,6 +428,13 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             subplot_idx = 3
             x_idx = x2_idx
             y_idx = y2_idx
+            # sub_p1 = get_standard_plot()
+            # plot!(inset = (1, bbox(0.0, 0.5, 0.3, 0.3, :top, :left)), bg_inside = :lightgrey, 
+            #       xlimits=[true_xs[x_idx, t]-boxsize, true_xs[x_idx, t]+boxsize],
+            #       ylimits=[true_xs[y_idx, t]-boxsize, true_xs[y_idx, t]+boxsize],
+            #       legendfontsize=24, tickfontsize=24, fontsize=24, labelfontsize=24,
+            #       legend=:outertop, legend_columns=3, fg_legend = :transparent, size=(800,600),
+            #       leftmargin=5Plots.mm, bottommargin=5Plots.mm, rightmargin=5Plots.mm))
             plot!(
                 inset = (1, bbox(0.0, 0.5, 0.3, 0.3, :top, :left)),
                 ticks = nothing,
