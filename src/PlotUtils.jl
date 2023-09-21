@@ -316,7 +316,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         p2_truth_label = ""
         # Remove axis and grid.
         # plot!(axis=([], true), grid=true)
-        plot!(legend=false)
+        plot!(legend=false, size=(800,500))
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
