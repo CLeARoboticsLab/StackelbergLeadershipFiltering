@@ -303,12 +303,12 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         p2_truth_label = ""
     else
         p2 = get_standard_plot(;columns=2)
-        p1_est_label = ""
-        p1_truth_label = ""
-        p2_est_label = ""
-        p2_truth_label = ""
+        # p1_est_label = ""
+        # p1_truth_label = ""
+        # p2_est_label = ""
+        # p2_truth_label = ""
         # Remove axis and grid.
-        plot!(axis=([], false), grid=true)
+        plot!(axis=([], true), grid=true)
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
