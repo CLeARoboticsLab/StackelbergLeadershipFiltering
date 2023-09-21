@@ -19,10 +19,12 @@ function get_final_lq_paths_p1()
 
     # data_folder = ""
 
+    # 30 Ts horizon
     data_folder = "lq_mc100_L1_9_13_22_32"
     lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"
     silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"
 
+    # 75 Ts horizon 
     data_folder = "lq_mc100_L1_9_15_17_31"
     lf_data_file = "lq_lf_mc100_L1_th0.015_ss0.01_M50.jld"
     silq_data_file = "lq_silq_mc100_L1_th0.015_ss0.01_M50.jld"
@@ -66,7 +68,7 @@ mc_folder = mc_local_folder
 
 #mc_folder = mc_server_folder
 data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2() 
-data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
+# data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
 
 
 
