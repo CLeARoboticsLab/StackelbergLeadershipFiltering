@@ -370,11 +370,11 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             x_idx = x1_idx
             y_idx = y1_idx
             plot!(
-                inset = (1, bbox(0.7, 0.3, 0.25, 0.25, :top, :left)),
+                inset = (1, bbox(0.65, 0.25, 0.25, 0.25, :top, :left)),
                 ticks = nothing,
                 subplot=subplot_idx,
                 bg_inside = :lightgrey,
-                axis=false,
+                axis=true,
                 grid=false,
                 legend=false,
                 # framestyle=:box,
@@ -428,7 +428,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                 ticks = nothing,
                 subplot=subplot_idx,
                 bg_inside = :lightgrey,
-                axis=false,
+                axis=true,
                 grid=false,
                 legend=false,
                 # framestyle=:box,
