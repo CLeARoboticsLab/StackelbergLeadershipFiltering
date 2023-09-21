@@ -378,24 +378,24 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                   [true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]+boxsize, true_xs[y1_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
             plot!([true_xs[x1_idx, t]-boxsize, 1.4],
-                  [true_xs[y1_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
-            plot!([true_xs[x1_idx, t]+boxsize, 2.3],
-                  [true_xs[y1_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
+                  [true_xs[y1_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
+            plot!([true_xs[x1_idx, t]+boxsize, 2.4],
+                  [true_xs[y1_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
 
             # P2
             plot!([true_xs[x2_idx, t]-boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]-boxsize], 
                   [true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]+boxsize, true_xs[y2_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
             if true_xs[y2_idx, t] > 1.5
-                plot!([true_xs[x2_idx, t]+boxsize, 0.15], 
-                      [true_xs[y2_idx, t]+boxsize, 2.2], color=:black, linestyle=:dot)
-                plot!([true_xs[x2_idx, t]+boxsize, 0.12],
-                      [true_xs[y2_idx, t]-boxsize, 1.5], color=:black, linestyle=:dot)
+                plot!([true_xs[x2_idx, t]+boxsize, 0.25], 
+                      [true_xs[y2_idx, t]+boxsize, 2.3], color=:black, linestyle=:dot)
+                plot!([true_xs[x2_idx, t]+boxsize, 0.2],
+                      [true_xs[y2_idx, t]-boxsize, 1.55], color=:black, linestyle=:dot)
             else
-                plot!([true_xs[x2_idx, t]-boxsize, 0.15], 
-                      [true_xs[y2_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
-                plot!([true_xs[x2_idx, t]+boxsize, 1.1],
-                      [true_xs[y2_idx, t]+boxsize, 1.5], color=:black, linestyle=:dot)
+                plot!([true_xs[x2_idx, t]-boxsize, 0.25], 
+                      [true_xs[y2_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
+                plot!([true_xs[x2_idx, t]+boxsize, 1.2],
+                      [true_xs[y2_idx, t]+boxsize, 1.55], color=:black, linestyle=:dot)
             end
 
             # TODO: add lines.
