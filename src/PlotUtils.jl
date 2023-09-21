@@ -340,8 +340,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         color = (does_p1_lead) ? "red" : "blue"
         # && include_all_labels
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1$ Measurement Model" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_2$ Measurement Model" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1 h(\tilde{x}{t}; H_t = 1)$": ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_1 h(\tilde{x}{t}; H_t = 2)$" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
