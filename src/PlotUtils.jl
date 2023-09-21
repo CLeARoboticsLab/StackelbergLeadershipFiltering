@@ -302,7 +302,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
         p2_truth_label = ""
     else
-        p2 = get_standard_plot(;columns=3, legendfontsize=24)
+        p2 = get_standard_plot(;columns=2, legendfontsize=24)
         # p1_est_label = ""
         # p1_truth_label = ""
         # p2_est_label = ""
@@ -340,8 +340,8 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         color = (does_p1_lead) ? "red" : "blue"
         # && include_all_labels
-        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$\mathcal{A}_1 h(\tilde{x}{t}; H_t = 1)$" : ""
-        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$\mathcal{A}_1 h(\tilde{x}{t}; H_t = 2)$" : ""
+        label_1 = (!has_labeled_p1 && does_p1_lead) ? L"$h(\tilde{x}_{t}; H_t = \mathcal{A}_1)$" : ""
+        label_2 = (!has_labeled_p2 && !does_p1_lead) ? L"$h(\tilde{x}_{t}; H_t = \mathcal{A}_2)$" : ""
 
         if label_1 != ""
             has_labeled_p1 = true
