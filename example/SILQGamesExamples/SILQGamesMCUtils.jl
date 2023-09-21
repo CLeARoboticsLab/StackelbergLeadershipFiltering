@@ -312,7 +312,8 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
         println("Mean: $means")
         scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Convergence $~$", color=:green, elinewidth=3, xticks=[0, 1])
     end
-    plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
+    plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
+         [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3, size(300, 800))
 
     return convergence_plot
 end
@@ -320,9 +321,9 @@ end
 function plot_convergence_histogram(num_iterations, max_iters; num_bins=:auto)
     num_sims = length(num_iterations)
     if all(num_iterations .== 2)
-        return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
+        return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence", fontsize=24)
     end
-    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500], rightmargin=5Plots.mm)
+    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500], rightmargin=6Plots.mm, size(300, 800))
     vline!(hist, [max_iters], label="Max Iterations", color=:black, linewidth=3)
     return hist
 end

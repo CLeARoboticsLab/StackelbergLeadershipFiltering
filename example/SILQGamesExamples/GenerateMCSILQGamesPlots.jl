@@ -76,7 +76,7 @@ end
 #### Make the MC plots. ####
 ############################
 # 1. Plot convergence metric max absolute state difference between iterations. For the LQ case, we should only need 1 iteration.
-convergence_plot = plot_convergence(all_convergence_metrics, all_num_iters, mc_max_iters, mc_threshold; lower_bound=1e-6)
+convergence_plot = plot_convergence(all_convergence_metrics, all_num_iters, mc_max_iters, mc_threshold; lower_bound=1e-4)
 
 # 2. Plot the convergence histogram. For the LQ case, all items should be in first bin.
 convergence_histogram = plot_convergence_histogram(all_num_iters, mc_max_iters)
