@@ -377,17 +377,19 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             plot!([true_xs[x1_idx, t]-boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]-boxsize], 
                   [true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]+boxsize, true_xs[y1_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
-            plot!([true_xs[x1_idx, t]-boxsize, 2.1-0.84], [true_xs[y1_idx, t]+boxsize, 1.5])
-            plot!([true_xs[x1_idx, t]+boxsize, 2.1], [true_xs[y1_idx, t]+boxsize, 1.5])
+            plot!([true_xs[x1_idx, t]-boxsize, 2.1-0.84],
+                  [true_xs[y1_idx, t]+boxsize, 1.5])
+            plot!([true_xs[x1_idx, t]+boxsize, 2.1],
+                  [true_xs[y1_idx, t]+boxsize, 1.5])
 
             # P2
             plot!([true_xs[x2_idx, t]-boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]-boxsize], 
                   [true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]+boxsize, true_xs[y2_idx, t]+boxsize],
                    color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
-            plot!([true_xs[x2_idx, t]-boxsize, 2.1-0.84-0.84-0.14], 
-                  [true_xs[y2_idx, t]+boxsize-0.84-0.14, 1.5], color=:black)
-            plot!([true_xs[x2_idx, t]+boxsize, 2.1-0.84-0.14],
-                  [true_xs[y2_idx, t]+boxsize, 1.5], color=:black)
+            # plot!([true_xs[x2_idx, t]-boxsize, 2.1-0.84-0.84-0.14], 
+            #       [true_xs[y2_idx, t]+boxsize-0.84-0.14, 1.5], color=:black)
+            # plot!([true_xs[x2_idx, t]+boxsize, 2.1-0.84-0.14],
+            #       [true_xs[y2_idx, t]+boxsize, 1.5], color=:black)
 
             # TODO: add lines.
             # Make inset border thicker
