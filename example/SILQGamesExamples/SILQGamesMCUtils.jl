@@ -310,7 +310,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
         upper_scatter = min.(upper_bound, means .+ stddevs)
         println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
         println("Mean: $means")
-        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit", color=:green, elinewidth=3, xticks=[0, 1])
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Convergence $~$", color=:green, elinewidth=3, xticks=[0, 1])
     end
     plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
 

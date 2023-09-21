@@ -281,6 +281,10 @@ function plot_leadership_filter_measurement_details(num_particles, sg_t::SILQGam
     plot_leadership_filter_measurement_details(sg_t.dyn, sg_t.leader_idxs, num_particles, sg_t.num_iterations, sg_t.xks, true_xs, est_xs; transform_particle_fn=transform_particle_fn, include_all_labels=include_all_labels)
 end
 
+function add_insets_for_details!(plt, subplot_idx, x_idx, y_idx; boxsize=0.1)
+    # TODO later
+end
+
 function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_leader_idxs_t, num_particles, particle_num_iterations_t, particle_traj_xs_t, true_xs, est_xs; transform_particle_fn=(xs)->xs, t=nothing, letter=nothing, include_all_labels=false)
     x₁ = true_xs[:, 1]
 
@@ -308,18 +312,12 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
-    # If t is provided, annotate the plot.
-    if !isnothing(t) && !isnothing(letter)
-        plot!(ylabel="", xlabel="")
-        annotate!(p2, 0.9, 2., text("($(letter)) measurement model\ntime step $(t)", 36))
-    end
-
     plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
-    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, label=p1_est_label)
+    plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, linewidth=3, label=p1_est_label)
     scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="") # L"$\mathcal{A}_1$ Start")
 
     plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
-    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, label=p2_est_label)
+    plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, linewidth=3, label=p2_est_label)
     scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
 
     # Add particles
@@ -349,6 +347,130 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
 
         scatter!(p2, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
         scatter!(p2, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=3., markerstrokewidth=0, label=label_2)
+    end
+
+    # If t is provided, annotate the plot.
+    if !isnothing(t) && !isnothing(letter)
+        plot!(ylabel="", xlabel="")
+        annotate!(p2, 0.9, 2., text("($(letter)) measurement\n model t = $(t*0.02)s", 36))
+
+        boxsize = 0.1
+
+        # inset boxes
+        plot!([true_xs[x1_idx, t]-boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]+boxsize, true_xs[x1_idx, t]-boxsize], 
+              [true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]-boxsize, true_xs[y1_idx, t]+boxsize, true_xs[y1_idx, t]+boxsize],
+               color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
+        plot!([true_xs[x2_idx, t]-boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]+boxsize, true_xs[x2_idx, t]-boxsize], 
+              [true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]-boxsize, true_xs[y2_idx, t]+boxsize, true_xs[y2_idx, t]+boxsize],
+               color=:transparent, seriestype=:shape, label="", linewidth=4)#alpha=0.5, legend=false, linewidth=2)
+
+        # PLAYER 1 INSET
+        subplot_idx = 2
+        x_idx = x1_idx
+        y_idx = y1_idx
+        plot!(
+            inset = (1, bbox(0.7, 0.2, 0.25, 0.25, :top, :left)),
+            ticks = nothing,
+            subplot=subplot_idx,
+            bg_inside = :lightgrey,
+            axis=false,
+            grid=false,
+            legend=false,
+            # framestyle=:box,
+            # bordercolor=:blue,
+            # borderwidth=3,
+            xlimits=[true_xs[x_idx, t]-boxsize, true_xs[x_idx, t]+boxsize],
+            ylimits=[true_xs[y_idx, t]-boxsize, true_xs[y_idx, t]+boxsize]
+        )
+
+        plot!(subplot=subplot_idx, true_xs[x_idx, :], true_xs[y_idx, :], color=:black, linewidth=3, label=p1_truth_label)
+        plot!(subplot=subplot_idx, est_xs[x_idx, :], est_xs[y_idx, :], linewidth=3, color=:orange, label=p1_est_label)
+        scatter!(subplot=subplot_idx, [x₁[x_idx]], [x₁[y_idx]], color=:red, label="") # L"$\mathcal{A}_1$ Start")
+
+        plot!(subplot=subplot_idx, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
+        plot!(subplot=subplot_idx, est_xs[x2_idx, :], est_xs[y2_idx, :], linewidth=3, color=:turquoise2, label=p2_est_label)
+        scatter!(subplot=subplot_idx, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
+        for n in 1:num_particles
+            num_iter = particle_num_iterations_t[n]
+            xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+            # TODO(hamzah) - change color based on which agent is leader
+            does_p1_lead = (particle_leader_idxs_t[n] == 1)
+
+            color = (does_p1_lead) ? "red" : "blue"
+            label_1 = (!has_labeled_p1 && does_p1_lead && include_all_labels) ? L"$\mathcal{A}_1$ Measurement Model" : ""
+            label_2 = (!has_labeled_p2 && !does_p1_lead && include_all_labels) ? L"$\mathcal{A}_2$ Measurement Model" : ""
+
+            if label_1 != ""
+                has_labeled_p1 = true
+            end
+            if label_2 != ""
+                has_labeled_p2 = true
+            end
+
+            scatter!(subplot=subplot_idx, xks[x_idx, :], xks[y_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
+            scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_1)
+
+            # scatter!(subplot=subplot_idx, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
+            # scatter!(subplot=subplot_idx, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_2)
+        end
+        scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
+        scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
+
+
+        # PLAYER 2 INSET
+        subplot_idx = 3
+        x_idx = x2_idx
+        y_idx = y2_idx
+        plot!(
+            inset = (1, bbox(0.0, 0.4, 0.25, 0.25, :top, :left)),
+            ticks = nothing,
+            subplot=subplot_idx,
+            bg_inside = :lightgrey,
+            axis=false,
+            grid=false,
+            legend=false,
+            # framestyle=:box,
+            # bordercolor=:blue,
+            # borderwidth=3,
+            xlimits=[true_xs[x_idx, t]-boxsize, true_xs[x_idx, t]+boxsize],
+            ylimits=[true_xs[y_idx, t]-boxsize, true_xs[y_idx, t]+boxsize]
+        )
+
+        plot!(subplot=subplot_idx, true_xs[x_idx, :], true_xs[y_idx, :], color=:black, linewidth=3, label=p1_truth_label)
+        plot!(subplot=subplot_idx, est_xs[x_idx, :], est_xs[y_idx, :], linewidth=3, color=:orange, label=p1_est_label)
+        scatter!(subplot=subplot_idx, [x₁[x_idx]], [x₁[y_idx]], color=:red, label="") # L"$\mathcal{A}_1$ Start")
+
+        plot!(subplot=subplot_idx, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
+        plot!(subplot=subplot_idx, est_xs[x2_idx, :], est_xs[y2_idx, :], linewidth=3, color=:turquoise2, label=p2_est_label)
+        scatter!(subplot=subplot_idx, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
+        for n in 1:num_particles
+            num_iter = particle_num_iterations_t[n]
+            xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+            # TODO(hamzah) - change color based on which agent is leader
+            does_p1_lead = (particle_leader_idxs_t[n] == 1)
+
+            color = (does_p1_lead) ? "red" : "blue"
+            label_1 = (!has_labeled_p1 && does_p1_lead && include_all_labels) ? L"$\mathcal{A}_1$ Measurement Model" : ""
+            label_2 = (!has_labeled_p2 && !does_p1_lead && include_all_labels) ? L"$\mathcal{A}_2$ Measurement Model" : ""
+
+            if label_1 != ""
+                has_labeled_p1 = true
+            end
+            if label_2 != ""
+                has_labeled_p2 = true
+            end
+
+            scatter!(subplot=subplot_idx, xks[x_idx, :], xks[y_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
+            scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_1)
+
+            # scatter!(subplot=subplot_idx, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
+            # scatter!(subplot=subplot_idx, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_2)
+        end
+        scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
+        scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
+
     end
 
     return p2

@@ -113,53 +113,53 @@ savefig(d2, filename)
 #############################
 
 
-# Generate a gif to see results.
-iter = ProgressBar(1:num_sims)
-anim = @animate for k in iter
-    p = @layout [a b c; d e f; g h i]
+# # Generate a gif to see results.
+# iter = ProgressBar(1:num_sims)
+# anim = @animate for k in iter
+#     p = @layout [a b c; d e f; g h i]
 
-    xs = all_xs[k, :, :]
-    u1s = all_us[1][k, :, :]
-    u2s = all_us[2][k, :, :]
+#     xs = all_xs[k, :, :]
+#     u1s = all_us[1][k, :, :]
+#     u2s = all_us[2][k, :, :]
 
-    p1, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times, xs, [u1s, u2s])
-    plot!(p1, xlimits=(-2.5, 2.5), ylimits=(-2.5, 2.5))
+#     p1, p2, p3, p4, p5, p6, p7 = plot_states_and_controls(dyn, times, xs, [u1s, u2s])
+#     plot!(p1, xlimits=(-2.5, 2.5), ylimits=(-2.5, 2.5))
 
-    # Plot convergence.
-    num_iters = all_num_iters[k]
-    conv_x = cumsum(ones(num_iters)) .- 1
-    conv_metrics = all_convergence_metrics[k, :, :]
-    evaluated_costs = all_evaluated_costs[k, :, :]
+#     # Plot convergence.
+#     num_iters = all_num_iters[k]
+#     conv_x = cumsum(ones(num_iters)) .- 1
+#     conv_metrics = all_convergence_metrics[k, :, :]
+#     evaluated_costs = all_evaluated_costs[k, :, :]
 
-    r1 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv.", label=L"\mathcal{A}_1", yaxis=:log)
-    # plot!(r1, conv_x, conv_metrics[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
-    plot!(r1, [k, k], [minimum(conv_metrics[1, 1:num_iters]), maximum(conv_metrics[1, 1:num_iters])], label="", color=:black, yaxis=:log)
+#     r1 = plot(conv_x, conv_metrics[1, 1:num_iters], title="conv.", label=L"\mathcal{A}_1", yaxis=:log)
+#     # plot!(r1, conv_x, conv_metrics[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
+#     plot!(r1, [k, k], [minimum(conv_metrics[1, 1:num_iters]), maximum(conv_metrics[1, 1:num_iters])], label="", color=:black, yaxis=:log)
 
-    # r2 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
-    # plot!(r2, conv_x, evaluated_costs[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
-    # plot!(r2, [k, k], [minimum(evaluated_costs[:, 1:num_iters]), maximum(evaluated_costs[:, 1:num_iters])], label="", color=:black, yaxis=:log)
+#     # r2 = plot(conv_x, evaluated_costs[1, 1:num_iters], title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
+#     # plot!(r2, conv_x, evaluated_costs[2, 1:num_iters], label=L"\mathcal{A}_2", yaxis=:log)
+#     # plot!(r2, [k, k], [minimum(evaluated_costs[:, 1:num_iters]), maximum(evaluated_costs[:, 1:num_iters])], label="", color=:black, yaxis=:log)
 
-    # Shift the cost to ensure they are positive.
-    costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-8)
-    costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-8)
+#     # Shift the cost to ensure they are positive.
+#     costs_1 = evaluated_costs[1, 1:num_iters] .+ (abs(minimum(evaluated_costs[1, 1:num_iters])) + 1e-8)
+#     costs_2 = evaluated_costs[2, 1:num_iters] .+ (abs(minimum(evaluated_costs[2, 1:num_iters])) + 1e-8)
 
-    q6 = plot(conv_x, costs_1, title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
-    plot!(q6, conv_x, costs_2, label=L"\mathcal{A}_2", yaxis=:log)
-    plot!(q6, [k, k], [minimum(costs_1), maximum(costs_2)], label="", color=:black, yaxis=:log)
+#     q6 = plot(conv_x, costs_1, title="evaluated costs", label=L"\mathcal{A}_1", yaxis=:log)
+#     plot!(q6, conv_x, costs_2, label=L"\mathcal{A}_2", yaxis=:log)
+#     plot!(q6, [k, k], [minimum(costs_1), maximum(costs_2)], label="", color=:black, yaxis=:log)
 
-    plot(p1, p2, p3, p4, p5, p6, p7, r1, q6, layout = p)
-end
+#     plot(p1, p2, p3, p4, p5, p6, p7, r1, q6, layout = p)
+# end
 
-# Speeds up call to gif (p.1/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
-previous_GKSwstype = get(ENV, "GKSwstype", "")
-ENV["GKSwstype"] = "100"
+# # Speeds up call to gif (p.1/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
+# previous_GKSwstype = get(ENV, "GKSwstype", "")
+# ENV["GKSwstype"] = "100"
 
-println("giffying...")
-gif(anim, joinpath(plots_path, "silqgames_animation.gif"), fps = 5)
-println("done")
+# println("giffying...")
+# gif(anim, joinpath(plots_path, "silqgames_animation.gif"), fps = 5)
+# println("done")
 
-# Speeds up call to gif (p.2/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
-ENV["GKSwstype"] = previous_GKSwstype
+# # Speeds up call to gif (p.2/2) - https://discourse.julialang.org/t/why-is-my-animate-loop-super-slow/43685/4
+# ENV["GKSwstype"] = previous_GKSwstype
 
 
 
