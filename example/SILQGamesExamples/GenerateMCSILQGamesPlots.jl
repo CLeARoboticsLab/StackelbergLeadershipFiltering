@@ -81,6 +81,8 @@ convergence_plot = plot_convergence(all_convergence_metrics, all_num_iters, mc_m
 # 2. Plot the convergence histogram. For the LQ case, all items should be in first bin.
 convergence_histogram = plot_convergence_histogram(all_num_iters, mc_max_iters)
 
+joint_plot = 
+
 # trajectory distance to origin (for each player)
 d1 = plot_distance_to_origin(dyn, times, all_xs)
 
@@ -91,6 +93,12 @@ d2 = plot_distance_to_agents(dyn, times, all_xs)
 ###########################
 #### Save the figures. ####
 ###########################
+# plot!(joint_plot, )
+q = @layout [a; b]
+plot(convergence_plot, convergence_histogram, layout = q, title="")
+filename = joinpath(plots_path, string("silq_mc$(num_sims)_convergence_all_L$(leader_idx).pdf"))
+savefig(joint_plot, filename)
+
 plot!(convergence_plot, title="")
 filename = joinpath(plots_path, string("silq_mc$(num_sims)_convergence_L$(leader_idx).pdf"))
 savefig(convergence_plot, filename)
