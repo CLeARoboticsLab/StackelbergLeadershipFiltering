@@ -313,7 +313,7 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
         p1_truth_label = "Truth"
         p2_est_label = L"$\mathcal{A}_2$ Estimate"
         # p2_truth_label = L"$\mathcal{A}_2$ Truth"
-        # p2_truth_label = ""
+        p2_truth_label = ""
         # Remove axis and grid.
         plot!(axis=([], true), grid=true)
     end
