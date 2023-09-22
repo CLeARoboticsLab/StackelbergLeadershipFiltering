@@ -13,7 +13,7 @@ function get_as_function(c::AbsoluteLogBarrierCost)
         # return _violates_bound(c, x) ? LARGE_NUMBER : -log(_get_input(c, x))
         input = _get_input(c, x)
         if _violates_bound(c, x)
-            return LARGE_NUMBER #+ 100*(input-0.01)^2 # input should be negative if bounds violated, this introduces a slope.
+            return LARGE_NUMBER + 100*(input-0.01)^2 # input should be negative if bounds violated, this introduces a slope.
         end
         return -log(input)
     end
