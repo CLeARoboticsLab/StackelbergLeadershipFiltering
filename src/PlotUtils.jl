@@ -534,7 +534,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
 
     # probability plot for P1 - plot 5
     plot = get_standard_plot(columns=4)
-    plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
+    plot!(xlabel="Time (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
     if player_to_plot == 1 || isnothing(player_to_plot)
         # L"""$\mathbb{P}(H_t=\mathcal{A}_1)$"""
         if !isnothing(include_gt)
@@ -562,7 +562,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if !isnothing(t_idx)
         # Remove the labels, add a title for the inset.
         # plot!(xlabel="", ylabel="", title="Leadership Probability v. time (s)", tickfontsize=36, fontsize=36, labelfontsize=36)
-        plot!(tickfontsize=36, fontsize=36, labelfontsize=36)
+        plot!(tickfontsize=30, fontsize=30, labelfontsize=34)
 
         label_str = join(t_idx, ",")
         for idx in t_idx

@@ -175,7 +175,7 @@ function make_debug_gif(folder_name, filename, cfg, limits, dyn, horizon, times,
 
         # plot 4 - accel. controls
         title5 = "Input acceleration controls (u) over time"
-        p4 = plot( xlabel="t (s)", ylabel="accel. (m/s^2)", title=title5)
+        p4 = plot( xlabel="Time (s)", ylabel="accel. (m/s^2)", title=title5)
         plot!(p4, times[1:T], true_us[1][1, 1:T], label=L"\mathcal{A}_1 ω")
         plot!(p4, times[1:T], true_us[2][1, 1:T], label=L"\mathcal{A}_2 ω")
         plot!(p4, times[1:T], true_us[1][2, 1:T], label=L"\mathcal{A}_1 a")
