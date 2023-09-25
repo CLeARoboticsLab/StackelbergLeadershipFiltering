@@ -287,8 +287,9 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
 end
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
-    convergence_plot = get_standard_plot(include_legend=:outertopright)
-    plot!(yaxis=:log, ylabel=L"Conv$(\xi^{k}, x^{k-1})$", xlabel="", xticks=false, labelsize=18)#"# Iterations"#Max Abs. State Difference")
+    num_sims = size(conv_metrics, 1)
+    convergence_plot = get_standard_plot(include_legend=:outertop)
+    plot!(yaxis=:log, ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="", xticks=false, labelsize=18)#"# Iterations"#Max Abs. State Difference")
     means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
@@ -303,7 +304,10 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     # println(means, lower, upper)
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
+        # plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
+        for ss in 1:num_sims
+            plot!(convergence_plot, conv_metrics[ss, 1:num_iterations[ss]], label="", linewidth=1)
+        end
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)

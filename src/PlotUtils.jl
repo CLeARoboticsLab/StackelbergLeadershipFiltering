@@ -161,7 +161,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
     conv_x = cumsum(ones(num_iters)) .- 1
     title8 = "convergence"
     q8 = get_standard_plot()
-    plot!(title=title8, yaxis=:log, xlabel="# Iterations", ylabel=L"Conv$(\xi^{k}, x^{k-1})$")#Max Abs. State Difference")
+    plot!(title=title8, yaxis=:log10, xlabel="# Iterations", ylabel=L"Conv$(x^{k}, x^{k-1})$")#Max Abs. State Difference")
 
     conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
     if num_iters > 2
@@ -188,7 +188,7 @@ function plot_convergence_and_costs(num_iters, threshold, conv_metrics, evaluate
 
     title9 = "evaluated costs"
     q9 = get_standard_plot()
-    plot!(title=title9, yaxis=:log, xlabel="# Iterations", ylabel="Cost")
+    plot!(title=title9, yaxis=:log10, xlabel="# Iterations", ylabel="Cost", yticks=[10, 100, 1000])
 
     if num_iters > 2
         plot!(conv_x, costs_1[1:num_iters], label=L"\mathcal{A}_1", color=:red, linewidth=2)
@@ -542,7 +542,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         end
 
         # Bound the stddevs to avoid going above 1 or below 0.
-        plot!(plot, times, probs, color=:red, label=L"\mathcal{A}_1", ribbon=(lower_p1, upper_p1), fillalpha=0.3)
+        plot!(plot, times, probs, color=:red, label=L"p(H_t = \mathcal{A}_1)", ribbon=(lower_p1, upper_p1), fillalpha=0.3, linewidth=5)
     end
 
     # probability plot for P2 - plot 6
@@ -555,11 +555,14 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         end
 
         lower_p2, upper_p2 = upper_p1, lower_p1
-        plot!(plot, times, 1 .- probs, color=:blue, label=L"\mathcal{A}_2", ribbon=(lower_p2, upper_p2), fillalpha=0.3)
+        plot!(plot, times, 1 .- probs, color=:blue, label=L"p(H_t = \mathcal{A}_2)", ribbon=(lower_p2, upper_p2), fillalpha=0.3, linewidth=5)
     end
 
     # Draw the lines of interest.
     if !isnothing(t_idx)
+        # Remove the labels, add a title for the inset.
+        plot!(xlabel="", ylabel="", title="Leadership Probability v. time (s)", tickfontsize=36, fontsize=36, labelfontsize=36)
+
         label_str = join(t_idx, ",")
         for idx in t_idx
             t = times[idx]
