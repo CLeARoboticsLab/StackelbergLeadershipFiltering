@@ -52,7 +52,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     # Generate a probability plot no timings.
     prob_plot = make_probability_plots(times[1:T], probs[1:T])
-    plot!(prob_plot, title="")
+    # plot!(prob_plot, title="")
     prob_filepath = joinpath(folder_name, "LF_passing_scenario_probs.pdf")
     savefig(prob_plot, prob_filepath)
 
@@ -63,7 +63,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
-        plot!(prob_plot, title="")
+        # plot!(prob_plot, title="")
 
         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_positions_detail.pdf")
         prob_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs.pdf")
@@ -106,7 +106,7 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     # Generate a probability plot no timings.
     prob_plot = make_probability_plots(times[1:T], probs[1:T])
-    plot!(prob_plot, title="")
+    # plot!(prob_plot, title="")
     prob_filepath = joinpath(folder_name, "LF_merging_scenario_probs.pdf")
     savefig(prob_plot, prob_filepath)
 
@@ -117,7 +117,7 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
-        plot!(prob_plot, title="")
+        # plot!(prob_plot, title="")
         # plot!(p6, title="")
 
         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_merging_scenario_positions_detail.pdf")
