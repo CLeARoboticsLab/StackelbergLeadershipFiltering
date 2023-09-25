@@ -564,7 +564,7 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
     if !isnothing(t_idx)
         # Remove the labels, add a title for the inset.
         # plot!(xlabel="", ylabel="", title="Leadership Probability v. time (s)", tickfontsize=36, fontsize=36, labelfontsize=36)
-        plot!(tickfontsize=30, fontsize=30, labelfontsize=34)
+        plot!(tickfontsize=30, fontsize=30, labelfontsize=34, ylabel="", title="Leadership Probability")
 
         label_str = join(t_idx, ",")
         for idx in t_idx
