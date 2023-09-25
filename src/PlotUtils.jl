@@ -542,20 +542,22 @@ function make_probability_plots(times, probs; player_to_plot=nothing, t_idx=noth
         end
 
         # Bound the stddevs to avoid going above 1 or below 0.
-        plot!(plot, times, probs, color=:red, label=L"p(H_t = \mathcal{A}_1)", ribbon=(lower_p1, upper_p1), fillalpha=0.3, linewidth=5)
+        label1 = !isnothing(t_idx) ? "" : L"p(H_t = \mathcal{A}_1)"
+        plot!(plot, times, probs, color=:red, label=label1, ribbon=(lower_p1, upper_p1), fillalpha=0.3, linewidth=5)
     end
 
     # probability plot for P2 - plot 6
     # p6 = get_standard_plot()
     if player_to_plot == 2 || isnothing(player_to_plot)
-        # plot!(xlabel="t (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
+        # plot!(xlabel="Time (s)", ylabel="Leadership Probability", ylimit=(-0.1, 1.1), label="")
         # L"""$\mathbb{P}(H_t=\mathcal{A}_2)$"""
         if !isnothing(include_gt)
             plot!(plot, times, ((include_gt+1)%2) * ones(T), label="Truth", color=:blue, linestyle=:dot, linewidth=8)
         end
 
         lower_p2, upper_p2 = upper_p1, lower_p1
-        plot!(plot, times, 1 .- probs, color=:blue, label=L"p(H_t = \mathcal{A}_2)", ribbon=(lower_p2, upper_p2), fillalpha=0.3, linewidth=5)
+        label2 = !isnothing(t_idx) ? "" : L"p(H_t = \mathcal{A}_2)"
+        plot!(plot, times, 1 .- probs, color=:blue, label=label2, ribbon=(lower_p2, upper_p2), fillalpha=0.3, linewidth=5)
     end
 
     # Draw the lines of interest.
