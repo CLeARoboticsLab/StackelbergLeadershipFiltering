@@ -306,7 +306,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     if final_idx > 2
         # plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
         for ss in 1:num_sims
-            plot!(convergence_plot, conv_metrics[ss, 1:num_iterations[ss]], label="", linewidth=1)
+            plot!(convergence_plot, conv_metrics[ss, 1, 1:num_iterations[ss]], label="", linewidth=1)
         end
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
