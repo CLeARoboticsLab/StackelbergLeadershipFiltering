@@ -4,7 +4,10 @@ struct AbsoluteLogBarrierControlCost <: NonQuadraticCost
     a::Vector{Float64}        # a vector that is multiplied by state to determine cost
     offset::Real              # scalar offset
     is_lower_bound::Bool      # true indicates lower bound barrier, false indicates upper bound
+    reg_term::Float64
+    reg_offset::Float64
 end
+AbsoluteLogBarrierControlCost(player_idx, a, offset, is_lower_bound) = AbsoluteLogBarrierControlCost(player_idx, a, offset, is_lower_bound, 0.0, 0.01)
 
 const LARGE_NUMBER = 1e6
 
@@ -12,7 +15,7 @@ function get_as_function(c::AbsoluteLogBarrierControlCost)
     f(si, x, us, t) = begin
         input = _get_input(c, us)
         if _violates_bound(c, us)
-            return LARGE_NUMBER + 100*(input-0.01)^2 # input should be negative if bounds violated, this introduces a slope.
+            return LARGE_NUMBER + c.reg_term*(input-c.reg_offset)^2 # input should be negative if bounds violated, this introduces a slope.
         end
         return -log(input)
     end
