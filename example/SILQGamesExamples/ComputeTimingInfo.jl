@@ -11,7 +11,7 @@ lqp1_data_folder, lqp1_silq_path, lqp1_lf_path = get_final_lq_paths_p1()
 # uqp1_data_folder, _, uqp1_lf_path = get_final_uq_paths_p1()
 nonlqp2_data_folder, nonlqp2_silq_path, nonlqp2_lf_path = get_final_nonlq_paths_p2()
 
-function compute_silqgames_timing_info(data_folder, silq_filename)
+function compute_silqgames_timing_info(data_folder, silq_filename; remove_build_times=false)
     mc_foldername = joinpath(mc_folder, data_folder)
     input_data_path = joinpath(mc_foldername, silq_filename)
     silq_data = load(input_data_path)["data"]
@@ -28,9 +28,16 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
     std_num_iters = std(num_iterations .- 1)
 
     iteration_times = deepcopy(silq_data["elapsed_iteration_times"])
-    println(iteration_times[1:5:100], "\n", iteration_times[101:5:200])
+
+    if remove_build_times
+        # For 100 sim LQ game, manually remove build times.
+        # println(iteration_times[1:5:100])
+        iteration_times[1:5:100] .= 0
+    end
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
-    @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations.-1) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations.-1))"
+    if !remove_build_times
+        @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations.-1) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations.-1))"
+    end
 
     mean_iter_time = mean(iters_of_interest)
     std_iter_time = std(iters_of_interest)
