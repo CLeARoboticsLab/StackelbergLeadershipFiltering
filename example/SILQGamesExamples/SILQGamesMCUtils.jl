@@ -325,7 +325,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     @assert all(iszero.(num_unconverged[2500:max_iters]))
 
     p = twinx()
-    plot!(p, 1:2500, num_unconverged, label="", ylabel="# Unconverged Sims", linewidth=3, size=(1000, 400), color=:black, labelfontsize=18, tickfontsize=18)
+    plot!(p, 1:2500, num_unconverged[1:2500], label="", ylabel="# Unconverged Sims", linewidth=3, size=(1000, 400), color=:black, labelfontsize=18, tickfontsize=18)
 
     return convergence_plot
 end
