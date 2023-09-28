@@ -268,7 +268,7 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
     mean_metrics = zeros(max_iters)
     std_metrics = zeros(max_iters)
     num_quants = size(quants, 1)
-    quant_metrics = zeros(num_quants, max_iters)
+    quant_metrics = zeros(max_iters, num_quants)
 
     while true
         idx_list = num_iterations .≥ curr_iters
@@ -281,7 +281,7 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
 
         mean_metrics[curr_iters] = mean(conv_metrics)
         std_metrics[curr_iters] = (sum(idx_list) > 1) ? std(conv_metrics) : 0.
-        quant_metrics[:, curr_iters] = quantile(conv_metrics, quants)
+        quant_metrics[curr_iters, :] = quantile(conv_metrics, quants)
 
         curr_iters = curr_iters + 1
     end
