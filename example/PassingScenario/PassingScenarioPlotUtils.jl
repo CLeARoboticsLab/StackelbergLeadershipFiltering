@@ -63,7 +63,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
-        plot!(prob_plot, title="Leadership Probability vs. Time (s)", xlabel="", ylabel="")
+        plot!(prob_plot, title="Leadership Probability vs. Time", xlabel="", ylabel="")
 
         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_positions_detail.pdf")
         prob_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs.pdf")
