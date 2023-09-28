@@ -74,17 +74,20 @@ function compute_overall_timing_info(data_folder, lf_filename)
 end
 
 # LQ P1
-lq1_lf_m, lq1_lf_s, lq1_silq_m, lq1_silq_s = compute_overall_timing_info(lqp1_data_folder, lqp1_lf_path)
-println("LQ SILQGames (P1), 201 timesteps @ 0.05s: $(lq1_silq_m) ± $(lq1_silq_s)")
-println("LQ LF (P1), 201 timesteps @ 0.05s, Ts=30, Ns=50: $(lq1_lf_m) ± $(lq1_lf_s)")
+# lq1_lf_m, lq1_lf_s, lq1_silq_m, lq1_silq_s = compute_overall_timing_info(lqp1_data_folder, lqp1_lf_path)
+# println("LQ SILQGames (P1), 501 timesteps @ 0.02s: $(lq1_silq_m) ± $(lq1_silq_s)")
+# println("LQ LF (P1), 501 timesteps @ 0.05s, Ts=75, Ns=50: $(lq1_lf_m) ± $(lq1_lf_s)")
 
-# # LQ P1
+# Non-LQ P1
 # nonlq2_lf_m, nonlq2_lf_s, nonlq2_silq_m, nonlq2_silq_s = compute_overall_timing_info(nonlqp2_data_folder, nonlqp2_lf_path)
-# println("NonLQ SILQGames (P2), 251 timesteps @ 0.02s: $(nonlq2_silq_m) ± $(nonlq2_silq_s)")
+# println("NonLQ SILQGames (P2), 501 timesteps @ 0.02s: $(nonlq2_silq_m) ± $(nonlq2_silq_s)")
 # println("NonLQ LF (P2), 251 timesteps @ 0.02s, Ts=30, Ns=100: $(nonlq2_lf_m) ± $(nonlq2_lf_s)")
 
 
 lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
 lq_lf_iters_means, lq_lf_iters_stds, lq_lf_total_mean, lq_lf_total_std = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
+println("LQ SILQGames (L=P2) 501 timesteps @ 0.02s: time/iteration: $(lq_iter_time_mean) ± $(lq_iter_time_std) \niterations: $(lq_iters_mean) ± $(lq_iters_std)")
+println("LQ SLF (L=P2) 501 timesteps @ 0.02s, Ts=75, Ns=50: time/iteration: $(lq_lf_iters_means) ± $(lq_lf_iters_stds) \nTotal Time: $(lq_lf_total_mean) ± $(lq_lf_total_std)")
 
 nonlq_iters_mean, nonlq_iters_std, nonlq_iter_time_mean, nonlq_iter_time_std = compute_silqgames_timing_info(nonlqp2_data_folder, nonlqp2_silq_path)
+println("Non-LQ SILQGames (L=P2) 501 timesteps @ 0.02s: time/iteration: $(nonlq_iter_time_mean) ± $(nonlq_iter_time_std) \niterations: $(nonlq_iters_mean) ± $(nonlq_iters_std)")
