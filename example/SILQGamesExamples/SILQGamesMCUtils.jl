@@ -297,13 +297,13 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     plot!(ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="# Iterations", labelsize=18)#"# Iterations"#Max Abs. State Difference")
 
 
-    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters) # 10%, 50%, 90% quantiles
+    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters, [0.25, 0.5, 0.75]) # 25%, 50%, 75% quantiles
     conv_x = cumsum(ones(final_idx)) .- 1
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dash, linewidth=3, label="10% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="25% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
         plot!(convergence_plot, conv_x, quantiles10_50_90[:, 2], color=:green, linewidth=3, label="Median")#L"Mean $\ell_{\infty}$ Convergence")
-        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dash, linewidth=3, label="90% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="75% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
 
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
@@ -325,7 +325,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     @assert all(iszero.(num_unconverged[2500:max_iters]))
 
     p = twinx()
-    plot!(p, conv_x, num_unconverged[1:final_idx], label="", ylabel="# Unconverged Sims", linewidth=3, color=:black, labelfontsize=18, tickfontsize=18)
+    plot!(p, 0:max_iters, num_unconverged, label="", ylabel="# Unconverged Sims", linewidth=3, color=:black, labelfontsize=18, tickfontsize=18)
 
     return convergence_plot
 end
