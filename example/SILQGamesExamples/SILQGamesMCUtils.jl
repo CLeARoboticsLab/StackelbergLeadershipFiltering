@@ -286,7 +286,7 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
         curr_iters = curr_iters + 1
     end
 
-    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1, quant_metrics
+    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1, quant_metrics[1:curr_iters-1, :]
 end
 
 # Plots median, 10%/90% quantile alongside a number of unconverged simulations plot with a second y-axis.
