@@ -33,7 +33,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename; remove_build_
         # For 100 sim LQ game, manually remove build times.
         # println(iteration_times[1:5:100])
         iteration_times[1:5:100] .= 0
-        println(iteration_times))
+        println(iteration_times)
     end
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
     if !remove_build_times
