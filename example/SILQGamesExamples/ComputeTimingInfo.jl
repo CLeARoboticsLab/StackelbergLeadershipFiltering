@@ -29,7 +29,6 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
 
     iteration_times = silq_data["elapsed_iteration_times"]
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
-    println("\n\niters_of_interest: $(iters_of_interest)\n\n")
     @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations.-1) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations.-1))"
 
     mean_iter_time = mean(iters_of_interest)
