@@ -301,7 +301,9 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     conv_x = cumsum(ones(final_idx)) .- 1
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, quantiles10_50_90, color=:green, linewidth=3, label="10%, 50%, 90% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dash, linewidth=3, label="10% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 2], color=:green, linewidth=3, label="Median")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dash, linewidth=3, label="90% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
 
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
@@ -312,7 +314,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
         scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), color=:green, elinewidth=3, xticks=[0, 1], label="")#L"Mean $\ell_{\infty}$ Convergence $~$")
     end
     plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
-         [threshold, threshold], color=:purple, linestyle=:dot, linewidth=3, size=(800, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm, labelfontsize=18, tickfontsize=18, label="")#"Threshold")
+         [threshold, threshold], color=:purple, yaxis=:log10, linestyle=:dot, linewidth=3, size=(1000, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm, labelfontsize=18, tickfontsize=18, label="")#"Threshold")
 
     # Initially, all simulations assumed to be unconverged. Then, subtract 1 for all future iterations after convergence.
     num_unconverged = num_sims * ones(max_iters)
@@ -323,7 +325,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     @assert all(iszero.(num_unconverged[2500:max_iters]))
 
     p = twinx()
-    plot!(p, conv_x, num_unconverged[1:final_idx], label="", ylabel="# Unconverged Simulations", linewidth=3, color=:black)
+    plot!(p, conv_x, num_unconverged[1:final_idx], label="", ylabel="# Unconverged Sims", linewidth=3, color=:black, labelfontsize=18, tickfontsize=18)
 
     return convergence_plot
 end
