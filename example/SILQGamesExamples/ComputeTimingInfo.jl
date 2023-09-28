@@ -29,6 +29,7 @@ function compute_silqgames_timing_info(data_folder, silq_filename)
 
     iteration_times = silq_data["elapsed_iteration_times"]
     iters_of_interest = iteration_times[iteration_times[:] .!= 0]
+    println("\n\niters_of_interest: $(iters_of_interest)\n\n")
     @assert length(iters_of_interest)-silq_data["num_sims"] == sum(num_iterations.-1) "length 1: $(length(iters_of_interest)-silq_data["num_sims"]), length 2: $(sum(num_iterations.-1))"
 
     mean_iter_time = mean(iters_of_interest)
@@ -87,7 +88,7 @@ end
 lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
 lq_lf_iters_means, lq_lf_iters_stds, lq_lf_total_mean, lq_lf_total_std = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
 println("LQ SILQGames (L=P2) 501 timesteps @ 0.02s: time/iteration: $(lq_iter_time_mean) ± $(lq_iter_time_std) \niterations: $(lq_iters_mean) ± $(lq_iters_std)")
-println("LQ SLF (L=P2) 501 timesteps @ 0.02s, Ts=75, Ns=50: time/iteration: $(lq_lf_iters_means) ± $(lq_lf_iters_stds) \nTotal Time: $(lq_lf_total_mean) ± $(lq_lf_total_std)")
+println("LQ SLF (L=P2) 501 timesteps @ 0.02s, Ts=75, Ns=50: time/iteration: $(mean(lq_lf_iters_means)) ± $(mean(lq_lf_iters_stds)) \nTotal Time: $(lq_lf_total_mean) ± $(lq_lf_total_std)")
 
 nonlq_iters_mean, nonlq_iters_std, nonlq_iter_time_mean, nonlq_iter_time_std = compute_silqgames_timing_info(nonlqp2_data_folder, nonlqp2_silq_path)
 println("Non-LQ SILQGames (L=P2) 501 timesteps @ 0.02s: time/iteration: $(nonlq_iter_time_mean) ± $(nonlq_iter_time_std) \niterations: $(nonlq_iters_mean) ± $(nonlq_iters_std)")
