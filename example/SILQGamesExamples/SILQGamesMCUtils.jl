@@ -261,12 +261,14 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
 end
 
 #### METRICS + PLOTTING ####
-function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max_iters)
+function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max_iters, quants=[0.1, 0.5, 0.9])
     curr_iters=1
     should_continue = true
 
     mean_metrics = zeros(max_iters)
     std_metrics = zeros(max_iters)
+    num_quants = size(quants, 1)
+    quant_metrics = zeros(num_quants, max_iters)
 
     while true
         idx_list = num_iterations .≥ curr_iters
@@ -279,18 +281,59 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
 
         mean_metrics[curr_iters] = mean(conv_metrics)
         std_metrics[curr_iters] = (sum(idx_list) > 1) ? std(conv_metrics) : 0.
+        quant_metrics[:, curr_iters] = quantile(conv_metrics, quants)
 
         curr_iters = curr_iters + 1
     end
 
-    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1
+    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1, quant_metrics
 end
+
+# Plots median, 10%/90% quantile alongside a number of unconverged simulations plot with a second y-axis.
+function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
+    num_sims = size(conv_metrics, 1)
+   
+    convergence_plot = get_standard_plot(include_legend=:outertop)
+    plot!(ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="# Iterations", labelsize=18)#"# Iterations"#Max Abs. State Difference")
+
+
+    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters, quants=[0.1, 0.5, 0.9])
+    conv_x = cumsum(ones(final_idx)) .- 1
+
+    if final_idx > 2
+        plot!(convergence_plot, conv_x, quantiles10_50_90, color=:green, linewidth=3, label="10%, 50%, 90% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
+
+    else
+        println("Lower: $(lower_bound), Upper: $(upper_bound)")
+        lower_scatter = max.(lower_bound, means .- stddevs)
+        upper_scatter = min.(upper_bound, means .+ stddevs)
+        println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
+        println("Mean: $means")
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), color=:green, elinewidth=3, xticks=[0, 1], label="")#L"Mean $\ell_{\infty}$ Convergence $~$")
+    end
+    plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
+         [threshold, threshold], color=:purple, linestyle=:dot, linewidth=3, size=(800, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm, labelfontsize=18, tickfontsize=18, label="")#"Threshold")
+
+    # Initially, all simulations assumed to be unconverged. Then, subtract 1 for all future iterations after convergence.
+    num_unconverged = num_sims * ones(max_iters)
+    for iter in num_iterations
+        num_unconverged[iter:max_iters] .-= 1
+    end
+    # Confirms that all simulations eventually converge.
+    @assert all(iszero.(num_unconverged[2500:max_iters]))
+
+    p = twinx()
+    plot!(p, conv_x, num_unconverged, label="", ylabel="# Unconverged Simulations", linewidth=3, color=:black)
+
+    return convergence_plot
+end
+
 
 function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
     num_sims = size(conv_metrics, 1)
     convergence_plot = get_standard_plot(include_legend=:outertop)
     plot!(yaxis=:log, ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="", xticks=false, labelsize=18)#"# Iterations"#Max Abs. State Difference")
-    means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
+    means, stddevs, final_idx, _ = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
     # conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
@@ -304,10 +347,7 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     # println(means, lower, upper)
 
     if final_idx > 2
-        # plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
-        for ss in 1:num_sims
-            plot!(convergence_plot, conv_metrics[ss, 1, 1:num_iterations[ss]], label="", linewidth=1)
-        end
+        plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)
