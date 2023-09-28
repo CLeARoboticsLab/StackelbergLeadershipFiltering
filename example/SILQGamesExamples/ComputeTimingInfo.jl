@@ -93,7 +93,7 @@ end
 # println("NonLQ LF (P2), 251 timesteps @ 0.02s, Ts=30, Ns=100: $(nonlq2_lf_m) ± $(nonlq2_lf_s)")
 
 
-lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path)
+lq_iters_mean, lq_iters_std, lq_iter_time_mean, lq_iter_time_std = compute_silqgames_timing_info(lqp1_data_folder, lqp1_silq_path; remove_build_times=true)
 lq_lf_iters_means, lq_lf_iters_stds, lq_lf_total_mean, lq_lf_total_std = compute_leadership_filter_timing_info(lqp1_data_folder, lqp1_lf_path)
 println("LQ SILQGames (L=P2) 501 timesteps @ 0.02s: time/iteration: $(lq_iter_time_mean) ± $(lq_iter_time_std) \niterations: $(lq_iters_mean) ± $(lq_iters_std)")
 println("LQ SLF (L=P2) 501 timesteps @ 0.02s, Ts=75, Ns=50: time/iteration: $(mean(lq_lf_iters_means)) ± $(mean(lq_lf_iters_stds)) \nTotal Time: $(lq_lf_total_mean) ± $(lq_lf_total_std)")
