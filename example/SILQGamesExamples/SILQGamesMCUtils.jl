@@ -297,7 +297,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     plot!(ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="# Iterations", labelsize=18)#"# Iterations"#Max Abs. State Difference")
 
 
-    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters, quants=[0.1, 0.5, 0.9])
+    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters) # 10%, 50%, 90% quantiles
     conv_x = cumsum(ones(final_idx)) .- 1
 
     if final_idx > 2
