@@ -301,7 +301,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     conv_x = cumsum(ones(final_idx)) .- 1
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="25% Percentiles")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="25% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
         plot!(convergence_plot, conv_x, quantiles10_50_90[:, 2], color=:green, linewidth=3, label="Median")#L"Mean $\ell_{\infty}$ Convergence")
         plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="75% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
 
@@ -325,7 +325,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     @assert all(iszero.(num_unconverged[2500:max_iters]))
 
     p = twinx()
-    plot!(p, 1:2500, num_unconverged[1:2500], label="", ylabel="# Unconverged Sims", linewidth=3, size=(1000, 400), color=:black, labelfontsize=18, tickfontsize=18)
+    plot!(p, 1:2500, num_unconverged[1:2500], label="", ylabel="# Unconverged Sims", ylimits=[0, 175] linewidth=3, size=(1000, 400), color=:black, labelfontsize=18, tickfontsize=18)
 
     return convergence_plot
 end
