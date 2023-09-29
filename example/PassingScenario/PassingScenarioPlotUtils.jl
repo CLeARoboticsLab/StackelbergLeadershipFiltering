@@ -118,6 +118,7 @@ function make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
         p1b = add_lane_lines!(p1b, cfg, limits)
 
         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
+        plot!(prob_plot, title="Leadership Probability v. Time", xlabel="", ylabel="")
         # plot!(prob_plot, title="")
         # plot!(p6, title="")
 
