@@ -301,12 +301,12 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     conv_x = cumsum(ones(final_idx)) .- 1
 
     if final_idx > 2
-        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="25% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="25% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
         median = quantiles10_50_90[:, 2]
         lower = median - quantiles10_50_90[:, 1]
         upper = quantiles10_50_90[:, 3] - median
         plot!(convergence_plot, conv_x, median, color=:green, linewidth=3, label="Median", ribbon=(lower, upper), fillalpha=0.3)#L"Mean $\ell_{\infty}$ Convergence")
-        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="75% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
+        plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="75% Percentile")#L"Mean $\ell_{\infty}$ Convergence")
 
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
