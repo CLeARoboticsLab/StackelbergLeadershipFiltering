@@ -306,7 +306,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
         lower = median - quantiles10_50_90[:, 1]
         upper = quantiles10_50_90[:, 3] - median
         plot!(convergence_plot, conv_x, median, color=:green, linewidth=3, label="Median", ribbon=(lower, upper), fillalpha=0.3)#L"Mean $\ell_{\infty}$ Convergence")
-        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="", xlimits=[0, 2500])#L"Mean $\ell_{\infty}$ Convergence")
+        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
 
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
@@ -318,7 +318,7 @@ function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold
     end
     plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
          [threshold, threshold], color=:purple, yaxis=:log10, linestyle=:dot, linewidth=3, size=(1000, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm, rightmargin=3Plots.mm, labelfontsize=18, tickfontsize=18, label="")#"Threshold")
-    plot!(convergence_plot, [2*max_iters, 2*max_iters], [1, 1], color=:black, linewidth=3, label="# Unconverged Sims")
+    plot!(convergence_plot, [2*max_iters, 2*max_iters], [1, 1], color=:black, linewidth=3, label="# Unconverged Sims", xlimits=[0, 2500])
 
     # Initially, all simulations assumed to be unconverged. Then, subtract 1 for all future iterations after convergence.
     num_unconverged = num_sims * ones(max_iters)
