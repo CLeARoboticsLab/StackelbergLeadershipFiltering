@@ -52,7 +52,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
     # Generate a probability plot no timings.
     prob_plot = make_probability_plots(times[1:T], probs[1:T])
-    # plot!(prob_plot, title="")
+    plot!(prob_plot, leftmargin=10Plots.mm, bottommargin=10Plots.mm)
     prob_filepath = joinpath(folder_name, "LF_passing_scenario_probs.pdf")
     savefig(prob_plot, prob_filepath)
 
@@ -64,6 +64,7 @@ function make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits
 
         prob_plot = make_probability_plots(times[1:T], probs[1:T]; t_idx=t)
         plot!(prob_plot, title="Leadership Probability v. Time", xlabel="", ylabel="")
+        plot!(prob_plot, leftmargin=12Plots.mm, bottommargin=12Plots.mm)
 
         pos2_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_positions_detail.pdf")
         prob_filepath = joinpath(folder_name, "0$(ii)_LF_passing_scenario_probs.pdf")
