@@ -68,7 +68,7 @@ mc_folder = mc_local_folder
 
 #mc_folder = mc_server_folder
 data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2() 
-# data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
+data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
 
 
 

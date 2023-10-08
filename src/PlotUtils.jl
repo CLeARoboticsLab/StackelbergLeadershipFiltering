@@ -430,12 +430,16 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             # plot!(subplot=subplot_idx, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
             # plot!(subplot=subplot_idx, est_xs[x2_idx, :], est_xs[y2_idx, :], linewidth=3, color=:turquoise2, label=p2_est_label)
             scatter!(subplot=subplot_idx, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
+            num_1 = 0
+            num_2 = 0
             for n in 1:num_particles
                 num_iter = particle_num_iterations_t[n]
                 xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
 
                 # TODO(hamzah) - change color based on which agent is leader
                 does_p1_lead = (particle_leader_idxs_t[n] == 1)
+                num_1 += does_p1_lead
+                num_2 += !does_p1_lead
 
                 color = (does_p1_lead) ? "red" : "blue"
                 label_1 = (!has_labeled_p1 && does_p1_lead && include_all_labels) ? L"$\mathcal{A}_1 h(\tilde{x}{t}; H_t = 1)$" : ""
@@ -454,6 +458,36 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                 # scatter!(subplot=subplot_idx, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
                 # scatter!(subplot=subplot_idx, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_2)
             end
+            # Replot the agent 1 expected measureuments
+            if num_1 ≤ 0.1 * num_particles
+                for n in 1:num_particles
+                    num_iter = particle_num_iterations_t[n]
+                    xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+                    # TODO(hamzah) - change color based on which agent is leader
+                    does_p1_lead = (particle_leader_idxs_t[n] == 1)
+                    color = (does_p1_lead) ? "red" : "blue"
+                    if does_p1_lead
+                        scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label="")
+                    end
+                end
+            end
+
+            # Replot the agent 2 expected measureuments
+            if num_2 ≤ 0.1 * num_particles
+                for n in 1:num_particles
+                    num_iter = particle_num_iterations_t[n]
+                    xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+                    # TODO(hamzah) - change color based on which agent is leader
+                    does_p1_lead = (particle_leader_idxs_t[n] == 1)
+                    color = (does_p1_lead) ? "red" : "blue"
+                    if !does_p1_lead
+                        scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label="")
+                    end
+                end
+            end
+
             scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
             # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
             scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:star, color=:yellow, ms = 10)
@@ -492,12 +526,17 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
             # plot!(subplot=subplot_idx, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
             # plot!(subplot=subplot_idx, est_xs[x2_idx, :], est_xs[y2_idx, :], linewidth=3, color=:turquoise2, label=p2_est_label)
             scatter!(subplot=subplot_idx, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
+            num_1 = 0
+            num_2 = 0
             for n in 1:num_particles
                 num_iter = particle_num_iterations_t[n]
                 xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
 
                 # TODO(hamzah) - change color based on which agent is leader
                 does_p1_lead = (particle_leader_idxs_t[n] == 1)
+
+                num_1 += does_p1_lead
+                num_2 += !does_p1_lead
 
                 color = (does_p1_lead) ? "red" : "blue"
                 label_1 = (!has_labeled_p1 && does_p1_lead && include_all_labels) ? L"$\mathcal{A}_1$ Measurement Model" : ""
@@ -516,6 +555,36 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
                 # scatter!(subplot=subplot_idx, xks[x2_idx, :], xks[y2_idx, :], color=color, markersize=1., markerstrokewidth=0, label="")
                 # scatter!(subplot=subplot_idx, [xks[x2_idx, 2]], [xks[y2_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label=label_2)
             end
+            # Replot the agent 1 expected measureuments
+            if num_1 ≤ 0.1 * num_particles
+                for n in 1:num_particles
+                    num_iter = particle_num_iterations_t[n]
+                    xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+                    # TODO(hamzah) - change color based on which agent is leader
+                    does_p1_lead = (particle_leader_idxs_t[n] == 1)
+                    color = (does_p1_lead) ? "red" : "blue"
+                    if does_p1_lead
+                        scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label="")
+                    end
+                end
+            end
+
+            # Replot the agent 2 expected measureuments
+            if num_2 ≤ 0.1 * num_particles
+                for n in 1:num_particles
+                    num_iter = particle_num_iterations_t[n]
+                    xks = transform_particle_fn(particle_traj_xs_t[n, :, :])
+
+                    # TODO(hamzah) - change color based on which agent is leader
+                    does_p1_lead = (particle_leader_idxs_t[n] == 1)
+                    color = (does_p1_lead) ? "red" : "blue"
+                    if !does_p1_lead
+                        scatter!(subplot=subplot_idx, [xks[x_idx, 2]], [xks[y_idx, 2]], color=color, markersize=7., markerstrokewidth=0, label="")
+                    end
+                end
+            end
+
             scatter!(subplot=subplot_idx, [true_xs[x_idx, t]], [true_xs[y_idx, t]], color=:black, ms=10)
             # scatter!(subplot=subplot_idx, [est_xs[x_idx, t]], [est_xs[y_idx, t]], color=:turquoise2, ms=10)
             scatter!(subplot=subplot_idx, [meas_xs[x_idx, t]], [meas_xs[y_idx, t]], marker=:star, color=:yellow, ms=10)
