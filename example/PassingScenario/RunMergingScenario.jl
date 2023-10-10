@@ -102,7 +102,8 @@ P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, ve
 
 # Process noise uncertainty
 pos_proc_2 = 5e-2
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, pos_proc_2, pos_proc_2, 1e-3, 1e-2])
+vel_proc_2 = 1e-1
+Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, pos_proc_2, pos_proc_2, 1e-3, vel_proc_2])
 
 
 # CONFIG: 
@@ -187,4 +188,6 @@ make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs
 # # This generates the gif.
 # filename = "merging_scenario_2.gif"
 # make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
+
+println("Saved in $(folder_name).")
 
