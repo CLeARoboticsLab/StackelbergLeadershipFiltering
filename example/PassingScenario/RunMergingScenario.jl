@@ -101,7 +101,7 @@ vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-pos_proc_2 = 3e-2
+pos_proc_2 = 1.5e-2
 Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, pos_proc_2, pos_proc_2, 1e-3, 1e-2])
 
 
