@@ -95,13 +95,14 @@ plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 # Run the leadership filter.
 
 # Initial condition chosen randomly. Ensure both have relatively low speed.
-pos_unc = 1e-2
+pos_unc = 1e-3
 θ_inc = 1e-4
 vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
 # Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
+pos_proc_2 = 2e-2
+Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, pos_proc_2, pos_proc_2, 1e-3, 1e-2])
 
 
 # CONFIG: 
