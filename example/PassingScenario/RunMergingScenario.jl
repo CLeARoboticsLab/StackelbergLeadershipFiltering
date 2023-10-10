@@ -95,7 +95,7 @@ plot_silqgames_gt(dyn, cfg, times[1:T], x_refs, us_refs)
 # Run the leadership filter.
 
 # Initial condition chosen randomly. Ensure both have relatively low speed.
-pos_unc = 1e-3
+pos_unc = 1e-2
 θ_inc = 1e-4
 vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
