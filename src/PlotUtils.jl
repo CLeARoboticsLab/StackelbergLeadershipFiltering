@@ -7,7 +7,7 @@ using Plots
 
 function get_standard_plot(;include_legend=:outertop, columns=-1, legendfontsize=24)
     return plot(legendfontsize=legendfontsize, tickfontsize=24, fontsize=24, labelfontsize=24, legend=include_legend, legend_columns=columns, fg_legend = :transparent, size=(800,600),
-                leftmargin=5Plots.mm, bottommargin=5Plots.mm, rightmargin=5Plots.mm)
+                leftmargin=15Plots.mm, bottommargin=10Plots.mm, rightmargin=5Plots.mm)
 end
 export get_standard_plot
 
