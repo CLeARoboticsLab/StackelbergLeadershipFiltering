@@ -320,11 +320,11 @@ function plot_leadership_filter_measurement_details(dyn::Dynamics, particle_lead
     end
     plot!(ylabel="Vertical Position (m)", xlabel="Horizontal Position (m)")
 
-    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linewidth=3, label=p1_truth_label)
+    plot!(p2, true_xs[x1_idx, :], true_xs[y1_idx, :], color=:black, linestyle=:dashed, linewidth=3, label=p1_truth_label)
     plot!(p2, est_xs[x1_idx, :], est_xs[y1_idx, :], color=:orange, linewidth=3, label=p1_est_label)
     scatter!(p2, [x₁[x1_idx]], [x₁[y1_idx]], color=:red, label="") # L"$\mathcal{A}_1$ Start")
 
-    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linewidth=3, label=p2_truth_label)
+    plot!(p2, true_xs[x2_idx, :], true_xs[y2_idx, :], color=:black, linestyle=:dashed, linewidth=3, label=p2_truth_label)
     plot!(p2, est_xs[x2_idx, :], est_xs[y2_idx, :], color=:turquoise2, linewidth=3, label=p2_est_label)
     scatter!(p2, [x₁[x2_idx]], [x₁[y2_idx]], color=:blue, label="") # L"$\mathcal{A}_2$ Start")
 
