@@ -8,20 +8,24 @@ using Statistics
 using StatsBase
 
 #### INITIALIZATION ####
-function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; angle_range=(0, 2*pi))
-    angle_diff = (angle_range[2] - angle_range[1])*((iter-1)//num_sims)
+function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
+    p1_angle_diff = (p1_angle_range[2] - p1_angle_range[1])*((iter-1)//num_sims)
+    p2_angle_diff = (p2_angle_range[2] - p2_angle_range[1])*((iter-1)//num_sims)
     us₁ = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
     xi₁ = deepcopy(init_x₁)
-    new_angle = wrap_angle(angle_range[1] + angle_diff)
+    p1_new_angle = wrap_angle(p1_angle_range[1] + p1_angle_diff)
+    p2_new_angle = wrap_angle(p2_angle_range[1] + p2_angle_diff)
     # println("ANGLE LinDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
     # new_angle = wrap_angle(p1_angle + angle_diff)
-    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
+    xi₁[[xidx(dyn, 1), yidx(dyn, 1)]] = p1_magnitude * [cos(p1_new_angle); sin(p1_new_angle)]
+    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(p2_new_angle); sin(p2_new_angle)]
     println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
 
-function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; angle_range=(0, 2*pi))
-    angle_diff = (angle_range[2] - angle_range[1])*((iter-1)//num_sims)
+function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
+    p1_angle_diff = (p1_angle_range[2] - p1_angle_range[1])*((iter-1)//num_sims)
+    p2_angle_diff = (p2_angle_range[2] - p2_angle_range[1])*((iter-1)//num_sims)
     us₁ = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
     # us₁[1][2, 1:31] .= 1//2
     # us₁[2][2, 1:31] .= 1//2
@@ -29,13 +33,15 @@ function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1
     # us₁[2][2, 61:91] .= -1//2
     xi₁ = deepcopy(init_x₁)
     # new_angle = wrap_angle(p1_angle + angle_diff)
-    new_angle = wrap_angle(angle_range[1] + angle_diff)
+    p1_new_angle = wrap_angle(p1_angle_range[1] + p1_angle_diff)
+    p2_new_angle = wrap_angle(p2_angle_range[1] + p2_angle_diff)
     # println("ANGLE UniDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
-    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
+    xi₁[[xidx(dyn, 1), yidx(dyn, 1)]] = p1_magnitude * [cos(p1_new_angle); sin(p1_new_angle)]
+    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(p2_new_angle); sin(p2_new_angle)]
 
     # Set headings to be pointed towards the middle.
-    xi₁[3] = wrap_angle(p1_angle - pi)
-    xi₁[7] = wrap_angle(new_angle - pi)
+    xi₁[3] = wrap_angle(p1_new_angle - pi)
+    xi₁[7] = wrap_angle(p2_new_angle - pi)
     println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
@@ -43,7 +49,7 @@ end
 
 
 #### RUN SIMS + GENERATE DATA ####
-function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=(0, 2*pi))
+function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
     elapsed_times = zeros(num_sims)
 
     # Nominal trajectory is always zero-controls. x₁ is drawn as follows: P1 starts at (2, 1) unmoving and P2 rotates in a circle about the origin at the same radius.
@@ -59,7 +65,7 @@ function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_ran
     u1s = [zeros(num_sims, udim(dyn, ii), T) for ii in 1:num_players]
     # for iter in sim_iters
     Threads.@threads for iter in sim_iters
-        new_x₁, new_us_1 = get_initial_conditions_at_idx(dyn, iter, num_sims, p1_angle, p1_magnitude, x₁; angle_range=angle_range)
+        new_x₁, new_us_1 = get_initial_conditions_at_idx(dyn, iter, num_sims, p1_angle, p1_magnitude, x₁; p2_angle_range=p2_angle_range, p1_angle_range=p1_angle_range)
         elapsed_times[iter] = @elapsed begin
             xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, new_x₁, new_us_1; manual_idx=iter)
         end
