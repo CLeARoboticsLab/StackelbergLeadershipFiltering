@@ -4,7 +4,10 @@ struct AbsoluteLogBarrierCost <: NonQuadraticCost
     idx::Int             # a single index of the state
     offset::Real         # offset with size identical to x
     is_lower_bound::Bool # true indicates lower bound barrier, false indicates upper bound
+    reg_term::Float64
+    reg_offset::Float64
 end
+AbsoluteLogBarrierCost(idx, offset, is_lower_bound) = AbsoluteLogBarrierCost(idx, offset, is_lower_bound, 0.0, 0.01)
 
 const LARGE_NUMBER = 1e6
 
@@ -13,7 +16,7 @@ function get_as_function(c::AbsoluteLogBarrierCost)
         # return _violates_bound(c, x) ? LARGE_NUMBER : -log(_get_input(c, x))
         input = _get_input(c, x)
         if _violates_bound(c, x)
-            return LARGE_NUMBER + 100*(input-0.01)^2 # input should be negative if bounds violated, this introduces a slope.
+            return LARGE_NUMBER + c.reg_term*(input-c.reg_offset)^2 # input should be negative if bounds violated, this introduces a slope.
         end
         return -log(input)
     end

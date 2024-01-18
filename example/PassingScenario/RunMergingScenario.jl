@@ -7,6 +7,7 @@ using Plots
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
+using Statistics
 #gr()
 
 include("CreateMergingScenarioGame.jl")
@@ -100,8 +101,10 @@ pos_unc = 1e-3
 vel_unc = 1e-3
 P₁ = Diagonal([pos_unc, pos_unc, θ_inc, vel_unc, pos_unc, pos_unc, θ_inc, vel_unc])
 
-# Process noise uncertainty
-Q = 1e-2 * Diagonal([1e-2, 1e-2, 1e-3, 1e-2, 1e-2, 1e-2, 1e-3, 1e-2])
+# Process noise uncertainty - P2 is leader, remember.
+pos_proc_1 = 1.5e-2
+pos_proc_2 = 1e-2
+Q = 1e-2 * Diagonal([pos_proc_1, pos_proc_1, 1e-3, 1e-2, pos_proc_2, pos_proc_2, 1e-3, 1e-2])
 
 
 # CONFIG: 
@@ -178,12 +181,19 @@ gr()
 folder_name = "merging_scenario_2_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
-# Generate the plots for the paper.
-snapshot_freq = Int((T - 1)/10)
-make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
-# make_driving_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+# Timing
+mean_times_per_step = mean(iter_timings)
+std_times_per_step = std(iter_timings)
+println("merging iter timings $(mean_times_per_step)±$(std_times_per_step)")
 
-# This generates the gif.
-filename = "merging_scenario_2.gif"
-make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
+# # Generate the plots for the paper.
+# snapshot_freq = Int((T - 1)/10)
+# make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+# # make_driving_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, dyn, horizon, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+
+# # # This generates the gif.
+# # filename = "merging_scenario_2.gif"
+# # make_debug_gif(folder_name, filename, cfg, limits, dyn, T, times, true_xs, true_us, probs, x̂s, zs, Ts, num_particles, p_transition, num_games)
+
+# println("Saved in $(folder_name).")
 

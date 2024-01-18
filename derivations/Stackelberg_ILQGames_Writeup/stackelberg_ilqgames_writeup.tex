@@ -84,7 +84,7 @@ and $\eta \in (0, 1]$.
 
 At each iteration $k = 1, 2, \ldots$ until convergence condition $\| \Delta \gamma^i_{k} \| < $ threshold $\epsilon$,
 \begin{enumerate}
-\item Propagate $\gamma^i_{k-1}$ forward in time using the gain matrices $S^i_{1:T, k=i}$ from $\truestate{0}$ to get $\xi_k \equiv \{ \stackmeas{}{1:\horizon}, \ctrlhat{i}{1:\horizon} \}$.
+\item Propagate $\gamma^i_{k-1}$ forward in time using the gain matrices $S^i_{1:T, k=i}$ from $\truestate{0}$ to get $\state{k} \equiv \{ \stackmeas{}{1:\horizon}, \ctrlhat{i}{1:\horizon} \}$.
 
 \item Compute errors
 \[ \delta \truestate{t} = \truestate{t} - \stackmeas{}{1:\horizon}, ~~~ \delta \ctrl{i}{t} = \ctrl{i}{t} -  \ctrlhat{i}{1:\horizon}. \]

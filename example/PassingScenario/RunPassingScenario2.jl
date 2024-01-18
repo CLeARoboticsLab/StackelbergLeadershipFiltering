@@ -6,6 +6,7 @@ using LinearAlgebra: norm, Diagonal, I
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
+using Statistics
 
 include("CreatePassingScenarioGame.jl")
 include("GroundTruthUtils.jl")
@@ -146,13 +147,18 @@ x̂s, P̂s, probs, pf, sg_objs, iter_timings = leadership_filter(dyn, costs, t�
 using Dates
 gr()
 
-# Create the folder if it doesn't exist
-folder_name = "passing_scenario_2_leadfilt_$(get_date_str())"
-isdir(folder_name) || mkdir(folder_name)
+# Timing
+mean_times_per_step = mean(iter_timings)
+std_times_per_step = std(iter_timings)
+println("passing iter timings $(mean_times_per_step)±$(std_times_per_step)")
 
-# Generate the plots for the paper.
-snapshot_freq = Int((T - 1)/10)
-make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
+# # Create the folder if it doesn't exist
+# folder_name = "passing_scenario_2_leadfilt_$(get_date_str())"
+# isdir(folder_name) || mkdir(folder_name)
+
+# # Generate the plots for the paper.
+# snapshot_freq = Int((T - 1)/10)
+# make_passing_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
 
 # # This generates the gif.
 # filename = "passing_scenario_2.gif"

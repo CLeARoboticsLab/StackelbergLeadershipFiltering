@@ -104,16 +104,18 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
     c2b = PlayerCost(avoid_collisions_cost_fn, si)
 
     # 3. enforce speed limit and turning limit
-    c1c_i = AbsoluteLogBarrierCost(4, cfg.speed_limit_mps, false)
-    c1c_ii = AbsoluteLogBarrierCost(4, -cfg.speed_limit_mps, true)
+    reg_term = 100.
+    reg_offset = 0.01
+    c1c_i = AbsoluteLogBarrierCost(4, cfg.speed_limit_mps, false, reg_term, reg_offset)
+    c1c_ii = AbsoluteLogBarrierCost(4, -cfg.speed_limit_mps, true, reg_term, reg_offset)
 
-    c1c_iii = AbsoluteLogBarrierCost(3, cfg.θ₀+cfg.max_heading_deviation, false)
-    c1c_iv = AbsoluteLogBarrierCost(3, cfg.θ₀-cfg.max_heading_deviation, true)
+    c1c_iii = AbsoluteLogBarrierCost(3, cfg.θ₀+cfg.max_heading_deviation, false, reg_term, reg_offset)
+    c1c_iv = AbsoluteLogBarrierCost(3, cfg.θ₀-cfg.max_heading_deviation, true, reg_term, reg_offset)
 
-    c2c_i = AbsoluteLogBarrierCost(8, cfg.speed_limit_mps, false)
-    c2c_ii = AbsoluteLogBarrierCost(8, -cfg.speed_limit_mps, true)
-    c2c_iii = AbsoluteLogBarrierCost(7, cfg.θ₀+cfg.max_heading_deviation, false)
-    c2c_iv = AbsoluteLogBarrierCost(7, cfg.θ₀-cfg.max_heading_deviation, true)
+    c2c_i = AbsoluteLogBarrierCost(8, cfg.speed_limit_mps, false, reg_term, reg_offset)
+    c2c_ii = AbsoluteLogBarrierCost(8, -cfg.speed_limit_mps, true, reg_term, reg_offset)
+    c2c_iii = AbsoluteLogBarrierCost(7, cfg.θ₀+cfg.max_heading_deviation, false, reg_term, reg_offset)
+    c2c_iv = AbsoluteLogBarrierCost(7, cfg.θ₀-cfg.max_heading_deviation, true, reg_term, reg_offset)
 
     # 4, 5. minimize and bound control effort - acceleration should be easier than rotation
     c1de = QuadraticCost(zeros(8, 8), zeros(8), 0.)
@@ -125,20 +127,20 @@ function create_merging_scenario_costs(cfg::MergingScenarioConfig, si, w_p1, w_p
     max_rotvel = cfg.max_rotational_velocity_radps
     max_accel = cfg.max_acceleration_mps
 
-    c1de_i = AbsoluteLogBarrierControlCost(1, [1.; 0.], max_rotvel, false)
-    c1de_ii = AbsoluteLogBarrierControlCost(1, [1.; 0.], -max_rotvel, true)
-    c1de_iii = AbsoluteLogBarrierControlCost(1, [0.; 1.], max_accel, false)
-    c1de_iv = AbsoluteLogBarrierControlCost(1, [0.; 1.], -max_accel, true)
+    c1de_i = AbsoluteLogBarrierControlCost(1, [1.; 0.], max_rotvel, false, reg_term, reg_offset)
+    c1de_ii = AbsoluteLogBarrierControlCost(1, [1.; 0.], -max_rotvel, true, reg_term, reg_offset)
+    c1de_iii = AbsoluteLogBarrierControlCost(1, [0.; 1.], max_accel, false, reg_term, reg_offset)
+    c1de_iv = AbsoluteLogBarrierControlCost(1, [0.; 1.], -max_accel, true, reg_term, reg_offset)
 
     c2de = QuadraticCost(zeros(8, 8))
     R22 = [1. 0; 0 1.]
     add_control_cost!(c2de, 2, Z22)
     add_control_cost!(c2de, 1, Z22)
 
-    c2de_i = AbsoluteLogBarrierControlCost(2, [1.; 0.], max_rotvel, false)
-    c2de_ii = AbsoluteLogBarrierControlCost(2, [1.; 0.], -max_rotvel, true)
-    c2de_iii = AbsoluteLogBarrierControlCost(2, [0.; 1.], max_accel, false)
-    c2de_iv = AbsoluteLogBarrierControlCost(2, [0.; 1.], -max_accel, true)
+    c2de_i = AbsoluteLogBarrierControlCost(2, [1.; 0.], max_rotvel, false, reg_term, reg_offset)
+    c2de_ii = AbsoluteLogBarrierControlCost(2, [1.; 0.], -max_rotvel, true, reg_term, reg_offset)
+    c2de_iii = AbsoluteLogBarrierControlCost(2, [0.; 1.], max_accel, false, reg_term, reg_offset)
+    c2de_iv = AbsoluteLogBarrierControlCost(2, [0.; 1.], -max_accel, true, reg_term, reg_offset)
 
     # 6. log barriers on the x dimension ensure that the vehicles don't exit the road
     # TODO(hamzah) - remove assumption of straight road

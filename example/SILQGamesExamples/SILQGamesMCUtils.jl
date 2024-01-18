@@ -8,20 +8,24 @@ using Statistics
 using StatsBase
 
 #### INITIALIZATION ####
-function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; angle_range=(0, 2*pi))
-    angle_diff = (angle_range[2] - angle_range[1])*((iter-1)//num_sims)
+function get_initial_conditions_at_idx(dyn::LinearDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
+    p1_angle_diff = (p1_angle_range[2] - p1_angle_range[1])*((iter-1)//num_sims)
+    p2_angle_diff = (p2_angle_range[2] - p2_angle_range[1])*((iter-1)//num_sims)
     us₁ = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
     xi₁ = deepcopy(init_x₁)
-    new_angle = wrap_angle(angle_range[1] + angle_diff)
+    p1_new_angle = wrap_angle(p1_angle_range[1] + p1_angle_diff)
+    p2_new_angle = wrap_angle(p2_angle_range[1] + p2_angle_diff)
     # println("ANGLE LinDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
     # new_angle = wrap_angle(p1_angle + angle_diff)
-    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
+    xi₁[[xidx(dyn, 1), yidx(dyn, 1)]] = p1_magnitude * [cos(p1_new_angle); sin(p1_new_angle)]
+    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(p2_new_angle); sin(p2_new_angle)]
     println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
 
-function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; angle_range=(0, 2*pi))
-    angle_diff = (angle_range[2] - angle_range[1])*((iter-1)//num_sims)
+function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1_angle, p1_magnitude, init_x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
+    p1_angle_diff = (p1_angle_range[2] - p1_angle_range[1])*((iter-1)//num_sims)
+    p2_angle_diff = (p2_angle_range[2] - p2_angle_range[1])*((iter-1)//num_sims)
     us₁ = [zeros(udim(dyn, ii), T) for ii in 1:num_agents(dyn)]
     # us₁[1][2, 1:31] .= 1//2
     # us₁[2][2, 1:31] .= 1//2
@@ -29,13 +33,15 @@ function get_initial_conditions_at_idx(dyn::UnicycleDynamics, iter, num_sims, p1
     # us₁[2][2, 61:91] .= -1//2
     xi₁ = deepcopy(init_x₁)
     # new_angle = wrap_angle(p1_angle + angle_diff)
-    new_angle = wrap_angle(angle_range[1] + angle_diff)
+    p1_new_angle = wrap_angle(p1_angle_range[1] + p1_angle_diff)
+    p2_new_angle = wrap_angle(p2_angle_range[1] + p2_angle_diff)
     # println("ANGLE UniDyn: ", new_angle, ", range 1: ", angle_range[1], ", diff: ", angle_diff)
-    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(new_angle); sin(new_angle)]
+    xi₁[[xidx(dyn, 1), yidx(dyn, 1)]] = p1_magnitude * [cos(p1_new_angle); sin(p1_new_angle)]
+    xi₁[[xidx(dyn, 2), yidx(dyn, 2)]] = p1_magnitude * [cos(p2_new_angle); sin(p2_new_angle)]
 
     # Set headings to be pointed towards the middle.
-    xi₁[3] = wrap_angle(p1_angle - pi)
-    xi₁[7] = wrap_angle(new_angle - pi)
+    xi₁[3] = wrap_angle(p1_new_angle - pi)
+    xi₁[7] = wrap_angle(p2_new_angle - pi)
     println("$iter - new IC: $xi₁")
     return xi₁, us₁
 end
@@ -43,7 +49,7 @@ end
 
 
 #### RUN SIMS + GENERATE DATA ####
-function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_range=(0, 2*pi))
+function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=(0., 0.), p1_angle_range=(0., 0.))
     elapsed_times = zeros(num_sims)
 
     # Nominal trajectory is always zero-controls. x₁ is drawn as follows: P1 starts at (2, 1) unmoving and P2 rotates in a circle about the origin at the same radius.
@@ -59,7 +65,7 @@ function simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; angle_ran
     u1s = [zeros(num_sims, udim(dyn, ii), T) for ii in 1:num_players]
     # for iter in sim_iters
     Threads.@threads for iter in sim_iters
-        new_x₁, new_us_1 = get_initial_conditions_at_idx(dyn, iter, num_sims, p1_angle, p1_magnitude, x₁; angle_range=angle_range)
+        new_x₁, new_us_1 = get_initial_conditions_at_idx(dyn, iter, num_sims, p1_angle, p1_magnitude, x₁; p2_angle_range=p2_angle_range, p1_angle_range=p1_angle_range)
         elapsed_times[iter] = @elapsed begin
             xs_k, us_k, is_converged, num_iters, conv_metrics, evaluated_costs = stackelberg_ilqgames(sg_obj, leader_idx, times[1], times, new_x₁, new_us_1; manual_idx=iter)
         end
@@ -261,12 +267,14 @@ function simulate_lf_with_silq_results(num_sims, leader_idx, dyn, prob_transitio
 end
 
 #### METRICS + PLOTTING ####
-function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max_iters)
+function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max_iters, quants=[0.1, 0.5, 0.9])
     curr_iters=1
     should_continue = true
 
     mean_metrics = zeros(max_iters)
     std_metrics = zeros(max_iters)
+    num_quants = size(quants, 1)
+    quant_metrics = zeros(max_iters, num_quants)
 
     while true
         idx_list = num_iterations .≥ curr_iters
@@ -279,17 +287,65 @@ function get_avg_convergence_w_uncertainty(all_conv_metrics, num_iterations, max
 
         mean_metrics[curr_iters] = mean(conv_metrics)
         std_metrics[curr_iters] = (sum(idx_list) > 1) ? std(conv_metrics) : 0.
+        quant_metrics[curr_iters, :] = quantile(conv_metrics, quants)
 
         curr_iters = curr_iters + 1
     end
 
-    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1
+    return mean_metrics[1:curr_iters-1], std_metrics[1:curr_iters-1], curr_iters-1, quant_metrics[1:curr_iters-1, :]
 end
 
-function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf)
-    convergence_plot = get_standard_plot()
-    plot!(yaxis=:log, xlabel="# Iterations", ylabel="Max Abs. State Difference")
-    means, stddevs, final_idx = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
+# Plots median, 10%/90% quantile alongside a number of unconverged simulations plot with a second y-axis.
+function plot_new_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
+    num_sims = size(conv_metrics, 1)
+   
+    convergence_plot = get_standard_plot(include_legend=:outertop, columns=2, legendfontsize=18)
+    plot!(ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="# Iterations", labelsize=18)#"# Iterations"#Max Abs. State Difference")
+
+
+    means, stddevs, final_idx, quantiles10_50_90 = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters, [0.1, 0.5, 0.9]) # 25%, 50%, 75% quantiles
+    conv_x = cumsum(ones(final_idx)) .- 1
+
+    if final_idx > 2
+        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 1], color=:green, linestyle=:dot, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
+        median = quantiles10_50_90[:, 2]
+        lower = median - quantiles10_50_90[:, 1]
+        upper = quantiles10_50_90[:, 3] - median
+        plot!(convergence_plot, conv_x, median, color=:green, linewidth=3, label="Median", ribbon=(lower, upper), fillalpha=0.3)#L"Mean $\ell_{\infty}$ Convergence")
+        # plot!(convergence_plot, conv_x, quantiles10_50_90[:, 3], color=:green, linestyle=:dot, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
+
+    else
+        println("Lower: $(lower_bound), Upper: $(upper_bound)")
+        lower_scatter = max.(lower_bound, means .- stddevs)
+        upper_scatter = min.(upper_bound, means .+ stddevs)
+        println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
+        println("Mean: $means")
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), color=:green, elinewidth=3, xticks=[0, 1], label="")#L"Mean $\ell_{\infty}$ Convergence $~$")
+    end
+    plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
+         [threshold, threshold], color=:purple, yaxis=:log10, linestyle=:dot, linewidth=3, size=(1000, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm, labelfontsize=18, tickfontsize=18, label="")#"Threshold")
+    plot!(convergence_plot, [2*max_iters, 2*max_iters], [1, 1], color=:black, linewidth=3, label="# Unconverged\n Simulations", xlimits=[-50, 2550])
+
+    # Initially, all simulations assumed to be unconverged. Then, subtract 1 for all future iterations after convergence.
+    num_unconverged = num_sims * ones(max_iters)
+    for iter in num_iterations
+        num_unconverged[iter:max_iters] .-= 1
+    end
+    # Confirms that all simulations eventually converge.
+    @assert all(iszero.(num_unconverged[2500:max_iters]))
+
+    p = twinx()
+    plot!(p, 1:2500, num_unconverged[1:2500], label="", rightmargin=8Plots.mm, ylabel="# Unconverged\n Simulations", ylimits=[0, 150], linewidth=3, size=(1000, 400), color=:black, labelfontsize=18, tickfontsize=18, xlimits=[-50, 2550])
+
+    return convergence_plot
+end
+
+
+function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lower_bound=0.0, upper_bound=Inf, num_bins=:auto)
+    num_sims = size(conv_metrics, 1)
+    convergence_plot = get_standard_plot(include_legend=:outertop)
+    plot!(yaxis=:log, ylabel=L"Conv$(x^{k}, x^{k-1})$", xlabel="", xticks=false, labelsize=18)#"# Iterations"#Max Abs. State Difference")
+    means, stddevs, final_idx, _ = get_avg_convergence_w_uncertainty(conv_metrics, num_iterations, max_iters)
     conv_x = cumsum(ones(final_idx)) .- 1
 
     # conv_sum = conv_metrics[1, 1:num_iters] #+ conv_metrics[2, 1:num_iters]
@@ -303,16 +359,26 @@ function plot_convergence(conv_metrics, num_iterations, max_iters, threshold; lo
     # println(means, lower, upper)
 
     if final_idx > 2
-        plot!(convergence_plot, conv_x, means, label=L"Mean $\ell_{\infty}$ Merit", color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3)
+        plot!(convergence_plot, conv_x, means, color=:green, ribbon=(lower, upper), fillalpha=0.3, linewidth=3, label="")#L"Mean $\ell_{\infty}$ Convergence")
     else
         println("Lower: $(lower_bound), Upper: $(upper_bound)")
         lower_scatter = max.(lower_bound, means .- stddevs)
         upper_scatter = min.(upper_bound, means .+ stddevs)
         println("Lower Scatter: $(lower_scatter), Upper Scatter: $(upper_scatter)")
         println("Mean: $means")
-        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), label=L"Mean $\ell_{\infty}$ Merit", color=:green, elinewidth=3, xticks=[0, 1])
+        scatter!(convergence_plot, conv_x, means, yerr=(lower_scatter, upper_scatter), color=:green, elinewidth=3, xticks=[0, 1], label="")#L"Mean $\ell_{\infty}$ Convergence $~$")
     end
-    plot!(convergence_plot, [0, final_idx-1], [threshold, threshold], label="Threshold", color=:purple, linestyle=:dot, linewidth=3)
+    plot!(convergence_plot, [0, 2500], #[0, final_idx-1], 
+         [threshold, threshold], color=:purple, linestyle=:dot, linewidth=3, size=(800, 400), bottommargin=8Plots.mm, topmargin=8Plots.mm,  labelfontsize=18, tickfontsize=18, label="")#"Threshold")
+
+    # num_sims = length(num_iterations)
+    # if all(num_iterations .== 2)
+    #     histogram!(num_iterations .- 1, subplot=2, inset=(1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left)), bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="# Iterations", fontsize=24) #xlabel="Iterations to Convergence"
+    # else
+    #     hist = histogram!(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence", xlimits=[0, 2500], leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 300))
+    #     vline!(subplot=2, inset=(1, bbox(0.0, 0.0, 1., 0.4, :bottom, :left)), [max_iters], label="Max Iterations", color=:black, linewidth=3)
+    # end
+    # return hist
 
     return convergence_plot
 end
@@ -320,9 +386,12 @@ end
 function plot_convergence_histogram(num_iterations, max_iters; num_bins=:auto)
     num_sims = length(num_iterations)
     if all(num_iterations .== 2)
-        return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="Iterations to Convergence")
+        return histogram(num_iterations .- 1, bins=range(0.5, 1.5, step=1), xticks=[1], legend=false, ylabel="Frequency", xlabel="# Iterations", fontsize=24) #xlabel="Iterations to Convergence"
     end
-    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, yticks=range(0, num_sims, step=1), ylabel="Frequency", xlabel="Iterations to Convergence")
+    hist = histogram(num_iterations .- 1, nbins=num_sims, legend=false, 
+                     yticks=[0, 2, 4, 6], xticks=[0, 500, 1000, 1500, 2000, 2500], #yticks=range(0, num_sims, step=1)
+                     ylabel="Frequency", xlabel="# Iterations", xlimits=[-100, 2700],
+                     leftmargin=6Plots.mm, rightmargin=6Plots.mm, size=(800, 400), bottommargin=10Plots.mm, labelfontsize=18, tickfontsize=18)
     vline!(hist, [max_iters], label="Max Iterations", color=:black, linewidth=3)
     return hist
 end
