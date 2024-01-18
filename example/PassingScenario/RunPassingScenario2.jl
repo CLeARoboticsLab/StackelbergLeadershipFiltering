@@ -146,6 +146,11 @@ x̂s, P̂s, probs, pf, sg_objs, iter_timings = leadership_filter(dyn, costs, t�
 using Dates
 gr()
 
+# Timing
+mean_times_per_step = mean(iter_timings)
+std_times_per_step = std(iter_timings)
+println("passing iter timings $(mean_times_per_step)±$(std_times_per_step)")
+
 # Create the folder if it doesn't exist
 folder_name = "passing_scenario_2_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)

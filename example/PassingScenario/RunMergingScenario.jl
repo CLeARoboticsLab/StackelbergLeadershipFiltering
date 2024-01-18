@@ -180,6 +180,11 @@ gr()
 folder_name = "merging_scenario_2_leadfilt_$(get_date_str())"
 isdir(folder_name) || mkdir(folder_name)
 
+# Timing
+mean_times_per_step = mean(iter_timings)
+std_times_per_step = std(iter_timings)
+println("merging iter timings $(mean_times_per_step)±$(std_times_per_step)")
+
 # Generate the plots for the paper.
 snapshot_freq = Int((T - 1)/10)
 make_merging_scenario_pdf_plots(folder_name, snapshot_freq, cfg, limits, sg_objs[1].dyn, T, times, true_xs, true_us, probs, x̂s, zs, num_particles)
