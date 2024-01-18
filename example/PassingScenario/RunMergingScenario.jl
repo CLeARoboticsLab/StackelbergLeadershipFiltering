@@ -7,6 +7,7 @@ using Plots
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
+using Statistics
 #gr()
 
 include("CreateMergingScenarioGame.jl")

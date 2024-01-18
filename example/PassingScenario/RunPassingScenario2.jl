@@ -6,6 +6,7 @@ using LinearAlgebra: norm, Diagonal, I
 using ProgressBars
 using Random: MersenneTwister
 using Distributions: Bernoulli, MvNormal
+using Statistics
 
 include("CreatePassingScenarioGame.jl")
 include("GroundTruthUtils.jl")
