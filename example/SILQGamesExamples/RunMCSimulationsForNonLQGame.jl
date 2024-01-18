@@ -21,7 +21,7 @@ include("SILQGamesMCUtils.jl")
 
 data_folder = "mc_data"
 
-num_sims = 10
+num_sims = 100
 # x₁ = [2.0, 1.0, -2.677945044588987, 0.0, -0.9192214382877095, 2.03838954750859, -1.1471487177940904, 0.0]
 angle_diff = 0.2
 # angle_diff = 0.
