@@ -49,6 +49,7 @@ function get_final_nonlq_paths_p2()
     silq_data_file="nonlq_silq_mc100_L2_th0.001_ss0.01_M3500.jld"
     lf_data_file=""
 
+    # [***] Final SILQGames results for paper.
     data_folder="nonlq_mc100_L2_9_13_19_41"
     silq_data_file="nonlq_silq_mc100_L2_th0.0012_ss0.01_M3500.jld"
     lf_data_file=""
@@ -68,7 +69,7 @@ mc_folder = mc_local_folder
 
 #mc_folder = mc_server_folder
 data_folder, silq_data_file, lf_data_file = get_final_nonlq_paths_p2() 
-data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
+# data_folder, silq_data_file, lf_data_file = get_final_lq_paths_p1()
 
 
 

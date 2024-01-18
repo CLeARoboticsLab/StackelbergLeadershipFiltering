@@ -40,11 +40,35 @@ sg_obj = initialize_silq_games_object(num_sims, T, dyn, costs;
                                       threshold=mc_threshold, max_iters=mc_max_iters, step_size=mc_step_size, verbose=mc_verbose)
 
 # 2. Run the Monte Carlo SILQGames simulation.
+# # Vary the leader, old.
+# y2idx = yidx(dyn, 2)
+# x2idx = xidx(dyn, 2)
+# angle = atan(x₁[y2idx], x₁[x2idx])
+# p2_angle_range_nonlq=(angle-angle_diff, angle+angle_diff)
+# sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=p2_angle_range_nonlq)
+
+# Vary the leader, new.
+y1idx = yidx(dyn, 1)
+x1idx = xidx(dyn, 1)
 y2idx = yidx(dyn, 2)
 x2idx = xidx(dyn, 2)
-angle = atan(x₁[y2idx], x₁[x2idx])
-p2_angle_range_nonlq=(angle-angle_diff, angle+angle_diff)
-sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=p2_angle_range_nonlq)
+p1_angle = atan(x₁[y1idx], x₁[x1idx])
+p2_angle = atan(x₁[y2idx], x₁[x2idx])
+p1_angle_range_nonlq=(p1_angle, p1_angle)
+p2_angle_range_nonlq=(p2_angle-angle_diff, p2_angle+angle_diff)
+sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=p2_angle_range_nonlq, p1_angle_range=p1_angle_range_nonlq)
+
+# # Vary the follower.
+# y1idx = yidx(dyn, 1)
+# x1idx = xidx(dyn, 1)
+# y2idx = yidx(dyn, 2)
+# x2idx = xidx(dyn, 2)
+# p1_angle = atan(x₁[y1idx], x₁[x1idx])
+# p2_angle = atan(x₁[y2idx], x₁[x2idx])
+# p1_angle_range_nonlq=(p1_angle-angle_diff, p1_angle+angle_diff)
+# p2_angle_range_nonlq=(p2_angle, p2_angle)
+# sg, x1s, u1s, silq_elapsed = simulate_silqgames(num_sims, leader_idx, sg_obj, times, x₁; p2_angle_range=p2_angle_range_nonlq, p1_angle_range=p1_angle_range_nonlq)
+
 
 # 3. Generate the data and save to the specified file.
 silq_data = generate_silq_jld_data(sg, leader_idx, times, dt, T, x1s, u1s, silq_elapsed)
